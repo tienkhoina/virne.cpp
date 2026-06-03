@@ -1,0 +1,2 @@
+/usr/bin/ar qc libconfig_lib.a CMakeFiles/config_lib.dir/config.cpp.o CMakeFiles/config_lib.dir/config_loader.cpp.o CMakeFiles/config_lib.dir/override_parser.cpp.o CMakeFiles/config_lib.dir/yaml_merge.cpp.o
+/usr/bin/ranlib libconfig_lib.a

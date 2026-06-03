@@ -1,0 +1,104 @@
+# ==========================================
+# Virtual Network Simulation (WX100 - Paper Accurate)
+# ==========================================
+
+num_v_nets: 1000
+
+topology:
+  type: random
+  random_prob: 0.5
+
+
+# -------------------------
+# VNR size
+# -------------------------
+v_net_size:
+  distribution: uniform
+  dtype: int
+  low: 2
+  high: 10
+
+
+# -------------------------
+# 🔥 Arrival process (THEO PAPER)
+# -------------------------
+# η = 0.18 (WX100)
+# sử dụng Poisson process
+
+arrival_rate:
+  distribution: poisson
+  dtype: float
+  lam: 0.1667
+
+
+# -------------------------
+# Lifetime
+# -------------------------
+lifetime:
+  distribution: exponential
+  dtype: float
+  scale: 500
+
+
+# -------------------------
+# 🔥 Node resource demand (chuẩn benchmark)
+# -------------------------
+node_attrs_setting:
+
+  - name: cpu
+    owner: node
+    type: resource
+    distribution: uniform
+    dtype: int
+    generative: true
+    low: 0
+    high: 20
+
+  - name: gpu
+    owner: node
+    type: resource
+    distribution: uniform
+    dtype: int
+    generative: true
+    low: 0
+    high: 20
+
+  - name: ram
+    owner: node
+    type: resource
+    distribution: uniform
+    dtype: int
+    generative: true
+    low: 0
+    high: 20
+
+
+# -------------------------
+# 🔥 Link resource demand (chuẩn benchmark)
+# -------------------------
+link_attrs_setting:
+
+  - name: bw
+    owner: link
+    type: resource
+    distribution: uniform
+    dtype: int
+    generative: true
+    low: 0
+    high: 50
+
+
+# -------------------------
+# Output
+# -------------------------
+output:
+
+  save_dir: dataset/v_nets
+
+  v_nets_save_dir: v_nets
+
+  v_nets_file_name: v_net.gml
+
+  events_file_name: events.yaml
+
+  setting_file_name: v_sim_setting.yaml

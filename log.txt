@@ -1,0 +1,606 @@
+===== /workspace/C++/config/config.h =====
+#pragma once
+
+#include <yaml-cpp/yaml.h>
+
+#include <string>
+#include <vector>
+
+class Config
+{
+public:
+    Config() = default;
+
+    explicit Config(
+        const YAML::Node& root);
+
+    template<typename T>
+    T get(
+        const std::string& path) const;
+
+    template<typename T>
+    T get(
+        const std::string& path,
+        const T& default_value) const;
+
+    bool contains(
+        const std::string& path) const;
+
+    void set(
+        const std::string& path,
+        const YAML::Node& value);
+
+    void save(
+        const std::string& file) const;
+
+    YAML::Node root() const;
+
+    YAML::Node get_raw(
+        const std::string& path) const;
+
+private:
+    YAML::Node root_;
+
+    YAML::Node get_node(
+        const std::string& path) const;
+
+    YAML::Node set_node(
+        const YAML::Node& node,
+        const std::vector<std::string>& parts,
+        size_t index,
+        const YAML::Node& value) const;
+};
+
+#include "config.tpp"===== /workspace/C++/config/config.cpp =====
+#include "config.h"
+
+#include <fstream>
+#include <sstream>
+#include <stdexcept>
+#include <iostream>
+
+Config::Config(
+    const YAML::Node& root)
+{
+    root_ = YAML::Clone(root);
+}
+
+YAML::Node Config::root() const
+{
+    return YAML::Clone(root_);
+}
+
+bool Config::contains(
+    const std::string& path) const
+{
+    YAML::Node node =
+        get_node(path);
+
+    return node.IsDefined()
+        && !node.IsNull();
+}
+
+YAML::Node Config::get_node(
+    const std::string& path) const
+{
+    if (path.empty())
+    {
+        return YAML::Clone(root_);
+    }
+
+    YAML::Node current =
+        YAML::Clone(root_);
+
+    std::stringstream ss(path);
+    std::string token;
+
+    while (std::getline(ss, token, '.'))
+    {
+        if (!current.IsMap())
+        {
+            return YAML::Node();
+        }
+
+        current = current[token];
+
+        if (!current)
+        {
+            return YAML::Node();
+        }
+    }
+
+    return YAML::Clone(current);
+}
+
+void Config::set(
+    const std::string& path,
+    const YAML::Node& value)
+{
+    std::stringstream ss(path);
+
+    std::vector<std::string> parts;
+    std::string token;
+
+    while (std::getline(ss, token, '.'))
+    {
+        parts.push_back(token);
+    }
+
+    if (parts.empty())
+    {
+        return;
+    }
+
+    root_ =
+        set_node(
+            root_,
+            parts,
+            0,
+            value);
+}
+
+YAML::Node Config::set_node(
+    const YAML::Node& node,
+    const std::vector<std::string>& parts,
+    size_t index,
+    const YAML::Node& value) const
+{
+    YAML::Node out;
+
+    if (node)
+    {
+        out = YAML::Clone(node);
+    }
+    else
+    {
+        out =
+            YAML::Node(
+                YAML::NodeType::Map);
+    }
+
+    if (!out.IsMap())
+    {
+        out =
+            YAML::Node(
+                YAML::NodeType::Map);
+    }
+
+    if (index + 1 == parts.size())
+    {
+        out[parts[index]] =
+            YAML::Clone(value);
+
+        return out;
+    }
+
+    out[parts[index]] =
+        set_node(
+            out[parts[index]],
+            parts,
+            index + 1,
+            value);
+
+    return out;
+}
+
+void Config::save(
+    const std::string& file) const
+{
+    std::ofstream ofs(file);
+
+    if (!ofs)
+    {
+        throw std::runtime_error(
+            "Cannot open file: " + file);
+    }
+
+    ofs << root_;
+}
+
+YAML::Node Config::get_raw(
+    const std::string& path) const
+{
+    return get_node(path);
+}===== /workspace/C++/config/config_loader.h =====
+#pragma once
+
+#include "config.h"
+
+#include <filesystem>
+#include <unordered_set>
+
+class ConfigLoader {
+public:
+    static Config load(
+        const std::string& main_yaml);
+
+private:
+    static YAML::Node load_recursive(
+        const std::filesystem::path& file,
+        std::unordered_set<std::string>& visited);
+};===== /workspace/C++/config/config_loader.cpp =====
+#include "config_loader.h"
+#include "yaml_merge.h"
+
+namespace fs = std::filesystem;
+
+Config ConfigLoader::load(
+    const std::string& main_yaml)
+{
+    std::unordered_set<std::string> visited;
+
+    return Config(
+        load_recursive(
+            fs::absolute(main_yaml),
+            visited));
+}
+
+YAML::Node ConfigLoader::load_recursive(
+    const fs::path& file,
+    std::unordered_set<std::string>& visited)
+{
+    auto abs = fs::absolute(file);
+    auto key = abs.string();
+
+    if (visited.find(key) != visited.end())
+    {
+        throw std::runtime_error(
+            "Config cycle detected: " + key);
+    }
+
+    visited.insert(key);
+
+    YAML::Node current =
+        YAML::LoadFile(key);
+
+    YAML::Node result;
+
+    auto defaults =
+        current["defaults"];
+
+    if (defaults)
+    {
+        for (const auto& item : defaults)
+        {
+            auto value =
+                item.as<std::string>();
+
+            if (value == "_self_")
+            {
+                YAML::Node filtered;
+
+                for (auto it = current.begin();
+                     it != current.end();
+                     ++it)
+                {
+                    auto k =
+                        it->first.as<std::string>();
+
+                    if (k == "defaults")
+                        continue;
+
+                    filtered[k] =
+                        it->second;
+                }
+
+                result =
+                    yaml_merge::merge(
+                        result,
+                        filtered);
+
+                continue;
+            }
+
+            auto child =
+                file.parent_path() /
+                (value + ".yaml");
+
+            auto sub =
+                load_recursive(
+                    child,
+                    visited);
+
+            auto pos =
+                value.find('/');
+
+            if (pos != std::string::npos)
+            {
+                auto group =
+                    value.substr(
+                        0,
+                        pos);
+
+                YAML::Node wrapped;
+                wrapped[group] = sub;
+
+                result =
+                    yaml_merge::merge(
+                        result,
+                        wrapped);
+            }
+            else
+            {
+                result =
+                    yaml_merge::merge(
+                        result,
+                        sub);
+            }
+        }
+    }
+    else
+    {
+        result =
+            yaml_merge::merge(
+                result,
+                current);
+    }
+
+    visited.erase(key);
+
+    return result;
+}===== /workspace/C++/config/yaml_merge.h =====
+#pragma once
+
+#include <yaml-cpp/yaml.h>
+
+namespace yaml_merge {
+
+YAML::Node merge(
+    const YAML::Node& base,
+    const YAML::Node& override);
+
+}===== /workspace/C++/config/yaml_merge.cpp =====
+#include "yaml_merge.h"
+
+namespace yaml_merge {
+
+YAML::Node merge(
+    const YAML::Node& base,
+    const YAML::Node& override)
+{
+    if (!base)
+        return YAML::Clone(override);
+
+    if (!override)
+        return YAML::Clone(base);
+
+    if (!base.IsMap() ||
+        !override.IsMap())
+    {
+        return YAML::Clone(override);
+    }
+
+    YAML::Node result =
+        YAML::Clone(base);
+
+    for (auto it = override.begin();
+         it != override.end();
+         ++it)
+    {
+        auto key =
+            it->first.as<std::string>();
+
+        if (result[key] &&
+            result[key].IsMap() &&
+            it->second.IsMap())
+        {
+            result[key] =
+                merge(
+                    result[key],
+                    it->second);
+        }
+        else
+        {
+            result[key] =
+                YAML::Clone(
+                    it->second);
+        }
+    }
+
+    return result;
+}
+
+}===== /workspace/C++/config/override_parser.h =====
+#pragma once
+
+#include "config.h"
+
+namespace override_parser {
+
+void apply(
+    Config& cfg,
+    const std::string& expr);
+
+}===== /workspace/C++/config/override_parser.cpp =====
+#include "override_parser.h"
+#include <iostream>
+
+#include <algorithm>
+
+namespace override_parser {
+
+static YAML::Node parse_value(
+    const std::string& value)
+{
+    if (value == "true")
+        return YAML::Node(true);
+
+    if (value == "false")
+        return YAML::Node(false);
+
+    if (value == "null")
+        return YAML::Node();
+
+    try
+    {
+        size_t pos;
+
+        int v =
+            std::stoi(
+                value,
+                &pos);
+
+        if (pos == value.size())
+            return YAML::Node(v);
+    }
+    catch (...)
+    {
+    }
+
+    try
+    {
+        size_t pos;
+
+        double v =
+            std::stod(
+                value,
+                &pos);
+
+        if (pos == value.size())
+            return YAML::Node(v);
+    }
+    catch (...)
+    {
+    }
+
+    return YAML::Node(value);
+}
+
+void apply(
+    Config& cfg,
+    const std::string& expr)
+{
+    bool create_only = false;
+    bool create_or_replace = false;
+
+    std::string work = expr;
+
+    if (work.rfind("++", 0) == 0)
+    {
+        create_or_replace = true;
+        work = work.substr(2);
+    }
+    else if (work.rfind("+", 0) == 0)
+    {
+        create_only = true;
+        work = work.substr(1);
+    }
+
+    auto pos =
+        work.find('=');
+
+    if (pos == std::string::npos)
+    {
+        throw std::runtime_error(
+            "Invalid override: " +
+            expr);
+    }
+
+    auto key =
+        work.substr(
+            0,
+            pos);
+
+    auto value =
+        work.substr(
+            pos + 1);
+
+    bool exists =
+        cfg.contains(key);
+    
+    std::cout
+        << "CONTAINS("
+        << key
+        << ") = "
+        << exists
+        << '\n';
+
+    std::cout
+        << "NODE =\n"
+        << cfg.get_raw(key)
+        << '\n';
+
+    std::cout
+        << "DEFINED = "
+        << cfg.get_raw(key).IsDefined()
+        << '\n';
+
+    std::cout
+        << "BOOL = "
+        << static_cast<bool>(cfg.get_raw(key))
+        << '\n';
+
+    if (create_only && exists)
+    {
+        throw std::runtime_error(
+            "Key already exists: " +
+            key);
+    }
+
+    if (!create_only &&
+        !create_or_replace &&
+        !exists)
+    {
+        throw std::runtime_error(
+            "Unknown key: " +
+            key);
+    }
+
+    cfg.set(
+        key,
+        parse_value(value));
+}
+
+}===== /workspace/C++/config/config.tpp =====
+#pragma once
+
+template<typename T>
+T Config::get(
+    const std::string& path) const
+{
+    auto node = get_node(path);
+
+    if (!node)
+    {
+        throw std::runtime_error(
+            "Missing config key: " + path);
+    }
+
+    return node.as<T>();
+}
+
+template<typename T>
+T Config::get(
+    const std::string& path,
+    const T& default_value) const
+{
+    auto node = get_node(path);
+
+    if (!node)
+        return default_value;
+
+    return node.as<T>();
+}===== /workspace/C++/config/CMakeLists.txt =====
+file(
+    GLOB CONFIG_SRCS
+    CONFIGURE_DEPENDS
+    *.cpp
+)
+
+add_library(
+    config_lib
+    ${CONFIG_SRCS}
+)
+
+target_include_directories(
+    config_lib
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${PROJECT_SOURCE_DIR}
+)
+
+target_link_libraries(
+    config_lib
+    PUBLIC
+    yaml-cpp
+)

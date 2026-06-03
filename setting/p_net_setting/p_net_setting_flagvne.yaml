@@ -1,0 +1,73 @@
+# Physical Network Configuration (FlagVNE style for VIRNE)
+
+topology:
+  num_nodes: 999
+  type: waxman
+  wm_alpha: 0.5
+  wm_beta: 0.2
+  # file_path: './datasets/topology/Geant.gml'
+
+link_attrs_setting:
+  - name: bw
+    owner: link
+    type: resource
+    distribution: uniform
+    dtype: int
+    generative: true
+    low: 50
+    high: 100 
+
+  - name: max_bw
+    owner: link
+    type: extrema
+    originator: bw
+
+
+node_attrs_setting:
+
+  - name: cpu
+    owner: node
+    type: resource
+    distribution: uniform
+    dtype: int
+    generative: true
+    low: 50
+    high: 100
+
+  - name: max_cpu
+    owner: node
+    type: extrema
+    originator: cpu
+
+  - name: gpu
+    owner: node
+    type: resource
+    distribution: uniform
+    dtype: int
+    generative: true
+    low: 50
+    high: 100
+
+  - name: max_gpu
+    owner: node
+    type: extrema
+    originator: gpu
+
+  - name: ram
+    owner: node
+    type: resource
+    distribution: uniform
+    dtype: int
+    generative: true
+    low: 50
+    high: 100
+
+  - name: max_ram
+    owner: node
+    type: extrema
+    originator: ram
+
+
+output:
+  save_dir: dataset/p_net
+  file_name: p_net.gml
