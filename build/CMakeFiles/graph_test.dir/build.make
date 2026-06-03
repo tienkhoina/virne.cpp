@@ -93,6 +93,8 @@ graph_test_EXTERNAL_OBJECTS =
 graph_test: CMakeFiles/graph_test.dir/graph_test.cpp.o
 graph_test: CMakeFiles/graph_test.dir/build.make
 graph_test: config/libconfig_lib.a
+graph_test: graph/libgraph_lib.a
+graph_test: random/librandom_lib.a
 graph_test: libs/yaml-cpp/libyaml-cpp.a
 graph_test: CMakeFiles/graph_test.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspace/C++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable graph_test"

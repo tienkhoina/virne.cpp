@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = -DYAML_CPP_STATIC_DEFINE
 
-CXX_INCLUDES = -I/workspace/C++/libs/boost -I/workspace/C++/config -I/workspace/C++ -I/workspace/C++/libs/yaml-cpp/include
+CXX_INCLUDES = -I/workspace/C++/libs/boost -I/workspace/C++/config -I/workspace/C++ -I/workspace/C++/libs/yaml-cpp/include -I/workspace/C++/graph
 
 CXX_FLAGS = -std=gnu++17
 

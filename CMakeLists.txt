@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory(libs/yaml-cpp)
 add_subdirectory(config)
+add_subdirectory(graph)
+add_subdirectory(random)
 
 #
 # Boost headers
@@ -23,6 +25,7 @@ target_link_libraries(
     main
     PRIVATE
     config_lib
+    graph_lib
 )
 
 add_executable(
@@ -34,4 +37,6 @@ target_link_libraries(
     graph_test
     PRIVATE
     config_lib
+    graph_lib
+    random_lib
 )

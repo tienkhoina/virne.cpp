@@ -1,0 +1,2 @@
+/usr/bin/ar qc libgraph_lib.a CMakeFiles/graph_lib.dir/graph.cpp.o CMakeFiles/graph_lib.dir/generators/waxman_generator.cpp.o CMakeFiles/graph_lib.dir/generators/gml_loader.cpp.o
+/usr/bin/ranlib libgraph_lib.a

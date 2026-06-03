@@ -572,6 +572,32 @@ config_lib/fast:
 	$(MAKE) $(MAKESILENT) -f config/CMakeFiles/config_lib.dir/build.make config/CMakeFiles/config_lib.dir/build
 .PHONY : config_lib/fast
 
+#=============================================================================
+# Target rules for targets named graph_lib
+
+# Build rule for target.
+graph_lib: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 graph_lib
+.PHONY : graph_lib
+
+# fast build rule for target.
+graph_lib/fast:
+	$(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/build
+.PHONY : graph_lib/fast
+
+#=============================================================================
+# Target rules for targets named random_lib
+
+# Build rule for target.
+random_lib: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 random_lib
+.PHONY : random_lib
+
+# fast build rule for target.
+random_lib/fast:
+	$(MAKE) $(MAKESILENT) -f random/CMakeFiles/random_lib.dir/build.make random/CMakeFiles/random_lib.dir/build
+.PHONY : random_lib/fast
+
 graph_test.o: graph_test.cpp.o
 .PHONY : graph_test.o
 
@@ -657,8 +683,10 @@ help:
 	@echo "... NightlyTest"
 	@echo "... NightlyUpdate"
 	@echo "... config_lib"
+	@echo "... graph_lib"
 	@echo "... graph_test"
 	@echo "... main"
+	@echo "... random_lib"
 	@echo "... yaml-cpp"
 	@echo "... yaml-cpp-parse"
 	@echo "... yaml-cpp-read"

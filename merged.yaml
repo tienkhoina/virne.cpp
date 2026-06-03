@@ -1,9 +1,0 @@
-seed: 42
-run_id: auto
-num_simulations: 1
-save_root_dir: virne/
-if_save_config: true
-if_save_p_net: false
-if_save_v_nets: false
-if_load_p_net: false
-if_load_v_nets: false
