@@ -1,0 +1,2 @@
+/usr/bin/ar qc libprogress_lib.a CMakeFiles/progress_lib.dir/progress.cpp.o
+/usr/bin/ranlib libprogress_lib.a

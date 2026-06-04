@@ -1,15 +1,21 @@
 [
 {
   "directory": "/workspace/C++/build",
-  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/workspace/C++/libs/boost -I/workspace/C++/config -I/workspace/C++ -I/workspace/C++/libs/yaml-cpp/include -I/workspace/C++/graph -std=gnu++17 -o CMakeFiles/main.dir/main.cpp.o -c /workspace/C++/main.cpp",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/workspace/C++/libs/boost -I/workspace/C++/config -I/workspace/C++ -I/workspace/C++/libs/yaml-cpp/include -I/workspace/C++/graph -I/workspace/C++/random -I/workspace/C++/progress -std=gnu++17 -o CMakeFiles/main.dir/main.cpp.o -c /workspace/C++/main.cpp",
   "file": "/workspace/C++/main.cpp",
   "output": "CMakeFiles/main.dir/main.cpp.o"
 },
 {
   "directory": "/workspace/C++/build",
-  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/workspace/C++/libs/boost -I/workspace/C++/config -I/workspace/C++ -I/workspace/C++/libs/yaml-cpp/include -I/workspace/C++/graph -I/workspace/C++/random -std=gnu++17 -o CMakeFiles/graph_test.dir/graph_test.cpp.o -c /workspace/C++/graph_test.cpp",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/workspace/C++/libs/boost -I/workspace/C++/config -I/workspace/C++ -I/workspace/C++/libs/yaml-cpp/include -I/workspace/C++/graph -I/workspace/C++/random -I/workspace/C++/progress -std=gnu++17 -o CMakeFiles/graph_test.dir/graph_test.cpp.o -c /workspace/C++/graph_test.cpp",
   "file": "/workspace/C++/graph_test.cpp",
   "output": "CMakeFiles/graph_test.dir/graph_test.cpp.o"
+},
+{
+  "directory": "/workspace/C++/build",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/workspace/C++/libs/boost -I/workspace/C++/config -I/workspace/C++ -I/workspace/C++/libs/yaml-cpp/include -I/workspace/C++/graph -I/workspace/C++/random -I/workspace/C++/progress -std=gnu++17 -o CMakeFiles/test_api.dir/test_api.cpp.o -c /workspace/C++/test_api.cpp",
+  "file": "/workspace/C++/test_api.cpp",
+  "output": "CMakeFiles/test_api.dir/test_api.cpp.o"
 },
 {
   "directory": "/workspace/C++/build/libs/yaml-cpp",
@@ -264,9 +270,69 @@
   "output": "graph/CMakeFiles/graph_lib.dir/generators/gml_loader.cpp.o"
 },
 {
+  "directory": "/workspace/C++/build/graph",
+  "command": "/usr/bin/c++  -I/workspace/C++/graph -I/workspace/C++/libs/boost -std=gnu++17 -o CMakeFiles/graph_lib.dir/nx/connectivity.cpp.o -c /workspace/C++/graph/nx/connectivity.cpp",
+  "file": "/workspace/C++/graph/nx/connectivity.cpp",
+  "output": "graph/CMakeFiles/graph_lib.dir/nx/connectivity.cpp.o"
+},
+{
+  "directory": "/workspace/C++/build/graph",
+  "command": "/usr/bin/c++  -I/workspace/C++/graph -I/workspace/C++/libs/boost -std=gnu++17 -o CMakeFiles/graph_lib.dir/nx/shortest_paths.cpp.o -c /workspace/C++/graph/nx/shortest_paths.cpp",
+  "file": "/workspace/C++/graph/nx/shortest_paths.cpp",
+  "output": "graph/CMakeFiles/graph_lib.dir/nx/shortest_paths.cpp.o"
+},
+{
+  "directory": "/workspace/C++/build/graph",
+  "command": "/usr/bin/c++  -I/workspace/C++/graph -I/workspace/C++/libs/boost -std=gnu++17 -o CMakeFiles/graph_lib.dir/algorithms/floyd_warshall.cpp.o -c /workspace/C++/graph/algorithms/floyd_warshall.cpp",
+  "file": "/workspace/C++/graph/algorithms/floyd_warshall.cpp",
+  "output": "graph/CMakeFiles/graph_lib.dir/algorithms/floyd_warshall.cpp.o"
+},
+{
+  "directory": "/workspace/C++/build/graph",
+  "command": "/usr/bin/c++  -I/workspace/C++/graph -I/workspace/C++/libs/boost -std=gnu++17 -o CMakeFiles/graph_lib.dir/algorithms/bfs.cpp.o -c /workspace/C++/graph/algorithms/bfs.cpp",
+  "file": "/workspace/C++/graph/algorithms/bfs.cpp",
+  "output": "graph/CMakeFiles/graph_lib.dir/algorithms/bfs.cpp.o"
+},
+{
+  "directory": "/workspace/C++/build/graph",
+  "command": "/usr/bin/c++  -I/workspace/C++/graph -I/workspace/C++/libs/boost -std=gnu++17 -o CMakeFiles/graph_lib.dir/algorithms/dijkstra.cpp.o -c /workspace/C++/graph/algorithms/dijkstra.cpp",
+  "file": "/workspace/C++/graph/algorithms/dijkstra.cpp",
+  "output": "graph/CMakeFiles/graph_lib.dir/algorithms/dijkstra.cpp.o"
+},
+{
+  "directory": "/workspace/C++/build/graph",
+  "command": "/usr/bin/c++  -I/workspace/C++/graph -I/workspace/C++/libs/boost -std=gnu++17 -o CMakeFiles/graph_lib.dir/algorithms/k_shortest_paths.cpp.o -c /workspace/C++/graph/algorithms/k_shortest_paths.cpp",
+  "file": "/workspace/C++/graph/algorithms/k_shortest_paths.cpp",
+  "output": "graph/CMakeFiles/graph_lib.dir/algorithms/k_shortest_paths.cpp.o"
+},
+{
+  "directory": "/workspace/C++/build/graph",
+  "command": "/usr/bin/c++  -I/workspace/C++/graph -I/workspace/C++/libs/boost -std=gnu++17 -o CMakeFiles/graph_lib.dir/algorithms/bidirectional_dijkstra.cpp.o -c /workspace/C++/graph/algorithms/bidirectional_dijkstra.cpp",
+  "file": "/workspace/C++/graph/algorithms/bidirectional_dijkstra.cpp",
+  "output": "graph/CMakeFiles/graph_lib.dir/algorithms/bidirectional_dijkstra.cpp.o"
+},
+{
+  "directory": "/workspace/C++/build/graph",
+  "command": "/usr/bin/c++  -I/workspace/C++/graph -I/workspace/C++/libs/boost -std=gnu++17 -o CMakeFiles/graph_lib.dir/algorithms/bidirectional_bfs.cpp.o -c /workspace/C++/graph/algorithms/bidirectional_bfs.cpp",
+  "file": "/workspace/C++/graph/algorithms/bidirectional_bfs.cpp",
+  "output": "graph/CMakeFiles/graph_lib.dir/algorithms/bidirectional_bfs.cpp.o"
+},
+{
+  "directory": "/workspace/C++/build/graph",
+  "command": "/usr/bin/c++  -I/workspace/C++/graph -I/workspace/C++/libs/boost -std=gnu++17 -o CMakeFiles/graph_lib.dir/cache/weight_cache.cpp.o -c /workspace/C++/graph/cache/weight_cache.cpp",
+  "file": "/workspace/C++/graph/cache/weight_cache.cpp",
+  "output": "graph/CMakeFiles/graph_lib.dir/cache/weight_cache.cpp.o"
+},
+{
   "directory": "/workspace/C++/build/random",
   "command": "/usr/bin/c++  -I/workspace/C++/random -std=gnu++17 -o CMakeFiles/random_lib.dir/py_random.cpp.o -c /workspace/C++/random/py_random.cpp",
   "file": "/workspace/C++/random/py_random.cpp",
   "output": "random/CMakeFiles/random_lib.dir/py_random.cpp.o"
+},
+{
+  "directory": "/workspace/C++/build/progress",
+  "command": "/usr/bin/c++  -I/workspace/C++/progress -std=gnu++17 -o CMakeFiles/progress_lib.dir/progress.cpp.o -c /workspace/C++/progress/progress.cpp",
+  "file": "/workspace/C++/progress/progress.cpp",
+  "output": "progress/CMakeFiles/progress_lib.dir/progress.cpp.o"
 }
 ]

@@ -300,6 +300,21 @@ DART_TESTING_TIMEOUT:STRING=1500
 //Path to a program.
 GITCOMMAND:FILEPATH=/usr/bin/git
 
+//Build indicators tests + enable CTest
+INDICATORS_BUILD_TESTS:BOOL=OFF
+
+//Build indicators demo
+INDICATORS_DEMO:BOOL=OFF
+
+//Include an install target
+INDICATORS_INSTALL:BOOL=OFF
+
+//Include package targets
+INDICATORS_PACKAGE:BOOL=OFF
+
+//Build indicators samples
+INDICATORS_SAMPLES:BOOL=OFF
+
 //Command to build the project
 MAKECOMMAND:STRING=/usr/bin/cmake --build . --config "${CTEST_CONFIGURATION_TYPE}"
 
@@ -359,6 +374,15 @@ YAML_ENABLE_PIC:BOOL=ON
 
 //Use system googletest if found
 YAML_USE_SYSTEM_GTEST:BOOL=OFF
+
+//Value Computed by CMake
+indicators_BINARY_DIR:STATIC=/workspace/C++/build/libs/indicators
+
+//Value Computed by CMake
+indicators_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+indicators_SOURCE_DIR:STATIC=/workspace/C++/libs/indicators
 
 
 ########################
@@ -443,6 +467,8 @@ CMAKE_GENERATOR_INSTANCE:INTERNAL=
 CMAKE_GENERATOR_PLATFORM:INTERNAL=
 //Name of generator toolset.
 CMAKE_GENERATOR_TOOLSET:INTERNAL=
+//Test CMAKE_HAVE_LIBC_PTHREAD
+CMAKE_HAVE_LIBC_PTHREAD:INTERNAL=1
 //Source directory with the top level CMakeLists.txt file for this
 // project
 CMAKE_HOME_DIRECTORY:INTERNAL=/workspace/C++
@@ -497,7 +523,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=6
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=7
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP
@@ -552,6 +578,8 @@ CTEST_SUBMIT_RETRY_COUNT-ADVANCED:INTERNAL=1
 CTEST_SUBMIT_RETRY_DELAY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: DART_TESTING_TIMEOUT
 DART_TESTING_TIMEOUT-ADVANCED:INTERNAL=1
+//Details about finding Threads
+FIND_PACKAGE_MESSAGE_DETAILS_Threads:INTERNAL=[TRUE][v()]
 //ADVANCED property for variable: GITCOMMAND
 GITCOMMAND-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: MAKECOMMAND

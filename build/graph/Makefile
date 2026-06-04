@@ -131,6 +131,174 @@ graph_lib/fast:
 	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/build
 .PHONY : graph_lib/fast
 
+algorithms/bfs.o: algorithms/bfs.cpp.o
+.PHONY : algorithms/bfs.o
+
+# target to build an object file
+algorithms/bfs.cpp.o:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/algorithms/bfs.cpp.o
+.PHONY : algorithms/bfs.cpp.o
+
+algorithms/bfs.i: algorithms/bfs.cpp.i
+.PHONY : algorithms/bfs.i
+
+# target to preprocess a source file
+algorithms/bfs.cpp.i:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/algorithms/bfs.cpp.i
+.PHONY : algorithms/bfs.cpp.i
+
+algorithms/bfs.s: algorithms/bfs.cpp.s
+.PHONY : algorithms/bfs.s
+
+# target to generate assembly for a file
+algorithms/bfs.cpp.s:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/algorithms/bfs.cpp.s
+.PHONY : algorithms/bfs.cpp.s
+
+algorithms/bidirectional_bfs.o: algorithms/bidirectional_bfs.cpp.o
+.PHONY : algorithms/bidirectional_bfs.o
+
+# target to build an object file
+algorithms/bidirectional_bfs.cpp.o:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/algorithms/bidirectional_bfs.cpp.o
+.PHONY : algorithms/bidirectional_bfs.cpp.o
+
+algorithms/bidirectional_bfs.i: algorithms/bidirectional_bfs.cpp.i
+.PHONY : algorithms/bidirectional_bfs.i
+
+# target to preprocess a source file
+algorithms/bidirectional_bfs.cpp.i:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/algorithms/bidirectional_bfs.cpp.i
+.PHONY : algorithms/bidirectional_bfs.cpp.i
+
+algorithms/bidirectional_bfs.s: algorithms/bidirectional_bfs.cpp.s
+.PHONY : algorithms/bidirectional_bfs.s
+
+# target to generate assembly for a file
+algorithms/bidirectional_bfs.cpp.s:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/algorithms/bidirectional_bfs.cpp.s
+.PHONY : algorithms/bidirectional_bfs.cpp.s
+
+algorithms/bidirectional_dijkstra.o: algorithms/bidirectional_dijkstra.cpp.o
+.PHONY : algorithms/bidirectional_dijkstra.o
+
+# target to build an object file
+algorithms/bidirectional_dijkstra.cpp.o:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/algorithms/bidirectional_dijkstra.cpp.o
+.PHONY : algorithms/bidirectional_dijkstra.cpp.o
+
+algorithms/bidirectional_dijkstra.i: algorithms/bidirectional_dijkstra.cpp.i
+.PHONY : algorithms/bidirectional_dijkstra.i
+
+# target to preprocess a source file
+algorithms/bidirectional_dijkstra.cpp.i:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/algorithms/bidirectional_dijkstra.cpp.i
+.PHONY : algorithms/bidirectional_dijkstra.cpp.i
+
+algorithms/bidirectional_dijkstra.s: algorithms/bidirectional_dijkstra.cpp.s
+.PHONY : algorithms/bidirectional_dijkstra.s
+
+# target to generate assembly for a file
+algorithms/bidirectional_dijkstra.cpp.s:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/algorithms/bidirectional_dijkstra.cpp.s
+.PHONY : algorithms/bidirectional_dijkstra.cpp.s
+
+algorithms/dijkstra.o: algorithms/dijkstra.cpp.o
+.PHONY : algorithms/dijkstra.o
+
+# target to build an object file
+algorithms/dijkstra.cpp.o:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/algorithms/dijkstra.cpp.o
+.PHONY : algorithms/dijkstra.cpp.o
+
+algorithms/dijkstra.i: algorithms/dijkstra.cpp.i
+.PHONY : algorithms/dijkstra.i
+
+# target to preprocess a source file
+algorithms/dijkstra.cpp.i:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/algorithms/dijkstra.cpp.i
+.PHONY : algorithms/dijkstra.cpp.i
+
+algorithms/dijkstra.s: algorithms/dijkstra.cpp.s
+.PHONY : algorithms/dijkstra.s
+
+# target to generate assembly for a file
+algorithms/dijkstra.cpp.s:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/algorithms/dijkstra.cpp.s
+.PHONY : algorithms/dijkstra.cpp.s
+
+algorithms/floyd_warshall.o: algorithms/floyd_warshall.cpp.o
+.PHONY : algorithms/floyd_warshall.o
+
+# target to build an object file
+algorithms/floyd_warshall.cpp.o:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/algorithms/floyd_warshall.cpp.o
+.PHONY : algorithms/floyd_warshall.cpp.o
+
+algorithms/floyd_warshall.i: algorithms/floyd_warshall.cpp.i
+.PHONY : algorithms/floyd_warshall.i
+
+# target to preprocess a source file
+algorithms/floyd_warshall.cpp.i:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/algorithms/floyd_warshall.cpp.i
+.PHONY : algorithms/floyd_warshall.cpp.i
+
+algorithms/floyd_warshall.s: algorithms/floyd_warshall.cpp.s
+.PHONY : algorithms/floyd_warshall.s
+
+# target to generate assembly for a file
+algorithms/floyd_warshall.cpp.s:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/algorithms/floyd_warshall.cpp.s
+.PHONY : algorithms/floyd_warshall.cpp.s
+
+algorithms/k_shortest_paths.o: algorithms/k_shortest_paths.cpp.o
+.PHONY : algorithms/k_shortest_paths.o
+
+# target to build an object file
+algorithms/k_shortest_paths.cpp.o:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/algorithms/k_shortest_paths.cpp.o
+.PHONY : algorithms/k_shortest_paths.cpp.o
+
+algorithms/k_shortest_paths.i: algorithms/k_shortest_paths.cpp.i
+.PHONY : algorithms/k_shortest_paths.i
+
+# target to preprocess a source file
+algorithms/k_shortest_paths.cpp.i:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/algorithms/k_shortest_paths.cpp.i
+.PHONY : algorithms/k_shortest_paths.cpp.i
+
+algorithms/k_shortest_paths.s: algorithms/k_shortest_paths.cpp.s
+.PHONY : algorithms/k_shortest_paths.s
+
+# target to generate assembly for a file
+algorithms/k_shortest_paths.cpp.s:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/algorithms/k_shortest_paths.cpp.s
+.PHONY : algorithms/k_shortest_paths.cpp.s
+
+cache/weight_cache.o: cache/weight_cache.cpp.o
+.PHONY : cache/weight_cache.o
+
+# target to build an object file
+cache/weight_cache.cpp.o:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/cache/weight_cache.cpp.o
+.PHONY : cache/weight_cache.cpp.o
+
+cache/weight_cache.i: cache/weight_cache.cpp.i
+.PHONY : cache/weight_cache.i
+
+# target to preprocess a source file
+cache/weight_cache.cpp.i:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/cache/weight_cache.cpp.i
+.PHONY : cache/weight_cache.cpp.i
+
+cache/weight_cache.s: cache/weight_cache.cpp.s
+.PHONY : cache/weight_cache.s
+
+# target to generate assembly for a file
+cache/weight_cache.cpp.s:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/cache/weight_cache.cpp.s
+.PHONY : cache/weight_cache.cpp.s
+
 generators/gml_loader.o: generators/gml_loader.cpp.o
 .PHONY : generators/gml_loader.o
 
@@ -203,6 +371,54 @@ graph.cpp.s:
 	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/graph.cpp.s
 .PHONY : graph.cpp.s
 
+nx/connectivity.o: nx/connectivity.cpp.o
+.PHONY : nx/connectivity.o
+
+# target to build an object file
+nx/connectivity.cpp.o:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/nx/connectivity.cpp.o
+.PHONY : nx/connectivity.cpp.o
+
+nx/connectivity.i: nx/connectivity.cpp.i
+.PHONY : nx/connectivity.i
+
+# target to preprocess a source file
+nx/connectivity.cpp.i:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/nx/connectivity.cpp.i
+.PHONY : nx/connectivity.cpp.i
+
+nx/connectivity.s: nx/connectivity.cpp.s
+.PHONY : nx/connectivity.s
+
+# target to generate assembly for a file
+nx/connectivity.cpp.s:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/nx/connectivity.cpp.s
+.PHONY : nx/connectivity.cpp.s
+
+nx/shortest_paths.o: nx/shortest_paths.cpp.o
+.PHONY : nx/shortest_paths.o
+
+# target to build an object file
+nx/shortest_paths.cpp.o:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/nx/shortest_paths.cpp.o
+.PHONY : nx/shortest_paths.cpp.o
+
+nx/shortest_paths.i: nx/shortest_paths.cpp.i
+.PHONY : nx/shortest_paths.i
+
+# target to preprocess a source file
+nx/shortest_paths.cpp.i:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/nx/shortest_paths.cpp.i
+.PHONY : nx/shortest_paths.cpp.i
+
+nx/shortest_paths.s: nx/shortest_paths.cpp.s
+.PHONY : nx/shortest_paths.s
+
+# target to generate assembly for a file
+nx/shortest_paths.cpp.s:
+	cd /workspace/C++/build && $(MAKE) $(MAKESILENT) -f graph/CMakeFiles/graph_lib.dir/build.make graph/CMakeFiles/graph_lib.dir/nx/shortest_paths.cpp.s
+.PHONY : nx/shortest_paths.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -212,6 +428,27 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... graph_lib"
+	@echo "... algorithms/bfs.o"
+	@echo "... algorithms/bfs.i"
+	@echo "... algorithms/bfs.s"
+	@echo "... algorithms/bidirectional_bfs.o"
+	@echo "... algorithms/bidirectional_bfs.i"
+	@echo "... algorithms/bidirectional_bfs.s"
+	@echo "... algorithms/bidirectional_dijkstra.o"
+	@echo "... algorithms/bidirectional_dijkstra.i"
+	@echo "... algorithms/bidirectional_dijkstra.s"
+	@echo "... algorithms/dijkstra.o"
+	@echo "... algorithms/dijkstra.i"
+	@echo "... algorithms/dijkstra.s"
+	@echo "... algorithms/floyd_warshall.o"
+	@echo "... algorithms/floyd_warshall.i"
+	@echo "... algorithms/floyd_warshall.s"
+	@echo "... algorithms/k_shortest_paths.o"
+	@echo "... algorithms/k_shortest_paths.i"
+	@echo "... algorithms/k_shortest_paths.s"
+	@echo "... cache/weight_cache.o"
+	@echo "... cache/weight_cache.i"
+	@echo "... cache/weight_cache.s"
 	@echo "... generators/gml_loader.o"
 	@echo "... generators/gml_loader.i"
 	@echo "... generators/gml_loader.s"
@@ -221,6 +458,12 @@ help:
 	@echo "... graph.o"
 	@echo "... graph.i"
 	@echo "... graph.s"
+	@echo "... nx/connectivity.o"
+	@echo "... nx/connectivity.i"
+	@echo "... nx/connectivity.s"
+	@echo "... nx/shortest_paths.o"
+	@echo "... nx/shortest_paths.i"
+	@echo "... nx/shortest_paths.s"
 .PHONY : help
 
 

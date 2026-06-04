@@ -144,6 +144,19 @@ graph_test/fast:
 .PHONY : graph_test/fast
 
 #=============================================================================
+# Target rules for targets named test_api
+
+# Build rule for target.
+test_api: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_api
+.PHONY : test_api
+
+# fast build rule for target.
+test_api/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_api.dir/build.make CMakeFiles/test_api.dir/build
+.PHONY : test_api/fast
+
+#=============================================================================
 # Target rules for targets named Experimental
 
 # Build rule for target.
@@ -598,6 +611,19 @@ random_lib/fast:
 	$(MAKE) $(MAKESILENT) -f random/CMakeFiles/random_lib.dir/build.make random/CMakeFiles/random_lib.dir/build
 .PHONY : random_lib/fast
 
+#=============================================================================
+# Target rules for targets named progress_lib
+
+# Build rule for target.
+progress_lib: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 progress_lib
+.PHONY : progress_lib
+
+# fast build rule for target.
+progress_lib/fast:
+	$(MAKE) $(MAKESILENT) -f progress/CMakeFiles/progress_lib.dir/build.make progress/CMakeFiles/progress_lib.dir/build
+.PHONY : progress_lib/fast
+
 graph_test.o: graph_test.cpp.o
 .PHONY : graph_test.o
 
@@ -646,6 +672,30 @@ main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/main.cpp.s
 .PHONY : main.cpp.s
 
+test_api.o: test_api.cpp.o
+.PHONY : test_api.o
+
+# target to build an object file
+test_api.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_api.dir/build.make CMakeFiles/test_api.dir/test_api.cpp.o
+.PHONY : test_api.cpp.o
+
+test_api.i: test_api.cpp.i
+.PHONY : test_api.i
+
+# target to preprocess a source file
+test_api.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_api.dir/build.make CMakeFiles/test_api.dir/test_api.cpp.i
+.PHONY : test_api.cpp.i
+
+test_api.s: test_api.cpp.s
+.PHONY : test_api.s
+
+# target to generate assembly for a file
+test_api.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_api.dir/build.make CMakeFiles/test_api.dir/test_api.cpp.s
+.PHONY : test_api.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -686,7 +736,9 @@ help:
 	@echo "... graph_lib"
 	@echo "... graph_test"
 	@echo "... main"
+	@echo "... progress_lib"
 	@echo "... random_lib"
+	@echo "... test_api"
 	@echo "... yaml-cpp"
 	@echo "... yaml-cpp-parse"
 	@echo "... yaml-cpp-read"
@@ -697,6 +749,9 @@ help:
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... test_api.o"
+	@echo "... test_api.i"
+	@echo "... test_api.s"
 .PHONY : help
 
 

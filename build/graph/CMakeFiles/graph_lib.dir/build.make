@@ -111,11 +111,146 @@ graph/CMakeFiles/graph_lib.dir/generators/gml_loader.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/graph_lib.dir/generators/gml_loader.cpp.s"
 	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/C++/graph/generators/gml_loader.cpp -o CMakeFiles/graph_lib.dir/generators/gml_loader.cpp.s
 
+graph/CMakeFiles/graph_lib.dir/nx/connectivity.cpp.o: graph/CMakeFiles/graph_lib.dir/flags.make
+graph/CMakeFiles/graph_lib.dir/nx/connectivity.cpp.o: /workspace/C++/graph/nx/connectivity.cpp
+graph/CMakeFiles/graph_lib.dir/nx/connectivity.cpp.o: graph/CMakeFiles/graph_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/C++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object graph/CMakeFiles/graph_lib.dir/nx/connectivity.cpp.o"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT graph/CMakeFiles/graph_lib.dir/nx/connectivity.cpp.o -MF CMakeFiles/graph_lib.dir/nx/connectivity.cpp.o.d -o CMakeFiles/graph_lib.dir/nx/connectivity.cpp.o -c /workspace/C++/graph/nx/connectivity.cpp
+
+graph/CMakeFiles/graph_lib.dir/nx/connectivity.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/graph_lib.dir/nx/connectivity.cpp.i"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/C++/graph/nx/connectivity.cpp > CMakeFiles/graph_lib.dir/nx/connectivity.cpp.i
+
+graph/CMakeFiles/graph_lib.dir/nx/connectivity.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/graph_lib.dir/nx/connectivity.cpp.s"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/C++/graph/nx/connectivity.cpp -o CMakeFiles/graph_lib.dir/nx/connectivity.cpp.s
+
+graph/CMakeFiles/graph_lib.dir/nx/shortest_paths.cpp.o: graph/CMakeFiles/graph_lib.dir/flags.make
+graph/CMakeFiles/graph_lib.dir/nx/shortest_paths.cpp.o: /workspace/C++/graph/nx/shortest_paths.cpp
+graph/CMakeFiles/graph_lib.dir/nx/shortest_paths.cpp.o: graph/CMakeFiles/graph_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/C++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object graph/CMakeFiles/graph_lib.dir/nx/shortest_paths.cpp.o"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT graph/CMakeFiles/graph_lib.dir/nx/shortest_paths.cpp.o -MF CMakeFiles/graph_lib.dir/nx/shortest_paths.cpp.o.d -o CMakeFiles/graph_lib.dir/nx/shortest_paths.cpp.o -c /workspace/C++/graph/nx/shortest_paths.cpp
+
+graph/CMakeFiles/graph_lib.dir/nx/shortest_paths.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/graph_lib.dir/nx/shortest_paths.cpp.i"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/C++/graph/nx/shortest_paths.cpp > CMakeFiles/graph_lib.dir/nx/shortest_paths.cpp.i
+
+graph/CMakeFiles/graph_lib.dir/nx/shortest_paths.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/graph_lib.dir/nx/shortest_paths.cpp.s"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/C++/graph/nx/shortest_paths.cpp -o CMakeFiles/graph_lib.dir/nx/shortest_paths.cpp.s
+
+graph/CMakeFiles/graph_lib.dir/algorithms/floyd_warshall.cpp.o: graph/CMakeFiles/graph_lib.dir/flags.make
+graph/CMakeFiles/graph_lib.dir/algorithms/floyd_warshall.cpp.o: /workspace/C++/graph/algorithms/floyd_warshall.cpp
+graph/CMakeFiles/graph_lib.dir/algorithms/floyd_warshall.cpp.o: graph/CMakeFiles/graph_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/C++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object graph/CMakeFiles/graph_lib.dir/algorithms/floyd_warshall.cpp.o"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT graph/CMakeFiles/graph_lib.dir/algorithms/floyd_warshall.cpp.o -MF CMakeFiles/graph_lib.dir/algorithms/floyd_warshall.cpp.o.d -o CMakeFiles/graph_lib.dir/algorithms/floyd_warshall.cpp.o -c /workspace/C++/graph/algorithms/floyd_warshall.cpp
+
+graph/CMakeFiles/graph_lib.dir/algorithms/floyd_warshall.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/graph_lib.dir/algorithms/floyd_warshall.cpp.i"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/C++/graph/algorithms/floyd_warshall.cpp > CMakeFiles/graph_lib.dir/algorithms/floyd_warshall.cpp.i
+
+graph/CMakeFiles/graph_lib.dir/algorithms/floyd_warshall.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/graph_lib.dir/algorithms/floyd_warshall.cpp.s"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/C++/graph/algorithms/floyd_warshall.cpp -o CMakeFiles/graph_lib.dir/algorithms/floyd_warshall.cpp.s
+
+graph/CMakeFiles/graph_lib.dir/algorithms/bfs.cpp.o: graph/CMakeFiles/graph_lib.dir/flags.make
+graph/CMakeFiles/graph_lib.dir/algorithms/bfs.cpp.o: /workspace/C++/graph/algorithms/bfs.cpp
+graph/CMakeFiles/graph_lib.dir/algorithms/bfs.cpp.o: graph/CMakeFiles/graph_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/C++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object graph/CMakeFiles/graph_lib.dir/algorithms/bfs.cpp.o"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT graph/CMakeFiles/graph_lib.dir/algorithms/bfs.cpp.o -MF CMakeFiles/graph_lib.dir/algorithms/bfs.cpp.o.d -o CMakeFiles/graph_lib.dir/algorithms/bfs.cpp.o -c /workspace/C++/graph/algorithms/bfs.cpp
+
+graph/CMakeFiles/graph_lib.dir/algorithms/bfs.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/graph_lib.dir/algorithms/bfs.cpp.i"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/C++/graph/algorithms/bfs.cpp > CMakeFiles/graph_lib.dir/algorithms/bfs.cpp.i
+
+graph/CMakeFiles/graph_lib.dir/algorithms/bfs.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/graph_lib.dir/algorithms/bfs.cpp.s"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/C++/graph/algorithms/bfs.cpp -o CMakeFiles/graph_lib.dir/algorithms/bfs.cpp.s
+
+graph/CMakeFiles/graph_lib.dir/algorithms/dijkstra.cpp.o: graph/CMakeFiles/graph_lib.dir/flags.make
+graph/CMakeFiles/graph_lib.dir/algorithms/dijkstra.cpp.o: /workspace/C++/graph/algorithms/dijkstra.cpp
+graph/CMakeFiles/graph_lib.dir/algorithms/dijkstra.cpp.o: graph/CMakeFiles/graph_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/C++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object graph/CMakeFiles/graph_lib.dir/algorithms/dijkstra.cpp.o"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT graph/CMakeFiles/graph_lib.dir/algorithms/dijkstra.cpp.o -MF CMakeFiles/graph_lib.dir/algorithms/dijkstra.cpp.o.d -o CMakeFiles/graph_lib.dir/algorithms/dijkstra.cpp.o -c /workspace/C++/graph/algorithms/dijkstra.cpp
+
+graph/CMakeFiles/graph_lib.dir/algorithms/dijkstra.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/graph_lib.dir/algorithms/dijkstra.cpp.i"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/C++/graph/algorithms/dijkstra.cpp > CMakeFiles/graph_lib.dir/algorithms/dijkstra.cpp.i
+
+graph/CMakeFiles/graph_lib.dir/algorithms/dijkstra.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/graph_lib.dir/algorithms/dijkstra.cpp.s"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/C++/graph/algorithms/dijkstra.cpp -o CMakeFiles/graph_lib.dir/algorithms/dijkstra.cpp.s
+
+graph/CMakeFiles/graph_lib.dir/algorithms/k_shortest_paths.cpp.o: graph/CMakeFiles/graph_lib.dir/flags.make
+graph/CMakeFiles/graph_lib.dir/algorithms/k_shortest_paths.cpp.o: /workspace/C++/graph/algorithms/k_shortest_paths.cpp
+graph/CMakeFiles/graph_lib.dir/algorithms/k_shortest_paths.cpp.o: graph/CMakeFiles/graph_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/C++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object graph/CMakeFiles/graph_lib.dir/algorithms/k_shortest_paths.cpp.o"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT graph/CMakeFiles/graph_lib.dir/algorithms/k_shortest_paths.cpp.o -MF CMakeFiles/graph_lib.dir/algorithms/k_shortest_paths.cpp.o.d -o CMakeFiles/graph_lib.dir/algorithms/k_shortest_paths.cpp.o -c /workspace/C++/graph/algorithms/k_shortest_paths.cpp
+
+graph/CMakeFiles/graph_lib.dir/algorithms/k_shortest_paths.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/graph_lib.dir/algorithms/k_shortest_paths.cpp.i"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/C++/graph/algorithms/k_shortest_paths.cpp > CMakeFiles/graph_lib.dir/algorithms/k_shortest_paths.cpp.i
+
+graph/CMakeFiles/graph_lib.dir/algorithms/k_shortest_paths.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/graph_lib.dir/algorithms/k_shortest_paths.cpp.s"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/C++/graph/algorithms/k_shortest_paths.cpp -o CMakeFiles/graph_lib.dir/algorithms/k_shortest_paths.cpp.s
+
+graph/CMakeFiles/graph_lib.dir/algorithms/bidirectional_dijkstra.cpp.o: graph/CMakeFiles/graph_lib.dir/flags.make
+graph/CMakeFiles/graph_lib.dir/algorithms/bidirectional_dijkstra.cpp.o: /workspace/C++/graph/algorithms/bidirectional_dijkstra.cpp
+graph/CMakeFiles/graph_lib.dir/algorithms/bidirectional_dijkstra.cpp.o: graph/CMakeFiles/graph_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/C++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object graph/CMakeFiles/graph_lib.dir/algorithms/bidirectional_dijkstra.cpp.o"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT graph/CMakeFiles/graph_lib.dir/algorithms/bidirectional_dijkstra.cpp.o -MF CMakeFiles/graph_lib.dir/algorithms/bidirectional_dijkstra.cpp.o.d -o CMakeFiles/graph_lib.dir/algorithms/bidirectional_dijkstra.cpp.o -c /workspace/C++/graph/algorithms/bidirectional_dijkstra.cpp
+
+graph/CMakeFiles/graph_lib.dir/algorithms/bidirectional_dijkstra.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/graph_lib.dir/algorithms/bidirectional_dijkstra.cpp.i"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/C++/graph/algorithms/bidirectional_dijkstra.cpp > CMakeFiles/graph_lib.dir/algorithms/bidirectional_dijkstra.cpp.i
+
+graph/CMakeFiles/graph_lib.dir/algorithms/bidirectional_dijkstra.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/graph_lib.dir/algorithms/bidirectional_dijkstra.cpp.s"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/C++/graph/algorithms/bidirectional_dijkstra.cpp -o CMakeFiles/graph_lib.dir/algorithms/bidirectional_dijkstra.cpp.s
+
+graph/CMakeFiles/graph_lib.dir/algorithms/bidirectional_bfs.cpp.o: graph/CMakeFiles/graph_lib.dir/flags.make
+graph/CMakeFiles/graph_lib.dir/algorithms/bidirectional_bfs.cpp.o: /workspace/C++/graph/algorithms/bidirectional_bfs.cpp
+graph/CMakeFiles/graph_lib.dir/algorithms/bidirectional_bfs.cpp.o: graph/CMakeFiles/graph_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/C++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object graph/CMakeFiles/graph_lib.dir/algorithms/bidirectional_bfs.cpp.o"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT graph/CMakeFiles/graph_lib.dir/algorithms/bidirectional_bfs.cpp.o -MF CMakeFiles/graph_lib.dir/algorithms/bidirectional_bfs.cpp.o.d -o CMakeFiles/graph_lib.dir/algorithms/bidirectional_bfs.cpp.o -c /workspace/C++/graph/algorithms/bidirectional_bfs.cpp
+
+graph/CMakeFiles/graph_lib.dir/algorithms/bidirectional_bfs.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/graph_lib.dir/algorithms/bidirectional_bfs.cpp.i"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/C++/graph/algorithms/bidirectional_bfs.cpp > CMakeFiles/graph_lib.dir/algorithms/bidirectional_bfs.cpp.i
+
+graph/CMakeFiles/graph_lib.dir/algorithms/bidirectional_bfs.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/graph_lib.dir/algorithms/bidirectional_bfs.cpp.s"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/C++/graph/algorithms/bidirectional_bfs.cpp -o CMakeFiles/graph_lib.dir/algorithms/bidirectional_bfs.cpp.s
+
+graph/CMakeFiles/graph_lib.dir/cache/weight_cache.cpp.o: graph/CMakeFiles/graph_lib.dir/flags.make
+graph/CMakeFiles/graph_lib.dir/cache/weight_cache.cpp.o: /workspace/C++/graph/cache/weight_cache.cpp
+graph/CMakeFiles/graph_lib.dir/cache/weight_cache.cpp.o: graph/CMakeFiles/graph_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/C++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object graph/CMakeFiles/graph_lib.dir/cache/weight_cache.cpp.o"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT graph/CMakeFiles/graph_lib.dir/cache/weight_cache.cpp.o -MF CMakeFiles/graph_lib.dir/cache/weight_cache.cpp.o.d -o CMakeFiles/graph_lib.dir/cache/weight_cache.cpp.o -c /workspace/C++/graph/cache/weight_cache.cpp
+
+graph/CMakeFiles/graph_lib.dir/cache/weight_cache.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/graph_lib.dir/cache/weight_cache.cpp.i"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/C++/graph/cache/weight_cache.cpp > CMakeFiles/graph_lib.dir/cache/weight_cache.cpp.i
+
+graph/CMakeFiles/graph_lib.dir/cache/weight_cache.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/graph_lib.dir/cache/weight_cache.cpp.s"
+	cd /workspace/C++/build/graph && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/C++/graph/cache/weight_cache.cpp -o CMakeFiles/graph_lib.dir/cache/weight_cache.cpp.s
+
 # Object files for target graph_lib
 graph_lib_OBJECTS = \
 "CMakeFiles/graph_lib.dir/graph.cpp.o" \
 "CMakeFiles/graph_lib.dir/generators/waxman_generator.cpp.o" \
-"CMakeFiles/graph_lib.dir/generators/gml_loader.cpp.o"
+"CMakeFiles/graph_lib.dir/generators/gml_loader.cpp.o" \
+"CMakeFiles/graph_lib.dir/nx/connectivity.cpp.o" \
+"CMakeFiles/graph_lib.dir/nx/shortest_paths.cpp.o" \
+"CMakeFiles/graph_lib.dir/algorithms/floyd_warshall.cpp.o" \
+"CMakeFiles/graph_lib.dir/algorithms/bfs.cpp.o" \
+"CMakeFiles/graph_lib.dir/algorithms/dijkstra.cpp.o" \
+"CMakeFiles/graph_lib.dir/algorithms/k_shortest_paths.cpp.o" \
+"CMakeFiles/graph_lib.dir/algorithms/bidirectional_dijkstra.cpp.o" \
+"CMakeFiles/graph_lib.dir/algorithms/bidirectional_bfs.cpp.o" \
+"CMakeFiles/graph_lib.dir/cache/weight_cache.cpp.o"
 
 # External object files for target graph_lib
 graph_lib_EXTERNAL_OBJECTS =
@@ -123,9 +258,18 @@ graph_lib_EXTERNAL_OBJECTS =
 graph/libgraph_lib.a: graph/CMakeFiles/graph_lib.dir/graph.cpp.o
 graph/libgraph_lib.a: graph/CMakeFiles/graph_lib.dir/generators/waxman_generator.cpp.o
 graph/libgraph_lib.a: graph/CMakeFiles/graph_lib.dir/generators/gml_loader.cpp.o
+graph/libgraph_lib.a: graph/CMakeFiles/graph_lib.dir/nx/connectivity.cpp.o
+graph/libgraph_lib.a: graph/CMakeFiles/graph_lib.dir/nx/shortest_paths.cpp.o
+graph/libgraph_lib.a: graph/CMakeFiles/graph_lib.dir/algorithms/floyd_warshall.cpp.o
+graph/libgraph_lib.a: graph/CMakeFiles/graph_lib.dir/algorithms/bfs.cpp.o
+graph/libgraph_lib.a: graph/CMakeFiles/graph_lib.dir/algorithms/dijkstra.cpp.o
+graph/libgraph_lib.a: graph/CMakeFiles/graph_lib.dir/algorithms/k_shortest_paths.cpp.o
+graph/libgraph_lib.a: graph/CMakeFiles/graph_lib.dir/algorithms/bidirectional_dijkstra.cpp.o
+graph/libgraph_lib.a: graph/CMakeFiles/graph_lib.dir/algorithms/bidirectional_bfs.cpp.o
+graph/libgraph_lib.a: graph/CMakeFiles/graph_lib.dir/cache/weight_cache.cpp.o
 graph/libgraph_lib.a: graph/CMakeFiles/graph_lib.dir/build.make
 graph/libgraph_lib.a: graph/CMakeFiles/graph_lib.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspace/C++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX static library libgraph_lib.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspace/C++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Linking CXX static library libgraph_lib.a"
 	cd /workspace/C++/build/graph && $(CMAKE_COMMAND) -P CMakeFiles/graph_lib.dir/cmake_clean_target.cmake
 	cd /workspace/C++/build/graph && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/graph_lib.dir/link.txt --verbose=$(VERBOSE)
 

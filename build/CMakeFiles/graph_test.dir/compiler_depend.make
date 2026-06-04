@@ -26,6 +26,7 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
   /usr/include/c++/13/bits/char_traits.h \
   /usr/include/c++/13/bits/charconv.h \
   /usr/include/c++/13/bits/chrono.h \
+  /usr/include/c++/13/bits/codecvt.h \
   /usr/include/c++/13/bits/concept_check.h \
   /usr/include/c++/13/bits/cpp_type_traits.h \
   /usr/include/c++/13/bits/cxxabi_forced.h \
@@ -35,6 +36,7 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
   /usr/include/c++/13/bits/exception.h \
   /usr/include/c++/13/bits/exception_defines.h \
   /usr/include/c++/13/bits/exception_ptr.h \
+  /usr/include/c++/13/bits/fstream.tcc \
   /usr/include/c++/13/bits/functexcept.h \
   /usr/include/c++/13/bits/functional_hash.h \
   /usr/include/c++/13/bits/hash_bytes.h \
@@ -46,8 +48,11 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
   /usr/include/c++/13/bits/list.tcc \
   /usr/include/c++/13/bits/locale_classes.h \
   /usr/include/c++/13/bits/locale_classes.tcc \
+  /usr/include/c++/13/bits/locale_conv.h \
   /usr/include/c++/13/bits/locale_facets.h \
   /usr/include/c++/13/bits/locale_facets.tcc \
+  /usr/include/c++/13/bits/locale_facets_nonio.h \
+  /usr/include/c++/13/bits/locale_facets_nonio.tcc \
   /usr/include/c++/13/bits/localefwd.h \
   /usr/include/c++/13/bits/memory_resource.h \
   /usr/include/c++/13/bits/memoryfwd.h \
@@ -61,6 +66,7 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
   /usr/include/c++/13/bits/postypes.h \
   /usr/include/c++/13/bits/predefined_ops.h \
   /usr/include/c++/13/bits/ptr_traits.h \
+  /usr/include/c++/13/bits/quoted_string.h \
   /usr/include/c++/13/bits/range_access.h \
   /usr/include/c++/13/bits/refwrap.h \
   /usr/include/c++/13/bits/requires_hosted.h \
@@ -109,6 +115,7 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
   /usr/include/c++/13/cassert \
   /usr/include/c++/13/cctype \
   /usr/include/c++/13/cerrno \
+  /usr/include/c++/13/chrono \
   /usr/include/c++/13/climits \
   /usr/include/c++/13/clocale \
   /usr/include/c++/13/cmath \
@@ -132,8 +139,10 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
   /usr/include/c++/13/ext/numeric_traits.h \
   /usr/include/c++/13/ext/string_conversions.h \
   /usr/include/c++/13/ext/type_traits.h \
+  /usr/include/c++/13/fstream \
   /usr/include/c++/13/functional \
   /usr/include/c++/13/initializer_list \
+  /usr/include/c++/13/iomanip \
   /usr/include/c++/13/ios \
   /usr/include/c++/13/iosfwd \
   /usr/include/c++/13/iostream \
@@ -141,6 +150,7 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
   /usr/include/c++/13/iterator \
   /usr/include/c++/13/limits \
   /usr/include/c++/13/list \
+  /usr/include/c++/13/locale \
   /usr/include/c++/13/map \
   /usr/include/c++/13/memory \
   /usr/include/c++/13/memory_resource \
@@ -187,6 +197,7 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
   /usr/include/errno.h \
   /usr/include/features-time64.h \
   /usr/include/features.h \
+  /usr/include/libintl.h \
   /usr/include/limits.h \
   /usr/include/linux/close_range.h \
   /usr/include/linux/errno.h \
@@ -288,8 +299,10 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
   /usr/include/x86_64-linux-gnu/bits/wordsize.h \
   /usr/include/x86_64-linux-gnu/bits/xopen_lim.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/atomic_word.h \
+  /usr/include/x86_64-linux-gnu/c++/13/bits/basic_file.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/c++allocator.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
+  /usr/include/x86_64-linux-gnu/c++/13/bits/c++io.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/c++locale.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/cpu_defines.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_base.h \
@@ -297,7 +310,9 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
   /usr/include/x86_64-linux-gnu/c++/13/bits/error_constants.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/gthr-default.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/gthr.h \
+  /usr/include/x86_64-linux-gnu/c++/13/bits/messages_members.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
+  /usr/include/x86_64-linux-gnu/c++/13/bits/time_members.h \
   /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
   /usr/include/x86_64-linux-gnu/gnu/stubs.h \
   /usr/include/x86_64-linux-gnu/sys/cdefs.h \
@@ -312,7 +327,11 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
   /workspace/C++/graph/attribute.h \
   /workspace/C++/graph/graph.h \
   /workspace/C++/graph/graph_types.h \
+  /workspace/C++/graph/algorithms/dijkstra.h \
+  /workspace/C++/graph/algorithms/k_shortest_paths.h \
   /workspace/C++/graph/generators/waxman_generator.h \
+  /workspace/C++/graph/sparse_matrix.h \
+  /workspace/C++/graph/nx/shortest_paths.h \
   /workspace/C++/libs/boost/boost/assert.hpp \
   /workspace/C++/libs/boost/boost/assert/source_location.hpp \
   /workspace/C++/libs/boost/boost/call_traits.hpp \
@@ -917,7 +936,8 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
   /workspace/C++/libs/boost/boost/utility/binary.hpp \
   /workspace/C++/libs/boost/boost/utility/enable_if.hpp \
   /workspace/C++/libs/boost/boost/utility/identity_type.hpp \
-  /workspace/C++/libs/boost/boost/version.hpp
+  /workspace/C++/libs/boost/boost/version.hpp \
+  /workspace/C++/random/py_random.h
 
 
 /workspace/C++/libs/boost/boost/version.hpp:
@@ -985,8 +1005,6 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 /workspace/C++/libs/boost/boost/type_traits/is_pointer.hpp:
 
 /workspace/C++/libs/boost/boost/type_traits/is_pod.hpp:
-
-/workspace/C++/libs/boost/boost/type_traits/is_nothrow_swappable.hpp:
 
 /workspace/C++/libs/boost/boost/type_traits/is_nothrow_move_constructible.hpp:
 
@@ -1083,8 +1101,6 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 /workspace/C++/libs/boost/boost/type_traits/function_traits.hpp:
 
 /workspace/C++/libs/boost/boost/type_traits/extent.hpp:
-
-/workspace/C++/libs/boost/boost/type_traits/enable_if.hpp:
 
 /workspace/C++/libs/boost/boost/type_traits/is_reference.hpp:
 
@@ -1183,8 +1199,6 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 /workspace/C++/libs/boost/boost/type_traits/has_modulus.hpp:
 
 /workspace/C++/libs/boost/boost/preprocessor/variadic/elem.hpp:
-
-/workspace/C++/libs/boost/boost/preprocessor/tuple/detail/is_single_return.hpp:
 
 /workspace/C++/libs/boost/boost/preprocessor/stringize.hpp:
 
@@ -1380,23 +1394,31 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /workspace/C++/libs/boost/boost/multi_index/detail/serialization_version.hpp:
 
-/usr/include/x86_64-linux-gnu/bits/types/__locale_t.h:
+/workspace/C++/libs/boost/boost/multi_index/detail/node_type.hpp:
 
-/usr/include/c++/13/bits/stl_multimap.h:
+/workspace/C++/libs/boost/boost/multi_index/detail/no_duplicate_tags.hpp:
 
-/workspace/C++/libs/boost/boost/core/empty_value.hpp:
+/workspace/C++/libs/boost/boost/multi_index/detail/modify_key_adaptor.hpp:
 
-/usr/include/x86_64-linux-gnu/bits/types/__FILE.h:
+/workspace/C++/libs/boost/boost/multi_index/detail/index_saver.hpp:
 
-/workspace/C++/libs/boost/boost/smart_ptr/detail/yield_k.hpp:
+/workspace/C++/libs/boost/boost/multi_index/detail/index_node_base.hpp:
 
-/workspace/C++/libs/boost/boost/mpl/int_fwd.hpp:
+/workspace/C++/libs/boost/boost/multi_index/detail/index_matcher.hpp:
+
+/workspace/C++/libs/boost/boost/preprocessor/config/config.hpp:
+
+/workspace/C++/libs/boost/boost/multi_index/detail/index_base.hpp:
+
+/workspace/C++/libs/boost/boost/multi_index/detail/index_access_sequence.hpp:
 
 /usr/include/x86_64-linux-gnu/bits/timex.h:
 
-/usr/include/x86_64-linux-gnu/bits/stdio_lim.h:
-
 /usr/include/time.h:
+
+/workspace/C++/libs/boost/boost/multi_index/detail/invalidate_iterators.hpp:
+
+/usr/include/x86_64-linux-gnu/bits/time.h:
 
 /workspace/C++/libs/boost/boost/type_traits/is_member_pointer.hpp:
 
@@ -1420,6 +1442,8 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /usr/include/c++/13/map:
 
+/workspace/C++/random/py_random.h:
+
 /workspace/C++/libs/boost/boost/mpl/aux_/config/ttp.hpp:
 
 /workspace/C++/libs/boost/boost/type_traits/detail/yes_no_type.hpp:
@@ -1442,6 +1466,10 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h:
 
+/workspace/C++/libs/boost/boost/multi_index/detail/is_transparent.hpp:
+
+/usr/include/x86_64-linux-gnu/bits/stdint-uintn.h:
+
 /usr/include/x86_64-linux-gnu/bits/select.h:
 
 /usr/include/x86_64-linux-gnu/c++/13/bits/gthr-default.h:
@@ -1449,6 +1477,12 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 /usr/include/unistd.h:
 
 /usr/include/string.h:
+
+/workspace/C++/libs/boost/boost/multi_index/detail/restore_wstrict_aliasing.hpp:
+
+/usr/include/x86_64-linux-gnu/bits/fp-fast.h:
+
+/workspace/C++/libs/boost/boost/core/invoke_swap.hpp:
 
 /workspace/C++/libs/boost/boost/tuple/tuple.hpp:
 
@@ -1463,6 +1497,12 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 /usr/include/pthread.h:
 
 /usr/include/c++/13/bits/enable_special_members.h:
+
+/workspace/C++/libs/boost/boost/type_traits/has_trivial_move_assign.hpp:
+
+/workspace/C++/libs/boost/boost/multi_index/detail/no_duplicate_tags_in_index_list.hpp:
+
+/workspace/C++/libs/boost/boost/mpl/identity.hpp:
 
 /usr/include/stdint.h:
 
@@ -1502,6 +1542,10 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /usr/include/stdc-predef.h:
 
+/workspace/C++/libs/boost/boost/multi_index/detail/raw_ptr.hpp:
+
+/usr/include/c++/13/tr1/modified_bessel_func.tcc:
+
 /usr/lib/gcc/x86_64-linux-gnu/13/include/limits.h:
 
 /usr/include/c++/13/tr1/legendre_function.tcc:
@@ -1516,11 +1560,11 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /workspace/C++/libs/boost/boost/concept/detail/general.hpp:
 
+/workspace/C++/libs/boost/boost/multi_index/detail/promotes_arg.hpp:
+
+/workspace/C++/libs/boost/boost/config/detail/select_platform_config.hpp:
+
 /workspace/C++/libs/boost/boost/mpl/aux_/config/gpu.hpp:
-
-/workspace/C++/libs/boost/boost/preprocessor/config/config.hpp:
-
-/workspace/C++/libs/boost/boost/multi_index/detail/index_base.hpp:
 
 /usr/include/c++/13/tr1/exp_integral.tcc:
 
@@ -1572,6 +1616,10 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /usr/include/strings.h:
 
+/workspace/C++/libs/boost/boost/type_traits/is_nothrow_swappable.hpp:
+
+/usr/include/c++/13/iomanip:
+
 /usr/include/c++/13/exception:
 
 /usr/include/x86_64-linux-gnu/bits/floatn.h:
@@ -1583,6 +1631,8 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 /usr/include/c++/13/tr1/hypergeometric.tcc:
 
 /usr/include/x86_64-linux-gnu/bits/types/wint_t.h:
+
+/workspace/C++/graph/algorithms/dijkstra.h:
 
 /usr/include/x86_64-linux-gnu/bits/posix_opt.h:
 
@@ -1598,6 +1648,10 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /usr/include/c++/13/istream:
 
+/workspace/C++/libs/boost/boost/multi_index/detail/index_loader.hpp:
+
+/workspace/C++/libs/boost/boost/mp11/list.hpp:
+
 /usr/include/c++/13/functional:
 
 /workspace/C++/libs/boost/boost/type_traits/remove_cv.hpp:
@@ -1605,6 +1659,10 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 /workspace/C++/libs/boost/boost/concept/assert.hpp:
 
 /workspace/C++/libs/boost/boost/iterator/interoperable.hpp:
+
+/workspace/C++/libs/boost/boost/multi_index/detail/node_handle.hpp:
+
+/usr/include/c++/13/ext/string_conversions.h:
 
 /workspace/C++/libs/boost/boost/type_traits/remove_extent.hpp:
 
@@ -1626,23 +1684,27 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /usr/include/c++/13/ext/concurrence.h:
 
-/usr/include/c++/13/iosfwd:
+/usr/include/c++/13/new:
 
-/workspace/C++/libs/boost/boost/mpl/void.hpp:
+/workspace/C++/libs/boost/boost/multi_index/detail/archive_constructed.hpp:
+
+/usr/include/x86_64-linux-gnu/bits/setjmp.h:
+
+/usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h:
+
+/workspace/C++/libs/boost/boost/mpl/aux_/config/nttp.hpp:
+
+/usr/include/locale.h:
+
+/usr/include/x86_64-linux-gnu/bits/errno.h:
+
+/workspace/C++/libs/boost/boost/preprocessor/comparison/limits/not_equal_256.hpp:
+
+/usr/include/c++/13/bits/stl_pair.h:
+
+/workspace/C++/libs/boost/boost/container_hash/hash_is_avalanching.hpp:
 
 /usr/include/x86_64-linux-gnu/gnu/stubs-64.h:
-
-/workspace/C++/libs/boost/boost/mp11/detail/config.hpp:
-
-/usr/include/c++/13/bits/parse_numbers.h:
-
-/usr/include/linux/errno.h:
-
-/usr/include/c++/13/bits/std_abs.h:
-
-/workspace/C++/libs/boost/boost/optional.hpp:
-
-/workspace/C++/libs/boost/boost/iterator/detail/eval_if_default.hpp:
 
 /usr/include/c++/13/bits/memoryfwd.h:
 
@@ -1650,11 +1712,11 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /workspace/C++/graph/generators/waxman_generator.h:
 
-/usr/include/x86_64-linux-gnu/bits/stdint-uintn.h:
-
-/workspace/C++/libs/boost/boost/multi_index/detail/is_transparent.hpp:
-
 /usr/include/c++/13/bits/shared_ptr_base.h:
+
+/usr/include/c++/13/bits/utility.h:
+
+/workspace/C++/libs/boost/boost/graph/graph_concepts.hpp:
 
 /usr/include/c++/13/pstl/glue_memory_defs.h:
 
@@ -1672,6 +1734,14 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /usr/include/c++/13/bits/invoke.h:
 
+/usr/include/c++/13/bits/locale_facets_nonio.tcc:
+
+/usr/include/c++/13/bits/locale_facets_nonio.h:
+
+/workspace/C++/libs/boost/boost/range/iterator_range_core.hpp:
+
+/usr/include/x86_64-linux-gnu/bits/confname.h:
+
 /workspace/C++/libs/boost/boost/type_traits/declval.hpp:
 
 /usr/include/c++/13/bits/locale_classes.tcc:
@@ -1683,12 +1753,6 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 /usr/include/c++/13/bits/locale_classes.h:
 
 /usr/include/x86_64-linux-gnu/bits/timesize.h:
-
-/workspace/C++/libs/boost/boost/range/concepts.hpp:
-
-/workspace/C++/libs/boost/boost/config/helper_macros.hpp:
-
-/usr/include/c++/13/bits/stl_set.h:
 
 /workspace/C++/libs/boost/boost/unordered/detail/serialize_fca_container.hpp:
 
@@ -1705,10 +1769,6 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 /workspace/C++/libs/boost/boost/type_traits/remove_cv_ref.hpp:
 
 /usr/include/c++/13/bits/functional_hash.h:
-
-/usr/include/c++/13/tr1/modified_bessel_func.tcc:
-
-/workspace/C++/libs/boost/boost/multi_index/detail/raw_ptr.hpp:
 
 /usr/include/c++/13/pstl/execution_defs.h:
 
@@ -1736,13 +1796,23 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /usr/include/c++/13/typeinfo:
 
-/workspace/C++/libs/boost/boost/unordered/detail/unordered_printers.hpp:
+/usr/include/x86_64-linux-gnu/c++/13/bits/c++io.h:
 
-/workspace/C++/libs/boost/boost/type_traits/is_enum.hpp:
+/usr/include/x86_64-linux-gnu/bits/types/__FILE.h:
 
-/usr/include/c++/13/ext/type_traits.h:
+/workspace/C++/libs/boost/boost/smart_ptr/detail/yield_k.hpp:
 
-/usr/include/x86_64-linux-gnu/bits/time64.h:
+/workspace/C++/libs/boost/boost/mpl/int_fwd.hpp:
+
+/workspace/C++/libs/boost/boost/limits.hpp:
+
+/usr/include/x86_64-linux-gnu/bits/flt-eval-method.h:
+
+/usr/include/c++/13/bits/streambuf_iterator.h:
+
+/workspace/C++/libs/boost/boost/range/detail/msvc_has_iterator_workaround.hpp:
+
+/usr/include/c++/13/bits/localefwd.h:
 
 /usr/include/c++/13/bits/basic_ios.h:
 
@@ -1768,15 +1838,35 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /usr/include/c++/13/bits/stl_raw_storage_iter.h:
 
+/usr/include/c++/13/bits/fstream.tcc:
+
+/usr/include/c++/13/bits/refwrap.h:
+
+/workspace/C++/libs/boost/boost/optional/bad_optional_access.hpp:
+
+/usr/include/c++/13/bits/exception_defines.h:
+
+/workspace/C++/libs/boost/boost/multi_index/detail/has_tag.hpp:
+
 /usr/include/alloca.h:
 
-/usr/include/assert.h:
+/usr/include/x86_64-linux-gnu/bits/stdio_lim.h:
 
-/usr/include/c++/13/backward/auto_ptr.h:
+/usr/include/c++/13/bits/locale_conv.h:
+
+/workspace/C++/libs/boost/boost/graph/adjacency_iterator.hpp:
+
+/usr/include/c++/13/bits/istream.tcc:
 
 /usr/include/c++/13/cwchar:
 
-/usr/include/x86_64-linux-gnu/sys/select.h:
+/usr/include/c++/13/iosfwd:
+
+/workspace/C++/libs/boost/boost/mpl/void.hpp:
+
+/usr/include/c++/13/backward/auto_ptr.h:
+
+/usr/include/assert.h:
 
 /workspace/C++/libs/boost/boost/type_traits/add_volatile.hpp:
 
@@ -1788,25 +1878,11 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /usr/include/c++/13/bits/allocated_ptr.h:
 
-/workspace/C++/libs/boost/boost/preprocessor/comparison/limits/not_equal_256.hpp:
+/usr/include/c++/13/fstream:
 
-/usr/include/c++/13/bits/stl_pair.h:
-
-/usr/include/x86_64-linux-gnu/bits/errno.h:
-
-/workspace/C++/libs/boost/boost/container_hash/hash_is_avalanching.hpp:
+/workspace/C++/libs/boost/boost/mpl/and.hpp:
 
 /usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h:
-
-/workspace/C++/libs/boost/boost/limits.hpp:
-
-/usr/include/x86_64-linux-gnu/bits/flt-eval-method.h:
-
-/usr/include/c++/13/bits/streambuf_iterator.h:
-
-/workspace/C++/libs/boost/boost/range/detail/msvc_has_iterator_workaround.hpp:
-
-/usr/include/c++/13/bits/localefwd.h:
 
 /usr/include/x86_64-linux-gnu/bits/fp-logb.h:
 
@@ -1824,22 +1900,6 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /usr/include/c++/13/bits/alloc_traits.h:
 
-/usr/include/c++/13/new:
-
-/workspace/C++/libs/boost/boost/multi_index/detail/archive_constructed.hpp:
-
-/usr/include/x86_64-linux-gnu/bits/setjmp.h:
-
-/usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h:
-
-/workspace/C++/libs/boost/boost/graph/graph_concepts.hpp:
-
-/usr/include/c++/13/bits/utility.h:
-
-/workspace/C++/libs/boost/boost/mpl/aux_/config/nttp.hpp:
-
-/usr/include/locale.h:
-
 /workspace/C++/libs/boost/boost/preprocessor/logical/bitor.hpp:
 
 /usr/include/c++/13/backward/binders.h:
@@ -1847,6 +1907,28 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 /usr/include/x86_64-linux-gnu/bits/long-double.h:
 
 /workspace/C++/libs/boost/boost/mp11/algorithm.hpp:
+
+/workspace/C++/libs/boost/boost/type_traits/enable_if.hpp:
+
+/usr/include/c++/13/bits/codecvt.h:
+
+/usr/include/c++/13/bits/stl_tempbuf.h:
+
+/workspace/C++/libs/boost/boost/config/platform/linux.hpp:
+
+/workspace/C++/libs/boost/boost/smart_ptr/detail/sp_counted_impl.hpp:
+
+/workspace/C++/libs/boost/boost/core/bit.hpp:
+
+/usr/include/c++/13/unordered_set:
+
+/usr/include/x86_64-linux-gnu/sys/types.h:
+
+/workspace/C++/libs/boost/boost/optional/detail/optional_reference_spec.hpp:
+
+/usr/include/x86_64-linux-gnu/bits/getopt_core.h:
+
+/usr/include/c++/13/bits/stl_vector.h:
 
 /workspace/C++/libs/boost/boost/utility.hpp:
 
@@ -1880,6 +1962,10 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /usr/include/c++/13/bits/specfun.h:
 
+/workspace/C++/libs/boost/boost/assert/source_location.hpp:
+
+/usr/include/c++/13/bits/streambuf.tcc:
+
 /usr/include/c++/13/bits/std_function.h:
 
 /workspace/C++/libs/boost/boost/graph/adjacency_list.hpp:
@@ -1896,6 +1982,12 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /usr/include/c++/13/bits/vector.tcc:
 
+/usr/include/c++/13/bits/stl_multimap.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/__locale_t.h:
+
+/workspace/C++/libs/boost/boost/core/empty_value.hpp:
+
 /workspace/C++/libs/boost/boost/smart_ptr/detail/sp_disable_deprecated.hpp:
 
 /usr/include/x86_64-linux-gnu/bits/waitstatus.h:
@@ -1908,17 +2000,11 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /workspace/C++/libs/boost/boost/graph/property_maps/null_property_map.hpp:
 
-/workspace/C++/libs/boost/boost/graph/adjacency_iterator.hpp:
-
-/usr/include/c++/13/bits/istream.tcc:
-
 /usr/include/c++/13/bits/move.h:
 
 /workspace/C++/libs/boost/boost/type_traits/is_scoped_enum.hpp:
 
 /workspace/C++/libs/boost/boost/mpl/aux_/config/pp_counter.hpp:
-
-/usr/include/x86_64-linux-gnu/bits/types.h:
 
 /workspace/C++/libs/boost/boost/container_hash/detail/hash_mix.hpp:
 
@@ -1929,12 +2015,6 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 /usr/include/c++/13/cassert:
 
 /workspace/C++/libs/boost/boost/detail/workaround.hpp:
-
-/workspace/C++/libs/boost/boost/multi_index/detail/index_matcher.hpp:
-
-/workspace/C++/libs/boost/boost/range/iterator_range_core.hpp:
-
-/usr/include/x86_64-linux-gnu/bits/confname.h:
 
 /usr/include/c++/13/ostream:
 
@@ -1952,13 +2032,29 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /workspace/C++/libs/boost/boost/config/pragma_message.hpp:
 
-/workspace/C++/libs/boost/boost/multi_index/detail/no_duplicate_tags.hpp:
-
 /usr/include/c++/13/bits/shared_ptr.h:
 
 /workspace/C++/libs/boost/boost/mpl/int.hpp:
 
 /usr/include/c++/13/bits/cxxabi_forced.h:
+
+/workspace/C++/libs/boost/boost/range/concepts.hpp:
+
+/workspace/C++/libs/boost/boost/config/helper_macros.hpp:
+
+/usr/include/c++/13/bits/stl_set.h:
+
+/workspace/C++/libs/boost/boost/mp11/detail/config.hpp:
+
+/usr/include/c++/13/bits/parse_numbers.h:
+
+/usr/include/linux/errno.h:
+
+/usr/include/c++/13/bits/std_abs.h:
+
+/workspace/C++/libs/boost/boost/optional.hpp:
+
+/workspace/C++/libs/boost/boost/iterator/detail/eval_if_default.hpp:
 
 /workspace/C++/libs/boost/boost/mpl/aux_/na_spec.hpp:
 
@@ -1968,14 +2064,6 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /usr/include/c++/13/complex:
 
-/usr/include/x86_64-linux-gnu/bits/thread-shared-types.h:
-
-/workspace/C++/libs/boost/boost/type_traits/is_destructible.hpp:
-
-/workspace/C++/libs/boost/boost/mp11/detail/mp_void.hpp:
-
-/usr/include/c++/13/bits/string_view.tcc:
-
 /usr/include/c++/13/bits/ostream_insert.h:
 
 /usr/include/c++/13/system_error:
@@ -1984,19 +2072,17 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /usr/include/c++/13/compare:
 
-/usr/include/c++/13/bits/basic_string.tcc:
-
-/usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h:
-
-/usr/include/c++/13/bits/refwrap.h:
-
-/workspace/C++/libs/boost/boost/optional/bad_optional_access.hpp:
-
-/usr/include/c++/13/bits/exception_defines.h:
-
-/workspace/C++/libs/boost/boost/multi_index/detail/has_tag.hpp:
-
 /usr/include/c++/13/bits/locale_facets.tcc:
+
+/workspace/C++/libs/boost/boost/type_traits/is_destructible.hpp:
+
+/workspace/C++/libs/boost/boost/mp11/detail/mp_void.hpp:
+
+/usr/include/c++/13/bits/string_view.tcc:
+
+/usr/include/libintl.h:
+
+/usr/include/x86_64-linux-gnu/bits/thread-shared-types.h:
 
 /workspace/C++/libs/boost/boost/type_traits/is_floating_point.hpp:
 
@@ -2028,6 +2114,8 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /usr/include/c++/13/bits/stl_multiset.h:
 
+/workspace/C++/graph/nx/shortest_paths.h:
+
 /usr/include/c++/13/bits/uses_allocator.h:
 
 /usr/include/c++/13/cstddef:
@@ -2037,6 +2125,12 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 /usr/include/c++/13/bits/stl_algo.h:
 
 /workspace/C++/libs/boost/boost/container_hash/detail/hash_range.hpp:
+
+/workspace/C++/libs/boost/boost/type_traits/is_const.hpp:
+
+/usr/include/c++/13/bits/char_traits.h:
+
+/workspace/C++/libs/boost/boost/container_hash/is_contiguous_range.hpp:
 
 /usr/include/c++/13/bits/stl_algobase.h:
 
@@ -2064,6 +2158,8 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_sched_param.h:
 
+/usr/include/c++/13/debug/assertions.h:
+
 /workspace/C++/libs/boost/boost/multi_index/detail/define_if_constexpr_macro.hpp:
 
 /workspace/C++/libs/boost/boost/type_traits/has_left_shift.hpp:
@@ -2072,27 +2168,13 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /usr/include/c++/13/cerrno:
 
-/workspace/C++/libs/boost/boost/multi_index/detail/node_type.hpp:
+/workspace/C++/libs/boost/boost/type_traits/has_less.hpp:
 
-/usr/include/c++/13/bits/stl_tempbuf.h:
-
-/workspace/C++/libs/boost/boost/config/platform/linux.hpp:
-
-/workspace/C++/libs/boost/boost/smart_ptr/detail/sp_counted_impl.hpp:
-
-/workspace/C++/libs/boost/boost/core/bit.hpp:
-
-/usr/include/c++/13/unordered_set:
-
-/usr/include/x86_64-linux-gnu/sys/types.h:
-
-/workspace/C++/libs/boost/boost/optional/detail/optional_reference_spec.hpp:
-
-/usr/include/x86_64-linux-gnu/bits/getopt_core.h:
-
-/usr/include/c++/13/bits/stl_vector.h:
+/workspace/C++/libs/boost/boost/mpl/aux_/preprocessor/enum.hpp:
 
 /usr/include/x86_64-linux-gnu/bits/getopt_posix.h:
+
+/usr/include/c++/13/locale:
 
 /usr/include/c++/13/bits/stl_map.h:
 
@@ -2107,6 +2189,12 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 /usr/include/c++/13/bits/stl_uninitialized.h:
 
 /usr/include/c++/13/bits/new_allocator.h:
+
+/usr/include/c++/13/bits/quoted_string.h:
+
+/workspace/C++/libs/boost/boost/type_traits/is_fundamental.hpp:
+
+/workspace/C++/libs/boost/boost/mp11/detail/mp_front.hpp:
 
 /workspace/C++/libs/boost/boost/type_traits/has_plus_assign.hpp:
 
@@ -2140,6 +2228,24 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /usr/include/c++/13/variant:
 
+/usr/include/x86_64-linux-gnu/bits/locale.h:
+
+/usr/include/x86_64-linux-gnu/bits/posix1_lim.h:
+
+/workspace/C++/libs/boost/boost/mpl/aux_/config/compiler.hpp:
+
+/usr/include/c++/13/tr1/gamma.tcc:
+
+/usr/include/c++/13/ext/atomicity.h:
+
+/workspace/C++/libs/boost/boost/type_traits/detail/has_prefix_operator.hpp:
+
+/workspace/C++/libs/boost/boost/range/value_type.hpp:
+
+/usr/include/x86_64-linux-gnu/bits/types/struct_tm.h:
+
+/usr/include/c++/13/cctype:
+
 /usr/include/limits.h:
 
 /usr/include/c++/13/cstdlib:
@@ -2164,31 +2270,19 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /usr/include/c++/13/ctime:
 
-/usr/include/x86_64-linux-gnu/bits/fp-fast.h:
+/workspace/C++/libs/boost/boost/unordered/detail/unordered_printers.hpp:
 
-/workspace/C++/libs/boost/boost/core/invoke_swap.hpp:
+/workspace/C++/libs/boost/boost/type_traits/is_enum.hpp:
 
-/workspace/C++/libs/boost/boost/multi_index/detail/restore_wstrict_aliasing.hpp:
+/usr/include/c++/13/ext/type_traits.h:
 
-/usr/include/c++/13/debug/assertions.h:
+/usr/include/x86_64-linux-gnu/bits/time64.h:
 
-/usr/include/x86_64-linux-gnu/bits/locale.h:
+/usr/include/x86_64-linux-gnu/bits/types.h:
 
-/usr/include/x86_64-linux-gnu/bits/posix1_lim.h:
+/usr/include/c++/13/bits/basic_string.tcc:
 
-/workspace/C++/libs/boost/boost/mpl/aux_/config/compiler.hpp:
-
-/usr/include/c++/13/tr1/gamma.tcc:
-
-/usr/include/c++/13/cctype:
-
-/usr/include/c++/13/ext/atomicity.h:
-
-/workspace/C++/libs/boost/boost/type_traits/detail/has_prefix_operator.hpp:
-
-/workspace/C++/libs/boost/boost/range/value_type.hpp:
-
-/usr/include/x86_64-linux-gnu/bits/types/struct_tm.h:
+/usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h:
 
 /usr/include/math.h:
 
@@ -2266,6 +2360,8 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /workspace/C++/libs/boost/boost/multi_index/detail/copy_map.hpp:
 
+/usr/include/x86_64-linux-gnu/c++/13/bits/basic_file.h:
+
 /usr/include/c++/13/ext/aligned_buffer.h:
 
 /usr/include/x86_64-linux-gnu/c++/13/bits/c++allocator.h:
@@ -2291,6 +2387,14 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 /workspace/C++/libs/boost/boost/mpl/aux_/config/overload_resolution.hpp:
 
 /usr/include/x86_64-linux-gnu/c++/13/bits/gthr.h:
+
+/usr/include/x86_64-linux-gnu/sys/select.h:
+
+/usr/include/x86_64-linux-gnu/c++/13/bits/messages_members.h:
+
+/workspace/C++/libs/boost/boost/mpl/aux_/config/ctps.hpp:
+
+/usr/include/x86_64-linux-gnu/c++/13/bits/time_members.h:
 
 /usr/include/c++/13/bits/erase_if.h:
 
@@ -2324,6 +2428,12 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /workspace/C++/libs/boost/boost/multi_index/detail/do_not_copy_elements_tag.hpp:
 
+/workspace/C++/libs/boost/boost/preprocessor/control/if.hpp:
+
+/workspace/C++/libs/boost/boost/multi_index/detail/ord_index_impl_fwd.hpp:
+
+/usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h:
+
 /workspace/C++/libs/boost/boost/preprocessor/punctuation/comma.hpp:
 
 /workspace/C++/libs/boost/boost/mp11/set.hpp:
@@ -2334,15 +2444,15 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /workspace/C++/graph/graph_types.h:
 
+/workspace/C++/libs/boost/boost/preprocessor/tuple/detail/is_single_return.hpp:
+
+/workspace/C++/graph/sparse_matrix.h:
+
+/workspace/C++/libs/boost/boost/config/stdlib/libstdcpp3.hpp:
+
 /workspace/C++/libs/boost/boost/type_traits/has_bit_and_assign.hpp:
 
 /workspace/C++/libs/boost/boost/assert.hpp:
-
-/usr/include/c++/13/bits/streambuf.tcc:
-
-/workspace/C++/libs/boost/boost/assert/source_location.hpp:
-
-/workspace/C++/libs/boost/boost/mpl/and.hpp:
 
 /workspace/C++/libs/boost/boost/preprocessor/repetition/detail/for.hpp:
 
@@ -2351,6 +2461,10 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 /workspace/C++/libs/boost/boost/concept/detail/concept_def.hpp:
 
 /workspace/C++/libs/boost/boost/concept/detail/concept_undef.hpp:
+
+/workspace/C++/libs/boost/boost/core/allocator_traits.hpp:
+
+/workspace/C++/libs/boost/boost/concept/detail/has_constraints.hpp:
 
 /workspace/C++/libs/boost/boost/concept_check.hpp:
 
@@ -2367,8 +2481,6 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 /workspace/C++/libs/boost/boost/config/detail/posix_features.hpp:
 
 /workspace/C++/libs/boost/boost/config/detail/suffix.hpp:
-
-/workspace/C++/libs/boost/boost/config/stdlib/libstdcpp3.hpp:
 
 /workspace/C++/libs/boost/boost/container_hash/detail/hash_integral.hpp:
 
@@ -2392,12 +2504,6 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /workspace/C++/libs/boost/boost/container_hash/hash_fwd.hpp:
 
-/workspace/C++/libs/boost/boost/type_traits/is_const.hpp:
-
-/usr/include/c++/13/bits/char_traits.h:
-
-/workspace/C++/libs/boost/boost/container_hash/is_contiguous_range.hpp:
-
 /workspace/C++/libs/boost/boost/type_traits/is_list_constructible.hpp:
 
 /workspace/C++/libs/boost/boost/container_hash/is_described_class.hpp:
@@ -2411,12 +2517,6 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 /workspace/C++/libs/boost/boost/core/addressof.hpp:
 
 /workspace/C++/libs/boost/boost/core/allocator_access.hpp:
-
-/workspace/C++/libs/boost/boost/concept/detail/has_constraints.hpp:
-
-/workspace/C++/libs/boost/boost/core/allocator_traits.hpp:
-
-/workspace/C++/libs/boost/boost/mpl/aux_/config/ctps.hpp:
 
 /workspace/C++/libs/boost/boost/core/checked_delete.hpp:
 
@@ -2480,6 +2580,8 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /workspace/C++/libs/boost/boost/type_traits/is_base_and_derived.hpp:
 
+/usr/include/c++/13/chrono:
+
 /workspace/C++/libs/boost/boost/functional/hash.hpp:
 
 /workspace/C++/libs/boost/boost/preprocessor/seq/limits/fold_left_256.hpp:
@@ -2491,6 +2593,8 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 /workspace/C++/libs/boost/boost/type_traits/is_compound.hpp:
 
 /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_inline.h:
+
+/workspace/C++/graph/algorithms/k_shortest_paths.h:
 
 /workspace/C++/libs/boost/boost/graph/detail/adj_list_edge_iterator.hpp:
 
@@ -2558,8 +2662,6 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /workspace/C++/libs/boost/boost/mp11/bind.hpp:
 
-/workspace/C++/libs/boost/boost/multi_index/detail/modify_key_adaptor.hpp:
-
 /workspace/C++/libs/boost/boost/mp11/detail/mp_append.hpp:
 
 /workspace/C++/libs/boost/boost/range/detail/extract_optional_type.hpp:
@@ -2581,10 +2683,6 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 /usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h:
 
 /workspace/C++/libs/boost/boost/mp11/detail/mp_fold.hpp:
-
-/workspace/C++/libs/boost/boost/type_traits/is_fundamental.hpp:
-
-/workspace/C++/libs/boost/boost/mp11/detail/mp_front.hpp:
 
 /workspace/C++/libs/boost/boost/mp11/detail/mp_is_value_list.hpp:
 
@@ -2662,21 +2760,11 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 
 /workspace/C++/libs/boost/boost/mpl/aux_/preprocessed/gcc/or.hpp:
 
-/workspace/C++/libs/boost/boost/preprocessor/control/if.hpp:
-
-/usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h:
-
-/workspace/C++/libs/boost/boost/multi_index/detail/ord_index_impl_fwd.hpp:
-
 /workspace/C++/libs/boost/boost/smart_ptr/detail/sp_convertible.hpp:
 
 /usr/include/c++/13/bits/ios_base.h:
 
 /workspace/C++/libs/boost/boost/mpl/aux_/preprocessor/def_params_tail.hpp:
-
-/workspace/C++/libs/boost/boost/type_traits/has_less.hpp:
-
-/workspace/C++/libs/boost/boost/mpl/aux_/preprocessor/enum.hpp:
 
 /workspace/C++/libs/boost/boost/preprocessor/cat.hpp:
 
@@ -2725,31 +2813,3 @@ CMakeFiles/graph_test.dir/graph_test.cpp.o: /workspace/C++/graph_test.cpp \
 /workspace/C++/libs/boost/boost/preprocessor/empty.hpp:
 
 /workspace/C++/libs/boost/boost/multi_index/detail/ignore_wstrict_aliasing.hpp:
-
-/workspace/C++/libs/boost/boost/multi_index/detail/index_access_sequence.hpp:
-
-/workspace/C++/libs/boost/boost/mp11/list.hpp:
-
-/workspace/C++/libs/boost/boost/multi_index/detail/index_loader.hpp:
-
-/workspace/C++/libs/boost/boost/multi_index/detail/index_node_base.hpp:
-
-/workspace/C++/libs/boost/boost/multi_index/detail/index_saver.hpp:
-
-/usr/include/x86_64-linux-gnu/bits/time.h:
-
-/workspace/C++/libs/boost/boost/multi_index/detail/invalidate_iterators.hpp:
-
-/workspace/C++/libs/boost/boost/type_traits/has_trivial_move_assign.hpp:
-
-/workspace/C++/libs/boost/boost/mpl/identity.hpp:
-
-/workspace/C++/libs/boost/boost/multi_index/detail/no_duplicate_tags_in_index_list.hpp:
-
-/usr/include/c++/13/ext/string_conversions.h:
-
-/workspace/C++/libs/boost/boost/multi_index/detail/node_handle.hpp:
-
-/workspace/C++/libs/boost/boost/config/detail/select_platform_config.hpp:
-
-/workspace/C++/libs/boost/boost/multi_index/detail/promotes_arg.hpp:
