@@ -19,6 +19,38 @@ using AttrValue =
 
 using AttrId = uint32_t;
 
+inline double
+attr_to_double(
+    const AttrValue& value)
+{
+    if (const auto* p =
+            std::get_if<int64_t>(
+                &value))
+    {
+        return static_cast<double>(
+            *p);
+    }
+
+    if (const auto* p =
+            std::get_if<double>(
+                &value))
+    {
+        return *p;
+    }
+
+    if (const auto* p =
+            std::get_if<bool>(
+                &value))
+    {
+        return *p
+            ? 1.0
+            : 0.0;
+    }
+
+    throw std::runtime_error(
+        "Attribute is not numeric");
+}
+
 struct TransparentStringHash
 {
     using is_transparent = void;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../graph.h"
-#include "../sparse_matrix.h"
+#include "../distance_matrix.h"
 
 #include <string>
 

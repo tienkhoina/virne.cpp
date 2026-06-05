@@ -1150,6 +1150,44 @@ auto dist =
         "weight");
 ```
 
+### bfs_nx
+
+Triển khai BFS theo phong cách NetworkX, tối ưu cho các bài toán chỉ cần khoảng cách ngắn nhất.
+
+Khác với BFS tổng quát, `bfs_nx` duyệt theo từng mức (level) và chỉ lưu khoảng cách của các đỉnh đã thăm. Thuật toán mô phỏng trực tiếp cách `networkx.single_source_shortest_path_length()` hoạt động.
+
+**Đặc điểm**
+
+* Duyệt theo từng lớp (level-by-level BFS)
+* Không lưu predecessor
+* Dừng sớm khi đã thăm toàn bộ đồ thị
+* Chỉ trả về khoảng cách của các đỉnh reachable
+* Tối ưu cho các phép đo centrality dựa trên khoảng cách
+
+**Hiệu năng**
+
+Trên đồ thị 1000 đỉnh, ~56k cạnh:
+
+```text
+BFS thường   ~1543 ms
+bfs_nx       ~450 ms
+```
+
+Nhanh hơn khoảng **3.4 lần** so với BFS tổng quát.
+
+**Sử dụng cho**
+
+* `single_source_shortest_path_length`
+* `closeness_centrality`
+* Các bài toán chỉ cần khoảng cách ngắn nhất
+
+**Không phù hợp cho**
+
+* Khôi phục đường đi
+* `shortest_path`
+* Các thuật toán cần predecessor
+
+
 ---
 
 ## nx::floyd_warshall
@@ -1217,4 +1255,262 @@ double w =
         u,
         v,
         weight);
+```
+
+# Attributes
+
+## get_node_attributes
+
+```cpp
+auto attrs =
+    nx::get_node_attributes(
+        g,
+        "cpu");
+```
+
+```cpp
+AttrId cpu =
+    g.attr_id(
+        "cpu");
+
+auto attrs =
+    nx::get_node_attributes(
+        g,
+        cpu);
+```
+
+---
+
+## set_node_attributes
+
+```cpp
+nx::set_node_attributes(
+    g,
+    values,
+    "cpu");
+```
+
+```cpp
+AttrId cpu =
+    g.attr_id(
+        "cpu");
+
+nx::set_node_attributes(
+    g,
+    values,
+    cpu);
+```
+
+---
+
+## get_edge_attributes
+
+```cpp
+auto attrs =
+    nx::get_edge_attributes(
+        g,
+        "bw");
+```
+
+```cpp
+AttrId bw =
+    g.attr_id(
+        "bw");
+
+auto attrs =
+    nx::get_edge_attributes(
+        g,
+        bw);
+```
+
+---
+
+## set_edge_attributes
+
+```cpp
+nx::set_edge_attributes(
+    g,
+    values,
+    "bw");
+```
+
+```cpp
+AttrId bw =
+    g.attr_id(
+        "bw");
+
+nx::set_edge_attributes(
+    g,
+    values,
+    bw);
+```
+
+## nx.adjacency_matrix
+
+Tạo ma trận kề dạng `SparseMatrix`.
+
+```cpp
+SparseMatrix A =
+    nx::adjacency_matrix(
+        graph);
+```
+
+---
+
+## nx.attr_sparse_matrix
+
+Tạo ma trận thưa từ thuộc tính cạnh.
+
+Theo tên thuộc tính:
+
+```cpp
+SparseMatrix A =
+    nx::attr_sparse_matrix(
+        graph,
+        "weight");
+```
+
+Theo `AttrId`:
+
+```cpp
+AttrId weight =
+    graph.attr_id(
+        "weight");
+
+SparseMatrix A =
+    nx::attr_sparse_matrix(
+        graph,
+        weight);
+```
+
+---
+
+## SparseMatrix
+
+Thêm phần tử:
+
+```cpp
+A.add(
+    row,
+    col,
+    value);
+```
+
+Số phần tử khác 0:
+
+```cpp
+size_t nnz =
+    A.nnz();
+```
+
+Chuyển sang CSR:
+
+```cpp
+CSRMatrix csr =
+    A.to_csr();
+```
+
+---
+
+## CSRMatrix
+
+Số phần tử khác 0:
+
+```cpp
+size_t nnz =
+    csr.nnz();
+```
+
+Truy cập dữ liệu:
+
+```cpp
+csr.row_ptr
+
+csr.col_idx
+
+csr.values
+```
+
+## nx.degree_centrality
+
+```cpp
+auto scores =
+    nx::degree_centrality(
+        graph);
+```
+
+---
+
+## nx.eigenvector_centrality
+
+```cpp
+auto scores =
+    nx::eigenvector_centrality(
+        graph);
+```
+
+Tùy chỉnh:
+
+```cpp
+auto scores =
+    nx::eigenvector_centrality(
+        graph,
+        100,
+        1e-6);
+```
+
+---
+
+## nx.closeness_centrality
+
+```cpp
+auto scores =
+    nx::closeness_centrality(
+        graph);
+```
+
+---
+
+## nx.betweenness_centrality
+
+```cpp
+auto scores =
+    nx::betweenness_centrality(
+        graph);
+```
+
+Theo thuộc tính trọng số cạnh:
+
+```cpp
+auto scores =
+    nx::betweenness_centrality(
+        graph,
+        "weight");
+```
+
+---
+
+## NodeScores
+
+Các API centrality trả về:
+
+```cpp
+using NodeScores =
+    std::vector<double>;
+```
+
+Truy cập điểm của node:
+
+```cpp
+double score =
+    scores[node];
+```
+## write_gml
+
+Lưu đồ thị ra file GML.
+
+```cpp
+nx::write_gml(
+    graph,
+    "graph.gml");
 ```

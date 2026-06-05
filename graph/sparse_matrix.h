@@ -1,85 +1,63 @@
 #pragma once
 
-#include <cassert>
+#include "csr_matrix.h"
+
 #include <cstddef>
 #include <vector>
 
-struct DistanceMatrix
+struct SparseMatrix
 {
-    size_t n = 0;
+    size_t rows = 0;
+    size_t cols = 0;
+
+    std::vector<size_t>
+        row;
+
+    std::vector<size_t>
+        col;
 
     std::vector<double>
-        data;
+        value;
 
-    DistanceMatrix() = default;
+    SparseMatrix() = default;
 
-    explicit DistanceMatrix(
-        size_t n_)
+    SparseMatrix(
+        size_t rows_,
+        size_t cols_)
         :
-        n(n_),
-        data(
-            n_ * n_)
+        rows(rows_),
+        cols(cols_)
     {
     }
 
-    double&
-    operator()(
-        size_t i,
-        size_t j)
+    void reserve(
+        size_t nnz)
     {
-        return data[
-            i * n + j];
+        row.reserve(nnz);
+        col.reserve(nnz);
+        value.reserve(nnz);
     }
 
-    const double&
-    operator()(
-        size_t i,
-        size_t j) const
+    void add(
+        size_t r,
+        size_t c,
+        double v)
     {
-        return data[
-            i * n + j];
+        row.push_back(r);
+        col.push_back(c);
+        value.push_back(v);
     }
 
-    //
-    // NEW
-    //
-
-    size_t rows() const noexcept
+    size_t nnz() const noexcept
     {
-        return n;
-    }
-
-    size_t cols() const noexcept
-    {
-        return n;
-    }
-
-    size_t size() const noexcept
-    {
-        return data.size();
+        return value.size();
     }
 
     bool empty() const noexcept
     {
-        return data.empty();
+        return value.empty();
     }
 
-    double* raw_data() noexcept
-    {
-        return data.data();
-    }
-
-    const double* raw_data() const noexcept
-    {
-        return data.data();
-    }
-
-    void fill(
-        double value)
-    {
-        std::fill(
-            data.begin(),
-            data.end(),
-            value);
-    }
+    CSRMatrix
+    to_csr() const;
 };

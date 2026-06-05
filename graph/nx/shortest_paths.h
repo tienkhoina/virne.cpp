@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../graph.h"
+#include "../distance_matrix.h"
 #include "../sparse_matrix.h"
 
 #include <unordered_map>

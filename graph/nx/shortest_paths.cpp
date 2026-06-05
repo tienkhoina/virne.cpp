@@ -11,6 +11,7 @@
 #include <limits>
 #include <stdexcept>
 #include "../algorithms/k_shortest_paths.h"
+#include "../algorithms/bfs_nx.h"
 
 namespace nx
 {
@@ -61,32 +62,9 @@ single_source_shortest_path_length(
     const Graph& g,
     Vertex source)
 {
-    auto result =
-        bfs(
-            g,
-            source);
-
-    std::unordered_map<
-        Vertex,
-        size_t> distances;
-
-    for (Vertex v = 0;
-         v < g.num_nodes();
-         ++v)
-    {
-        if (
-            result.distance[v]
-            ==
-            std::numeric_limits<size_t>::max())
-        {
-            continue;
-        }
-
-        distances[v] =
-            result.distance[v];
-    }
-
-    return distances;
+    return bfs_nx(
+        g,
+        source);
 }
 
 std::vector<Vertex> dijkstra_path(

@@ -1,346 +1,584 @@
-
-import math
 import time
 import networkx as nx
+import numpy as np
 
+INPUT_FILE = "graph_dump_cpp.txt"
+OUTPUT_FILE = "graph_dump_py.txt"
 
-def fmt(x):
-    if math.isinf(x):
-        return "inf"
-    return f"{x:.12f}"
+#
+# LOAD GRAPH FROM CPP DUMP
+#
 
+G = nx.Graph()
 
-def bench(fn):
-    start = time.perf_counter()
+current_node = None
+current_edge = None
 
-    result = fn()
+with open(
+    INPUT_FILE,
+    "r",
+    encoding="utf8",
+) as f:
 
-    end = time.perf_counter()
+    lines = [
+        line.strip()
+        for line in f
+        if line.strip()
+    ]
 
-    return result, (end - start) * 1000.0
+for line in lines:
 
+    parts = line.split()
 
-def path_cost(G, path):
-    cost = 0.0
+    tag = parts[0]
 
-    for u, v in zip(
-        path[:-1],
-        path[1:]):
-        cost += G[u][v]["weight"]
+    if tag == "NODE":
 
-    return cost
+        current_node = int(
+            parts[1])
 
+        G.add_node(
+            current_node)
 
-def print_path(path):
-    print(
-        " ".join(
-            str(v)
-            for v in path))
+        continue
 
+    if tag == "CPU":
 
-def load_graph(path):
-    G = nx.Graph()
+        if current_node is not None:
 
-    source = None
-    target = None
+            G.nodes[
+                current_node
+            ]["cpu"] = int(
+                parts[1])
 
-    with open(
-        path,
-        "r",
-        encoding="utf-8") as f:
+        continue
 
-        for line in f:
+    if tag == "GPU":
 
-            line = line.strip()
+        if current_node is not None:
 
-            if not line:
-                continue
+            G.nodes[
+                current_node
+            ]["gpu"] = int(
+                parts[1])
 
-            parts = line.split()
+        continue
 
-            tag = parts[0]
+    if tag == "EDGE":
 
-            if tag == "NODES":
+        u = int(parts[1])
+        v = int(parts[2])
 
-                n = int(parts[1])
+        G.add_edge(
+            u,
+            v)
 
-                G.add_nodes_from(
-                    range(n))
+        current_edge = (
+            u,
+            v)
 
-            elif tag == "SOURCE":
+        continue
 
-                source = int(
-                    parts[1])
+    if tag == "EDGE_ID":
 
-            elif tag == "TARGET":
+        if current_edge is not None:
 
-                target = int(
-                    parts[1])
+            G.edges[
+                current_edge
+            ]["edge_id"] = int(
+                parts[1])
 
-            elif tag == "EDGE":
+        continue
 
-                u = int(parts[1])
-                v = int(parts[2])
+    if tag == "WEIGHT":
 
-                w = float(
-                    parts[3])
+        if current_edge is not None:
 
-                G.add_edge(
-                    u,
-                    v,
-                    weight=w)
+            G.edges[
+                current_edge
+            ]["weight"] = float(
+                parts[1])
 
-    return (
-        G,
-        source,
-        target)
+        continue
 
+    if tag == "BW":
 
-G, source, target = load_graph(
-    "graph_dump.txt")
+        if current_edge is not None:
 
-print("===== GRAPH =====")
+            G.edges[
+                current_edge
+            ]["bw"] = float(
+                parts[1])
+
+        continue
 
 print(
-    "nodes=",
+    "===== GRAPH =====")
+
+print(
+    "NODES",
     G.number_of_nodes())
 
 print(
-    "edges=",
+    "EDGES",
     G.number_of_edges())
 
-print()
-
-print("===== EDGE LIST =====")
-
-for u, v, data in G.edges(data=True):
-
-    print(
-        u,
-        v,
-        fmt(
-            data["weight"]))
-
-print()
-
 #
-# BFS
+# ATTRIBUTES
 #
 
-print("===== BFS =====")
+node_cpu = nx.get_node_attributes(
+    G,
+    "cpu")
 
-bfs_path, bfs_ms = bench(
-    lambda:
-    nx.shortest_path(
+node_gpu = nx.get_node_attributes(
+    G,
+    "gpu")
+
+edge_weight = nx.get_edge_attributes(
+    G,
+    "weight")
+
+edge_bw = nx.get_edge_attributes(
+    G,
+    "bw")
+
+#
+# MATRICES
+#
+
+import time
+import networkx as nx
+
+def benchmark_scan(G):
+    s = 0
+
+    t0 = time.perf_counter()
+
+    for _ in range(G.number_of_nodes()):
+        for u in G:
+            for v in G[u]:
+                s += v
+
+    return (
+        time.perf_counter()
+        - t0
+    ) * 1000.0
+
+
+def benchmark_bfs_nopred(G):
+
+    n = G.number_of_nodes()
+
+    t0 = time.perf_counter()
+
+    for source in G:
+
+        seen = {source}
+        queue = [source]
+
+        head = 0
+
+        while head < len(queue):
+
+            u = queue[head]
+            head += 1
+
+            for v in G[u]:
+
+                if v in seen:
+                    continue
+
+                seen.add(v)
+                queue.append(v)
+
+    return (
+        time.perf_counter()
+        - t0
+    ) * 1000.0
+
+
+print(
+    f"SCAN_FULL(ms) "
+    f"{benchmark_scan(G):.6f}"
+)
+
+print(
+    f"BFS_NOPRED(ms) "
+    f"{benchmark_bfs_nopred(G):.6f}"
+)
+
+import time
+import networkx as nx
+
+t0 = time.perf_counter()
+
+for source in G:
+    nx.single_source_shortest_path_length(
         G,
-        source,
-        target))
+        source)
 
-bfs_len = nx.shortest_path_length(
-    G,
-    source,
-    target)
+
 
 print(
-    "shortest_path_length",
-    bfs_len)
+    "SSSP_FULL(ms)",
+    (
+        time.perf_counter()
+        - t0
+    ) * 1000.0
+)
+
+t0 = time.perf_counter()
+
+nx.closeness_centrality(
+    G)
 
 print(
-    "shortest_path",
-    end=" ")
+    "CLOSE(ms)",
+    (
+        time.perf_counter()
+        - t0
+    ) * 1000.0
+)
 
-print_path(
-    bfs_path)
+t0 = time.perf_counter()
 
-print()
+total = 0
 
-dist = nx.single_source_shortest_path_length(
-    G,
-    source)
-
-print(
-    "single_source_shortest_path_length")
-
-for v in sorted(dist):
-
-    print(
-        v,
-        dist[v])
-
-print()
-
-#
-# Dijkstra
-#
-
-print("===== DIJKSTRA =====")
-
-dijkstra_path, dijkstra_ms = bench(
-    lambda:
-    nx.dijkstra_path(
+for source in G:
+    d = nx.single_source_shortest_path_length(
         G,
-        source,
-        target,
-        weight="weight"))
+        source)
 
-dijkstra_cost = nx.dijkstra_path_length(
+    total += len(d)
+    total += sum(d.values())
+
+print(f"TOTAL: {total}")
+
+print(
+    (time.perf_counter()-t0)*1000
+)
+
+print(
+    "\n===== MATRICES =====")
+
+t0 = time.perf_counter()
+
+A = nx.adjacency_matrix(
+    G).tocoo()
+
+adj_ms = (
+    time.perf_counter()
+    - t0
+) * 1000.0
+
+print(
+    "ADJ NNZ",
+    A.nnz)
+
+t0 = time.perf_counter()
+
+W, _ = nx.attr_sparse_matrix(
     G,
-    source,
-    target,
+    edge_attr="weight")
+
+W = W.tocoo()
+
+attr_ms = (
+    time.perf_counter()
+    - t0
+) * 1000.0
+
+print(
+    "WEIGHT NNZ",
+    W.nnz)
+
+#
+# CENTRALITY
+#
+
+print(
+    "\n===== CENTRALITY =====")
+
+t0 = time.perf_counter()
+
+degree = nx.degree_centrality(
+    G)
+
+degree_ms = (
+    time.perf_counter()
+    - t0
+) * 1000.0
+
+t0 = time.perf_counter()
+
+eigen = nx.eigenvector_centrality(
+    G,
+    max_iter=10000,
+    tol=1e-6)
+
+eigen_ms = (
+    time.perf_counter()
+    - t0
+) * 1000.0
+
+t0 = time.perf_counter()
+
+for v in G.nodes():
+    nx.single_source_shortest_path_length(
+        G,
+        v)
+
+bfs_full_ms = (
+    time.perf_counter()
+    - t0
+) * 1000.0
+
+print(
+    f"BFS_FULL(ms)  "
+    f"{bfs_full_ms:.12f}")
+
+
+
+close = nx.closeness_centrality(
+    G)
+
+close_ms = (
+    time.perf_counter()
+    - t0
+) * 1000.0
+
+t0 = time.perf_counter()
+
+between = nx.betweenness_centrality(
+    G,
     weight="weight")
 
-print(
-    "dijkstra_path_length",
-    fmt(
-        dijkstra_cost))
+between_ms = (
+    time.perf_counter()
+    - t0
+) * 1000.0
+
+#
+# DUMP PY RESULTS
+#
+
+with open(
+    OUTPUT_FILE,
+    "w",
+    encoding="utf8",
+) as out:
+
+    out.write(
+        f"NUM_NODES {G.number_of_nodes()}\n")
+
+    out.write(
+        f"NUM_EDGES {G.number_of_edges()}\n")
+
+    #
+    # NODES
+    #
+
+    for n in sorted(
+        G.nodes()):
+
+        out.write(
+            f"NODE {n}\n")
+
+        out.write(
+            f"CPU "
+            f"{node_cpu[n]}\n")
+
+        out.write(
+            f"GPU "
+            f"{node_gpu[n]}\n")
+
+    #
+    # EDGES
+    #
+
+    for u, v, d in G.edges(
+        data=True):
+
+        out.write(
+            f"EDGE {u} {v}\n")
+
+        out.write(
+            f"EDGE_ID "
+            f"{d['edge_id']}\n")
+
+        out.write(
+            f"WEIGHT "
+            f"{d['weight']:.12f}\n")
+
+        out.write(
+            f"BW "
+            f"{d['bw']:.12f}\n")
+
+    #
+    # ADJ MATRIX
+    #
+
+    out.write(
+        f"ADJ_NNZ "
+        f"{A.nnz}\n")
+
+    adj_entries = sorted(
+        zip(
+            A.row,
+            A.col,
+            A.data))
+
+    for r, c, val in adj_entries:
+
+        out.write(
+            f"ADJ "
+            f"{r} "
+            f"{c} "
+            f"{float(val):.12f}\n")
+
+    #
+    # WEIGHT MATRIX
+    #
+
+    out.write(
+        f"WEIGHT_NNZ "
+        f"{W.nnz}\n")
+
+    weight_entries = sorted(
+        zip(
+            W.row,
+            W.col,
+            W.data))
+
+    for r, c, val in weight_entries:
+
+        out.write(
+            f"W "
+            f"{r} "
+            f"{c} "
+            f"{float(val):.12f}\n")
+
+    #
+    # CENTRALITY
+    #
+
+    for v in sorted(
+        G.nodes()):
+
+        out.write(
+            f"DEGREE "
+            f"{v} "
+            f"{degree[v]:.12f}\n")
+
+        out.write(
+            f"EIGEN "
+            f"{v} "
+            f"{eigen[v]:.12f}\n")
+
+        out.write(
+            f"CLOSE "
+            f"{v} "
+            f"{close[v]:.12f}\n")
+
+        out.write(
+            f"BETWEEN "
+            f"{v} "
+            f"{between[v]:.12f}\n")
 
 print(
-    "dijkstra_path",
-    end=" ")
+    "\n===== TOP CENTRALITY =====")
 
-print_path(
-    dijkstra_path)
+top_degree = sorted(
+    degree.items(),
+    key=lambda x: x[1],
+    reverse=True)
 
-print()
+top_eigen = sorted(
+    eigen.items(),
+    key=lambda x: x[1],
+    reverse=True)
 
-dist, sssp_ms = bench(
-    lambda:
-    nx.single_source_dijkstra_path_length(
-        G,
-        source,
-        weight="weight"))
+top_close = sorted(
+    close.items(),
+    key=lambda x: x[1],
+    reverse=True)
+
+top_between = sorted(
+    between.items(),
+    key=lambda x: x[1],
+    reverse=True)
 
 print(
-    "single_source_dijkstra_path_length")
+    "\nTOP DEGREE")
 
-for v in sorted(dist):
+for v, score in top_degree[:5]:
 
     print(
         v,
-        fmt(
-            dist[v]))
+        score)
 
-print()
+print(
+    "\nTOP EIGEN")
 
-#
-# Floyd
-#
-
-print("===== FLOYD WARSHALL =====")
-
-fw, fw_ms = bench(
-    lambda:
-    nx.floyd_warshall(
-        G,
-        weight="weight"))
-
-for i in range(
-    G.number_of_nodes()):
-
-    row = []
-
-    for j in range(
-        G.number_of_nodes()):
-
-        row.append(
-            fmt(
-                fw[i][j]))
+for v, score in top_eigen[:5]:
 
     print(
-        " ".join(row))
-
-print()
-
-#
-# Yen
-#
-
-print("===== YEN =====")
-
-def run_yen():
-
-    paths = []
-
-    for path in nx.shortest_simple_paths(
-        G,
-        source,
-        target,
-        weight="weight"):
-
-        paths.append(
-            path)
-
-        if len(paths) >= 10:
-            break
-
-    return paths
-
-paths, yen_ms = bench(
-    run_yen)
+        v,
+        score)
 
 print(
-    "count",
-    len(paths))
+    "\nTOP CLOSE")
 
-last_cost = -1.0
-
-for i, path in enumerate(
-    paths):
-
-    cost = path_cost(
-        G,
-        path)
-
-    assert cost >= last_cost
-
-    last_cost = cost
+for v, score in top_close[:5]:
 
     print(
-        "path",
-        i,
-        end=" ")
+        v,
+        score)
 
-    print_path(
-        path)
+print(
+    "\nTOP BETWEEN")
+
+for v, score in top_between[:5]:
 
     print(
-        "cost",
-        fmt(
-            cost))
-
-print()
-
-#
-# Performance
-#
-
-print("===== PERFORMANCE =====")
+        v,
+        score)
 
 print(
-    "BFS(ms)",
-    fmt(
-        bfs_ms))
+    "\n===== PERFORMANCE =====")
 
 print(
-    "DIJKSTRA(ms)",
-    fmt(
-        dijkstra_ms))
+    f"ADJ(ms)      "
+    f"{adj_ms:.12f}")
 
 print(
-    "SSSP(ms)",
-    fmt(
-        sssp_ms))
+    f"ATTR(ms)     "
+    f"{attr_ms:.12f}")
 
 print(
-    "FLOYD(ms)",
-    fmt(
-        fw_ms))
+    f"DEGREE(ms)   "
+    f"{degree_ms:.12f}")
 
 print(
-    "YEN(ms)",
-    fmt(
-        yen_ms))
+    f"EIGEN(ms)    "
+    f"{eigen_ms:.12f}")
 
-print()
-print("ALL PASS")
+print(
+    f"CLOSE(ms)    "
+    f"{close_ms:.12f}")
+
+print(
+    f"BETWEEN(ms)  "
+    f"{between_ms:.12f}")
+
+print(
+    "\nOUTPUT:",
+    OUTPUT_FILE)
+
+print(
+    "\nCOMPARE:")
+
+print(
+    "diff graph_dump_cpp.txt graph_dump_py.txt")
 

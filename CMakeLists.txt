@@ -116,3 +116,8 @@ virne_executable(
     test_api
     test_api.cpp
 )
+
+virne_executable(
+    test_bfs_full
+    test_bfs_full.cpp
+)
