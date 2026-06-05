@@ -328,104 +328,6 @@ graph/
 └── views/
 ```
 
----
-
-# Kiến trúc
-
-## graph/
-
-Chứa cấu trúc dữ liệu lõi.
-
-Bao gồm:
-
-```cpp
-Graph
-Vertex
-Edge
-AttrMap
-```
-
-Không chứa thuật toán.
-
----
-
-## algorithms/
-
-Chứa thuật toán hiệu năng cao.
-
-Ví dụ:
-
-```cpp
-bfs
-bidirectional_bfs
-dijkstra
-bidirectional_dijkstra
-floyd_warshall
-yen_k_shortest_paths
-```
-
-Không chứa API NetworkX.
-
----
-
-## nx/
-
-Lớp tương thích NetworkX.
-
-Ví dụ:
-
-```cpp
-nx::shortest_path
-nx::dijkstra_path
-nx::is_connected
-```
-
-Được phép gọi:
-
-```cpp
-algorithms/*
-```
-
-Không được cài thuật toán tại đây.
-
----
-
-## generators/
-
-Sinh topology hoặc đọc topology.
-
-Ví dụ:
-
-```cpp
-WaxmanGenerator
-GmlLoader
-```
-
----
-
-## config/
-
-Hệ thống cấu hình.
-
-Tương tự:
-
-```text
-Hydra
-OmegaConf
-```
-
----
-
-## random/
-
-Bộ sinh số ngẫu nhiên tương thích:
-
-```python
-random.Random
-```
-
----
-
 # Kiểu dữ liệu
 
 ## Vertex
@@ -442,7 +344,28 @@ Luôn liên tiếp:
 
 ## Edge
 
-Descriptor của cạnh.
+Descriptor của Boost Graph.
+
+Được sử dụng trong các thuật toán nội bộ.
+
+Không nên cache lâu dài sau các thao tác chỉnh sửa đồ thị.
+
+---
+
+## EdgeId
+
+ID ổn định của cạnh.
+
+```cpp
+using EdgeId =
+    uint32_t;
+```
+
+Mỗi cạnh được gán một ID duy nhất khi được tạo.
+
+ID không thay đổi trong suốt vòng đời graph.
+
+ID không được tái sử dụng sau khi cạnh bị xóa.
 
 ---
 
@@ -459,25 +382,90 @@ std::string
 
 ---
 
-## AttrMap
+## AttrId
 
-Map lưu thuộc tính node hoặc edge.
+ID nội bộ của thuộc tính.
+
+```cpp
+using AttrId =
+    uint32_t;
+```
+
+Ví dụ:
+
+```text
+cpu -> 0
+gpu -> 1
+bw  -> 2
+```
+
+ID được sinh lần đầu khi thuộc tính xuất hiện.
+
+---
+
+## AttributeRegistry
+
+Graph quản lý toàn bộ thuộc tính thông qua registry.
+
+```cpp
+AttrId attr_id(
+    std::string_view name);
+
+std::string_view attr_name(
+    AttrId id) const;
+```
 
 Ví dụ:
 
 ```cpp
-g.node_attrs(v)["cpu"] =
-    int64_t(100);
+AttrId cpu =
+    g.attr_id("cpu");
 
-g.edge_attrs(e)["weight"] =
-    10.0;
+AttrId bw =
+    g.attr_id("bw");
 ```
+
+Mỗi tên thuộc tính chỉ được hash một lần.
+
+Sau đó toàn bộ hệ thống sử dụng AttrId.
+
+---
+
+## AttrStore
+
+Node và edge lưu dữ liệu bằng mảng.
+
+```cpp
+AttrId
+    ->
+slot
+```
+
+Ví dụ:
+
+```text
+cpu -> slot[0]
+gpu -> slot[1]
+bw  -> slot[2]
+```
+
+Không sử dụng:
+
+```cpp
+unordered_map<
+    std::string,
+    AttrValue>
+```
+
+trong runtime.
 
 ---
 
 # Graph API
 
-## Khởi tạo
+## Graph
+
+### Tạo đồ thị
 
 ```cpp
 Graph g;
@@ -485,649 +473,620 @@ Graph g;
 
 ---
 
-## Node
-
-### add_node
+### Thêm node
 
 ```cpp
-Vertex add_node();
-```
-
-Output:
-
-```cpp
-Vertex
+Vertex v =
+    g.add_node();
 ```
 
 ---
 
-## Edge
-
-### add_edge
+### Thêm cạnh
 
 ```cpp
-Edge add_edge(
-    Vertex u,
-    Vertex v);
-```
-
-Output:
-
-```cpp
-Edge
+Edge e =
+    g.add_edge(
+        u,
+        v);
 ```
 
 ---
 
-## Node Attributes
-
-### node_attrs
+### Xóa cạnh
 
 ```cpp
-AttrMap&
-node_attrs(
-    Vertex v);
-```
-
-Ví dụ:
-
-```cpp
-g.node_attrs(v)["cpu"];
+g.remove_edge(
+    u,
+    v);
 ```
 
 ---
 
-## Edge Attributes
-
-### edge_attrs
+### Kiểm tra cạnh tồn tại
 
 ```cpp
-AttrMap&
-edge_attrs(
-    Edge e);
-```
-
-Ví dụ:
-
-```cpp
-g.edge_attrs(e)["weight"];
+bool ok =
+    g.has_edge(
+        u,
+        v);
 ```
 
 ---
 
-## Queries
-
-### num_nodes
+### Lấy cạnh
 
 ```cpp
-size_t num_nodes() const;
+Edge e =
+    g.edge(
+        u,
+        v);
 ```
 
 ---
 
-### num_edges
+### Số node
 
 ```cpp
-size_t num_edges() const;
+size_t n =
+    g.num_nodes();
 ```
 
 ---
 
-### degree
+### Số cạnh
 
 ```cpp
-size_t degree(
-    Vertex v) const;
+size_t m =
+    g.num_edges();
 ```
 
 ---
 
-### has_edge
+### Degree
 
 ```cpp
-bool has_edge(
-    Vertex u,
-    Vertex v) const;
+size_t deg =
+    g.degree(v);
 ```
 
 ---
 
-### edge
+### Lấy source / target
 
 ```cpp
-Edge edge(
-    Vertex u,
-    Vertex v) const;
-```
+Vertex u =
+    g.source(e);
 
-Ném exception nếu không tồn tại.
-
----
-
-### source
-
-```cpp
-Vertex source(
-    Edge e) const;
+Vertex v =
+    g.target(e);
 ```
 
 ---
 
-### target
+### Duyệt node
 
 ```cpp
-Vertex target(
-    Edge e) const;
+auto [it, end] =
+    g.nodes();
+
+for (; it != end; ++it)
+{
+    Vertex v =
+        *it;
+}
 ```
 
 ---
 
-## Removal
-
-### remove_edge
+### Duyệt cạnh
 
 ```cpp
-bool remove_edge(
-    Vertex u,
-    Vertex v);
-```
+auto [it, end] =
+    g.edges();
 
-Output:
-
-```cpp
-true
-false
+for (; it != end; ++it)
+{
+    Edge e =
+        *it;
+}
 ```
 
 ---
 
-## Iterators
-
-### nodes
+### Duyệt neighbor
 
 ```cpp
-nodes()
+auto [it, end] =
+    g.neighbors(v);
+
+for (; it != end; ++it)
+{
+    Vertex u =
+        *it;
+}
 ```
 
 ---
 
-### edges
+### Fast neighbor access
 
 ```cpp
-edges()
+const auto& out =
+    g.neighbors_fast(v);
+
+for (const auto& edge : out)
+{
+    Vertex u =
+        edge.get_target();
+}
 ```
 
 ---
 
-### neighbors
+### Edge id
 
 ```cpp
-neighbors(
-    Vertex v)
+uint32_t id =
+    g.edge_id(e);
 ```
 
 ---
 
-## Raw Boost Graph
-
-### raw
+### Edge lookup theo id
 
 ```cpp
-BGLGraph&
-raw();
-
-const BGLGraph&
-raw() const;
-```
-
-Truy cập trực tiếp graph Boost.
-
----
-
-## Fast Adjacency
-
-### neighbors_fast
-
-```cpp
-const RawNeighborList&
-neighbors_fast(
-    Vertex v) const;
-```
-
-Được dùng trong:
-
-```cpp
-bfs
-bidirectional_bfs
-dijkstra
-bidirectional_dijkstra
-floyd_warshall
+Edge e =
+    g.edge_by_id(id);
 ```
 
 ---
 
-# Trọng số cạnh
-
-Mặc định:
+### Endpoint lookup theo id
 
 ```cpp
-"weight"
+auto [u, v] =
+    g.edge_endpoints(id);
 ```
 
-Ví dụ:
+---
+
+### Raw boost graph
+
+```cpp
+BGLGraph& bg =
+    g.raw();
+```
+
+---
+
+# Attributes
+
+## Node attributes
+
+### Gán
+
+```cpp
+g.node_attrs(v)["cpu"] =
+    int64_t(100);
+
+g.node_attrs(v)["name"] =
+    std::string("A");
+```
+
+---
+
+### Đọc
+
+```cpp
+int64_t cpu =
+    std::get<int64_t>(
+        g.node_attrs(v)
+            .at("cpu"));
+```
+
+---
+
+### Tìm
+
+```cpp
+auto value =
+    g.node_attrs(v)
+        .find("cpu");
+
+if (value != nullptr)
+{
+}
+```
+
+---
+
+### Kiểm tra tồn tại
+
+```cpp
+bool ok =
+    g.node_attrs(v)
+        .contains("cpu");
+```
+
+---
+
+## Edge attributes
+
+### Gán
 
 ```cpp
 g.edge_attrs(e)["weight"] =
-    5.0;
+    10.0;
 ```
 
-Nếu không tồn tại:
+---
+
+### Đọc
 
 ```cpp
-weight = 1.0
+double w =
+    std::get<double>(
+        g.edge_attrs(e)
+            .at("weight"));
 ```
 
-Các kiểu hợp lệ:
+---
+
+### Tìm
 
 ```cpp
-double
-int64_t
+auto value =
+    g.edge_attrs(e)
+        .find("weight");
+```
+
+---
+
+# Attribute Registry
+
+## Tạo id cho attribute
+
+```cpp
+AttrId cpu =
+    g.attr_id("cpu");
+
+AttrId gpu =
+    g.attr_id("gpu");
+```
+
+---
+
+## Lấy tên từ id
+
+```cpp
+std::string_view name =
+    g.attr_name(cpu);
+```
+
+---
+
+## Truy cập bằng AttrId
+
+```cpp
+AttrId cpu =
+    g.attr_id("cpu");
+
+auto value =
+    g.node_attrs(v)
+        .find(cpu);
+```
+
+---
+
+## Duyệt toàn bộ attribute hiện có
+
+```cpp
+for (AttrId id :
+     attrs.attribute_ids())
+{
+}
 ```
 
 ---
 
 # Generators
 
-## WaxmanGenerator
-
-Header:
+## Waxman
 
 ```cpp
-graph/generators/waxman_generator.h
-```
+WaxmanConfig cfg;
 
-API:
+cfg.num_nodes = 100;
+cfg.alpha = 0.4;
+cfg.beta = 0.2;
+cfg.seed = 42;
 
-```cpp
-Graph generate(
-    const WaxmanConfig&);
-```
-
-Config:
-
-```cpp
-struct WaxmanConfig
-{
-    size_t num_nodes;
-
-    double alpha;
-    double beta;
-
-    uint64_t seed;
-};
-```
-
-Node attributes:
-
-```cpp
-pos_x
-pos_y
-```
-
-Edge attributes:
-
-```cpp
-distance
+Graph g =
+    WaxmanGenerator::
+        generate(cfg);
 ```
 
 ---
 
-## GmlLoader
-
-Header:
+## GML
 
 ```cpp
-graph/generators/gml_loader.h
+Graph g =
+    GmlLoader::load(
+        "graph.gml");
 ```
-
-API:
-
-```cpp
-Graph load(
-    const std::string& path);
-```
-
-Hỗ trợ:
-
-```gml
-node [
-    id
-]
-
-edge [
-    source
-    target
-]
-```
-
-Các field khác bị bỏ qua.
-
----
-
-# Algorithms
-
-## BFS
-
-Header:
-
-```cpp
-algorithms/bfs.h
-```
-
-API:
-
-```cpp
-BFSResult
-bfs(
-    const Graph&,
-    Vertex source);
-```
-
-Output:
-
-```cpp
-distance
-predecessor
-```
-
-Khoảng cách từ source tới mọi node reachable.
-
----
-
-## Bidirectional BFS
-
-Header:
-
-```cpp
-algorithms/bidirectional_bfs.h
-```
-
-API:
-
-```cpp
-BidirectionalBFSResult
-bidirectional_bfs(
-    const Graph&,
-    Vertex source,
-    Vertex target);
-```
-
-Output:
-
-```cpp
-found
-distance
-path
-```
-
-Tìm một đường đi ngắn nhất theo số cạnh.
-
----
-
-## Dijkstra
-
-Header:
-
-```cpp
-algorithms/dijkstra.h
-```
-
-API:
-
-```cpp
-DijkstraResult
-dijkstra(
-    const Graph&,
-    Vertex source,
-    const std::string& weight_attr =
-        "weight");
-```
-
-Output:
-
-```cpp
-distance
-predecessor
-```
-
-Tính:
-
-```cpp
-source -> mọi node reachable
-```
-
----
-
-## Dijkstra có ràng buộc
-
-```cpp
-DijkstraResult
-dijkstra(
-    const Graph&,
-    Vertex source,
-    const VertexSet& banned_vertices,
-    const EdgeSet& banned_edges,
-    const std::string& weight_attr =
-        "weight");
-```
-
-Dùng trong Yen.
-
----
-
-## Dijkstra Helpers
-
-### build_path
-
-```cpp
-std::vector<Vertex>
-build_path(
-    const DijkstraResult&,
-    Vertex source,
-    Vertex target);
-```
-
----
-
-### edge_cost
-
-```cpp
-double edge_cost(
-    const Graph&,
-    Vertex u,
-    Vertex v,
-    const std::string& weight_attr =
-        "weight");
-```
-
----
-
-### path_cost
-
-```cpp
-double path_cost(
-    const Graph&,
-    const std::vector<Vertex>& path,
-    const std::string& weight_attr =
-        "weight");
-```
-
----
-
-### path_prefix_costs
-
-```cpp
-std::vector<double>
-path_prefix_costs(
-    const Graph&,
-    const std::vector<Vertex>& path,
-    const std::string& weight_attr =
-        "weight");
-```
-
-Dùng trong Yen.
-
----
-
-## Bidirectional Dijkstra
-
-Header:
-
-```cpp
-algorithms/bidirectional_dijkstra.h
-```
-
-API:
-
-```cpp
-BidirectionalPathResult
-bidirectional_dijkstra(
-    const Graph&,
-    Vertex source,
-    Vertex target,
-    const VertexSet& banned_vertices,
-    const EdgeSet& banned_edges,
-    const std::string& weight_attr =
-        "weight");
-```
-
-Output:
-
-```cpp
-found
-cost
-path
-```
-
-Được dùng bởi:
-
-```cpp
-nx::dijkstra_path
-nx::dijkstra_path_length
-yen_k_shortest_paths
-```
-
----
-
-## Floyd Warshall
-
-Header:
-
-```cpp
-algorithms/floyd_warshall.h
-```
-
-API:
-
-```cpp
-DistanceMatrix
-floyd_warshall(
-    const Graph&,
-    const std::string& weight_attr =
-        "weight");
-```
-
-Output:
-
-```cpp
-Khoảng cách ngắn nhất giữa mọi cặp đỉnh
-```
-
----
-
-## Yen K Shortest Paths
-
-Header:
-
-```cpp
-algorithms/k_shortest_paths.h
-```
-
-### PathResult
-
-```cpp
-struct PathResult
-{
-    std::vector<Vertex> path;
-    double cost;
-};
-```
-
----
-
-### join_paths
-
-```cpp
-std::vector<Vertex>
-join_paths(
-    const std::vector<Vertex>& root,
-    const std::vector<Vertex>& spur);
-```
-
----
-
-### yen_k_shortest_paths
-
-```cpp
-std::vector<PathResult>
-yen_k_shortest_paths(
-    const Graph&,
-    Vertex source,
-    Vertex target,
-    size_t k,
-    const std::string& weight_attr =
-        "weight");
-```
-
-Output:
-
-```cpp
-K đường đi đơn ngắn nhất
-```
-
-sắp xếp theo cost tăng dần.
 
 ---
 
 # Connectivity
 
-Header:
+## Kiểm tra liên thông
 
 ```cpp
-nx/connectivity.h
-```
-
-API:
-
-```cpp
-bool is_connected(
-    const Graph&);
+bool ok =
+    nx::is_connected(g);
 ```
 
 ---
 
-# NetworkX Layer
+# BFS
 
-Namespace:
+## Chạy BFS
 
 ```cpp
-nx
+auto result =
+    bfs(
+        g,
+        source);
 ```
 
-Mục tiêu:
+---
+
+### Distance
 
 ```cpp
-API tương tự NetworkX
+result.distance[v];
+```
+
+---
+
+### Predecessor
+
+```cpp
+result.predecessor[v];
+```
+
+---
+
+# Bidirectional BFS
+
+## Đường đi ngắn nhất không trọng số
+
+```cpp
+auto result =
+    bidirectional_bfs(
+        g,
+        source,
+        target);
+```
+
+---
+
+### Found
+
+```cpp
+result.found;
+```
+
+---
+
+### Distance
+
+```cpp
+result.distance;
+```
+
+---
+
+### Path
+
+```cpp
+result.path;
+```
+
+---
+
+# Dijkstra
+
+## Single source
+
+```cpp
+auto result =
+    dijkstra(
+        g,
+        source,
+        "weight");
+```
+
+---
+
+### Distance
+
+```cpp
+result.distance[v];
+```
+
+---
+
+### Predecessor
+
+```cpp
+result.predecessor[v];
+```
+
+---
+
+## Có blacklist
+
+```cpp
+VertexSet banned_vertices;
+
+EdgeSet banned_edges;
+
+auto result =
+    dijkstra(
+        g,
+        source,
+        banned_vertices,
+        banned_edges,
+        "weight");
+```
+
+---
+
+## Path reconstruction
+
+```cpp
+auto path =
+    build_path(
+        result,
+        source,
+        target);
+```
+
+---
+
+## Edge cost
+
+```cpp
+double w =
+    edge_cost(
+        g,
+        u,
+        v,
+        "weight");
+```
+
+---
+
+## Path cost
+
+```cpp
+double cost =
+    path_cost(
+        g,
+        path,
+        "weight");
+```
+
+---
+
+## Prefix cost
+
+```cpp
+auto prefix =
+    path_prefix_costs(
+        g,
+        path,
+        "weight");
+```
+
+---
+
+# Bidirectional Dijkstra
+
+```cpp
+auto result =
+    bidirectional_dijkstra(
+        g,
+        source,
+        target,
+        VertexSet{},
+        EdgeSet{},
+        "weight");
+```
+
+---
+
+### Found
+
+```cpp
+result.found;
+```
+
+---
+
+### Cost
+
+```cpp
+result.cost;
+```
+
+---
+
+### Path
+
+```cpp
+result.path;
+```
+
+---
+
+# Floyd Warshall
+
+```cpp
+DistanceMatrix dist =
+    floyd_warshall(
+        g,
+        "weight");
+```
+
+---
+
+### Truy cập
+
+```cpp
+double d =
+    dist(i, j);
+```
+
+---
+
+# Yen K Shortest Paths
+
+```cpp
+auto paths =
+    yen_k_shortest_paths(
+        g,
+        source,
+        target,
+        k,
+        "weight");
+```
+
+---
+
+### PathResult
+
+```cpp
+paths[i].path;
+
+paths[i].cost;
+```
+
+---
+
+# NetworkX Compatible APIs
+
+## shortest_path_length
+
+```cpp
+size_t d =
+    nx::shortest_path_length(
+        g,
+        source,
+        target);
 ```
 
 ---
@@ -1135,35 +1094,11 @@ API tương tự NetworkX
 ## shortest_path
 
 ```cpp
-std::vector<Vertex>
-shortest_path(
-    const Graph&,
-    Vertex source,
-    Vertex target);
-```
-
-Implementation:
-
-```cpp
-bidirectional_bfs
-```
-
----
-
-## shortest_path_length
-
-```cpp
-size_t
-shortest_path_length(
-    const Graph&,
-    Vertex source,
-    Vertex target);
-```
-
-Implementation:
-
-```cpp
-bidirectional_bfs
+auto path =
+    nx::shortest_path(
+        g,
+        source,
+        target);
 ```
 
 ---
@@ -1171,18 +1106,10 @@ bidirectional_bfs
 ## single_source_shortest_path_length
 
 ```cpp
-std::unordered_map<
-    Vertex,
-    size_t>
-single_source_shortest_path_length(
-    const Graph&,
-    Vertex source);
-```
-
-Implementation:
-
-```cpp
-bfs
+auto dist =
+    nx::single_source_shortest_path_length(
+        g,
+        source);
 ```
 
 ---
@@ -1190,19 +1117,12 @@ bfs
 ## dijkstra_path
 
 ```cpp
-std::vector<Vertex>
-dijkstra_path(
-    const Graph&,
-    Vertex source,
-    Vertex target,
-    const std::string& weight_attr =
+auto path =
+    nx::dijkstra_path(
+        g,
+        source,
+        target,
         "weight");
-```
-
-Implementation:
-
-```cpp
-bidirectional_dijkstra
 ```
 
 ---
@@ -1210,19 +1130,12 @@ bidirectional_dijkstra
 ## dijkstra_path_length
 
 ```cpp
-double
-dijkstra_path_length(
-    const Graph&,
-    Vertex source,
-    Vertex target,
-    const std::string& weight_attr =
+double cost =
+    nx::dijkstra_path_length(
+        g,
+        source,
+        target,
         "weight");
-```
-
-Implementation:
-
-```cpp
-bidirectional_dijkstra
 ```
 
 ---
@@ -1230,38 +1143,22 @@ bidirectional_dijkstra
 ## single_source_dijkstra_path_length
 
 ```cpp
-std::unordered_map<
-    Vertex,
-    double>
-single_source_dijkstra_path_length(
-    const Graph&,
-    Vertex source,
-    const std::string& weight_attr =
+auto dist =
+    nx::single_source_dijkstra_path_length(
+        g,
+        source,
         "weight");
-```
-
-Implementation:
-
-```cpp
-dijkstra
 ```
 
 ---
 
-## floyd_warshall
+## nx::floyd_warshall
 
 ```cpp
-DistanceMatrix
-floyd_warshall(
-    const Graph&,
-    const std::string& weight_attr =
+auto dist =
+    nx::floyd_warshall(
+        g,
         "weight");
-```
-
-Implementation:
-
-```cpp
-algorithms::floyd_warshall
 ```
 
 ---
@@ -1269,60 +1166,55 @@ algorithms::floyd_warshall
 ## shortest_simple_paths
 
 ```cpp
-std::vector<
-    std::vector<Vertex>>
-shortest_simple_paths(
-    const Graph&,
-    Vertex source,
-    Vertex target,
-    size_t k,
-    const std::string& weight_attr =
+auto paths =
+    nx::shortest_simple_paths(
+        g,
+        source,
+        target,
+        k,
         "weight");
-```
-
-Implementation:
-
-```cpp
-yen_k_shortest_paths
 ```
 
 ---
 
+# WeightCache
 
-
-# Quy tắc hiệu năng
-
-Ưu tiên:
+## Build
 
 ```cpp
-neighbors_fast(...)
+WeightCache cache(
+    g);
 ```
 
-Tránh:
+---
+
+## Attribute id
 
 ```cpp
-boost::adjacent_vertices(...)
-boost::out_edges(...)
+AttrId weight =
+    cache.attribute_id(
+        "weight");
 ```
 
-Không dùng:
+---
+
+## Fast edge lookup
 
 ```cpp
-Boost Property Map
+double w =
+    cache.value(
+        edge,
+        weight);
 ```
 
-trong các vòng lặp nóng.
+---
 
-Thuật toán phải nằm trong:
+## Fast vertex lookup
 
 ```cpp
-algorithms/
+double w =
+    cache.value(
+        u,
+        v,
+        weight);
 ```
-
-Không cài thuật toán trong:
-
-```cpp
-nx/
-```
-
-Lớp `nx` chỉ là wrapper tương thích NetworkX.

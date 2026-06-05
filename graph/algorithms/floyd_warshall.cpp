@@ -8,32 +8,32 @@ namespace
 
 inline double fast_edge_weight(
     const RawNeighbor& edge,
-    const std::string& weight_attr)
+    AttrId weight_attr_id)
 {
     const auto& attrs =
         edge.get_property().attrs;
 
-    auto it =
-        attrs.find(weight_attr);
+    const AttrValue* value =
+        attrs.find(weight_attr_id);
 
-    if (it == attrs.end())
+    if (value == nullptr)
     {
         return 1.0;
     }
 
     if (std::holds_alternative<double>(
-            it->second))
+            *value))
     {
         return std::get<double>(
-            it->second);
+            *value);
     }
 
     if (std::holds_alternative<int64_t>(
-            it->second))
+            *value))
     {
         return static_cast<double>(
             std::get<int64_t>(
-                it->second));
+                *value));
     }
 
     throw std::runtime_error(
@@ -51,6 +51,9 @@ DistanceMatrix floyd_warshall(
 
     const size_t n =
         g.num_nodes();
+
+    const AttrId weight_attr_id =
+        g.attr_id(weight_attr);
 
     DistanceMatrix dist(
         n);
@@ -87,7 +90,7 @@ DistanceMatrix floyd_warshall(
             const double w =
                 fast_edge_weight(
                     edge,
-                    weight_attr);
+                    weight_attr_id);
 
             if (w < dist(u, v))
             {

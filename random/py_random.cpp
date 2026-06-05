@@ -294,6 +294,33 @@ PyRandom::getrandbits32()
 }
 
 uint64_t
+PyRandom::getrandbits(
+    int k)
+{
+    uint64_t result = 0;
+    int bits = 0;
+
+    while(bits < k)
+    {
+        result =
+            (result << 32)
+            |
+            static_cast<uint64_t>(
+                genrand_uint32());
+
+        bits += 32;
+    }
+
+    if(bits > k)
+    {
+        result >>=
+            (bits - k);
+    }
+
+    return result;
+}
+
+uint64_t
 PyRandom::randrange(
     uint64_t stop)
 {
@@ -302,29 +329,25 @@ PyRandom::randrange(
         return 0;
     }
 
-    uint64_t limit =
-        UINT64_MAX -
-        (
-            UINT64_MAX
-            %
-            stop
-        );
+    int k = 0;
 
-    uint64_t r;
+    uint64_t n =
+        stop - 1;
 
-    do
+    while(n)
     {
-        r =
-            (
-                static_cast<uint64_t>(
-                    genrand_uint32())
-                << 32
-            )
-            |
-            genrand_uint32();
+        ++k;
+        n >>= 1;
     }
-    while(r >= limit);
 
-    return
-        r % stop;
+    while(true)
+    {
+        uint64_t r =
+            getrandbits(k);
+
+        if(r < stop)
+        {
+            return r;
+        }
+    }
 }

@@ -2,6 +2,7 @@
 
 #include "../../random/py_random.h"
 
+#include <algorithm>
 #include <cmath>
 #include <vector>
 
@@ -22,6 +23,13 @@ WaxmanGenerator::generate(
 
     PyRandom rng(
         cfg.seed);
+
+    const AttrId x_attr =
+        g.attr_id("x");
+    const AttrId y_attr =
+        g.attr_id("y");
+    const AttrId distance_attr =
+        g.attr_id("distance");
 
     std::vector<Vertex> vertices;
     std::vector<Point> points;
@@ -52,14 +60,15 @@ WaxmanGenerator::generate(
                 0.0,
                 1.0);
 
-        g.node_attrs(v)["x"] =
-            x;
+        g.node_attrs(v).set(
+            x_attr,
+            x);
 
-        g.node_attrs(v)["y"] =
-            y;
+        g.node_attrs(v).set(
+            y_attr,
+            y);
 
         vertices.push_back(v);
-
         points.push_back(
             {x, y});
     }
@@ -95,6 +104,11 @@ WaxmanGenerator::generate(
                     L,
                     d);
         }
+    }
+
+    if (L == 0.0)
+    {
+        return g;
     }
 
     //
@@ -134,8 +148,9 @@ WaxmanGenerator::generate(
                         vertices[i],
                         vertices[j]);
 
-                g.edge_attrs(e)
-                 ["distance"] = d;
+                g.edge_attrs(e).set(
+                    distance_attr,
+                    d);
             }
         }
     }

@@ -115,11 +115,12 @@ get_weight(
 {
     const auto& attrs = g.edge_attrs(e);
     auto it = attrs.find("weight");
-    if (it == attrs.end())
+    if (it == nullptr)
     {
         return 1.0;
     }
-    return std::get<double>(it->second);
+    return std::get<double>(
+    *it);
 }
 
 void
@@ -134,16 +135,21 @@ assign_weights_from_distance_or_default(
         double w = 1.0;
 
         const auto& attrs = g.edge_attrs(*it);
-        auto dit = attrs.find("distance");
-        if (dit != attrs.end())
+        auto dit =
+            attrs.find(
+                "distance");
+
+        if (dit != nullptr)
         {
-            if (std::holds_alternative<double>(dit->second))
+            if (std::holds_alternative<double>(*dit))
             {
-                w = std::get<double>(dit->second);
+                w = std::get<double>(*dit);
             }
-            else if (std::holds_alternative<int64_t>(dit->second))
+            else if (
+                std::holds_alternative<int64_t>(*dit))
             {
-                w = static_cast<double>(std::get<int64_t>(dit->second));
+                w = static_cast<double>(
+                    std::get<int64_t>(*dit));
             }
         }
 
@@ -168,6 +174,8 @@ build_waxman_graph(
     cfg.beta = prng.uniform(0.20, 0.90);
     cfg.seed = static_cast<uint64_t>(
         prng.randrange(1000000000ULL) + 1);
+
+    std::cout << "alpha :" << cfg.alpha << "beta: " << cfg.beta << "seed: " << cfg.seed << '\n';
 
     out_waxman_seed = cfg.seed;
     out_alpha = cfg.alpha;
@@ -437,6 +445,15 @@ print_yen_section(
 void
 run_end_to_end()
 {
+    PyRandom r(42);
+
+    std::cout << r.random() << '\n';
+    std::cout << r.random() << '\n';
+
+    std::cout << r.uniform(0.20,0.70) << '\n';
+    std::cout << r.uniform(0.20,0.90) << '\n';
+
+    std::cout << r.randrange(1000000000ULL)+1 << '\n';
     constexpr uint64_t py_seed = 42;
 
     PyRandom prng(py_seed);

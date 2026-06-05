@@ -4,7 +4,6 @@
 
 #include <cstdint>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 class WeightCache
@@ -12,27 +11,29 @@ class WeightCache
 public:
 
     explicit WeightCache(
-        Graph& g);
+        const Graph& g);
 
-    std::size_t attribute_id(
+    AttrId attribute_id(
         const std::string& name) const;
 
     double value(
         const RawNeighbor& edge,
-        std::size_t attr_id) const;
+        AttrId attr_id) const;
 
     double value(
         Vertex u,
         Vertex v,
-        std::size_t attr_id) const;
+        AttrId attr_id) const;
 
 private:
 
-    std::size_t edge_count_ = 0;
+    const Graph* graph_ =
+        nullptr;
 
-    std::unordered_map<
-        std::string,
-        std::size_t> attr_ids_;
+    size_t edge_count_ = 0;
 
-    std::vector<double> values_;
+    size_t attr_count_ = 0;
+
+    std::vector<double>
+        values_;
 };

@@ -3,10 +3,11 @@
 #include "attribute.h"
 
 #include <boost/graph/adjacency_list.hpp>
+#include <utility>
+
 #define private public
 #define protected public
-
-
+#include <boost/graph/adjacency_list.hpp>
 #undef private
 #undef protected
 
@@ -18,7 +19,6 @@ struct VertexProperty
 struct EdgeProperty
 {
     AttrMap attrs;
-
     uint32_t edge_id = 0;
 };
 

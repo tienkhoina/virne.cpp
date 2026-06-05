@@ -49,6 +49,9 @@ public:
 
     uint32_t getrandbits32();
 
+    uint64_t getrandbits(
+        int k);
+
     uint64_t randrange(
         uint64_t stop);
 

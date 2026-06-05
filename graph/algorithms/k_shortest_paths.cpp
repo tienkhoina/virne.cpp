@@ -1,14 +1,12 @@
-// graph/algorithms/k_shortest_paths.cpp
 #include "k_shortest_paths.h"
 
 #include "bidirectional_dijkstra.h"
 
 #include <algorithm>
+#include <queue>
 #include <stdexcept>
 #include <unordered_set>
 #include <utility>
-
-#include <queue>
 
 namespace
 {
@@ -21,7 +19,8 @@ struct PathHash
         std::size_t h = 0;
         for (Vertex v : path)
         {
-            std::size_t x = std::hash<Vertex>{}(v);
+            std::size_t x =
+                std::hash<Vertex>{}(v);
             h ^= x + 0x9e3779b9 + (h << 6) + (h >> 2);
         }
         return h;
@@ -32,8 +31,7 @@ using PathSet = std::unordered_set<
     std::vector<Vertex>,
     PathHash>;
 
-static bool
-is_simple_path(
+static bool is_simple_path(
     const std::vector<Vertex>& path)
 {
     std::unordered_set<Vertex> seen;
@@ -50,8 +48,7 @@ is_simple_path(
     return true;
 }
 
-static bool
-same_root(
+static bool same_root(
     const std::vector<Vertex>& path,
     const std::vector<Vertex>& root)
 {
@@ -71,8 +68,7 @@ same_root(
     return true;
 }
 
-static std::vector<Vertex>
-path_prefix(
+static std::vector<Vertex> path_prefix(
     const std::vector<Vertex>& path,
     size_t end_exclusive)
 {
@@ -81,12 +77,81 @@ path_prefix(
         path.begin() + end_exclusive);
 }
 
+static double edge_cost_by_id(
+    const Graph& g,
+    Vertex u,
+    Vertex v,
+    AttrId weight_attr_id)
+{
+    Edge e =
+        g.edge(u, v);
+
+    const auto& attrs =
+        g.edge_attrs(e);
+
+    const AttrValue* value =
+        attrs.find(weight_attr_id);
+
+    if (value == nullptr)
+    {
+        return 1.0;
+    }
+
+    if (std::holds_alternative<double>(*value))
+    {
+        return std::get<double>(*value);
+    }
+
+    if (std::holds_alternative<int64_t>(*value))
+    {
+        return static_cast<double>(
+            std::get<int64_t>(*value));
+    }
+
+    throw std::runtime_error(
+        "Edge weight must be numeric");
+}
+
+static std::vector<double> path_prefix_costs_by_id(
+    const Graph& g,
+    const std::vector<Vertex>& path,
+    AttrId weight_attr_id)
+{
+    std::vector<double> prefix;
+    prefix.reserve(path.size());
+
+    if (path.empty())
+    {
+        return prefix;
+    }
+
+    prefix.push_back(0.0);
+
+    double running = 0.0;
+
+    for (std::size_t i = 0;
+         i + 1 < path.size();
+         ++i)
+    {
+        running += edge_cost_by_id(
+            g,
+            path[i],
+            path[i + 1],
+            weight_attr_id);
+
+        prefix.push_back(running);
+    }
+
+    return prefix;
+}
+
 static std::vector<PathResult>
 build_candidates_from_base_path(
     const Graph& g,
     const std::vector<PathResult>& accepted_paths,
     const std::vector<Vertex>& base_path,
     Vertex target,
+    AttrId weight_attr_id,
     const std::string& weight_attr)
 {
     std::vector<PathResult> candidates;
@@ -97,15 +162,17 @@ build_candidates_from_base_path(
     }
 
     const auto prefix_costs =
-        path_prefix_costs(
+        path_prefix_costs_by_id(
             g,
             base_path,
-            weight_attr);
+            weight_attr_id);
 
     PathSet local_seen;
     local_seen.reserve(base_path.size());
 
-    for (size_t spur_idx = 0; spur_idx + 1 < base_path.size(); ++spur_idx)
+    for (size_t spur_idx = 0;
+         spur_idx + 1 < base_path.size();
+         ++spur_idx)
     {
         Vertex spur_node = base_path[spur_idx];
 
@@ -119,11 +186,13 @@ build_candidates_from_base_path(
 
         for (size_t j = 0; j < spur_idx; ++j)
         {
-            banned_vertices.insert(base_path[j]);
+            banned_vertices.insert(
+                base_path[j]);
         }
 
         EdgeSet banned_edges;
-        banned_edges.reserve(accepted_paths.size());
+        banned_edges.reserve(
+            accepted_paths.size());
 
         for (const auto& accepted : accepted_paths)
         {
@@ -178,7 +247,8 @@ build_candidates_from_base_path(
             prefix_costs[spur_idx] +
             spur_result.cost;
 
-        candidates.push_back(std::move(candidate));
+        candidates.push_back(
+            std::move(candidate));
     }
 
     return candidates;
@@ -233,11 +303,15 @@ generate_candidates(
     std::vector<PathResult> accepted;
     accepted.push_back(shortest);
 
+    const AttrId weight_attr_id =
+        g.attr_id(weight_attr);
+
     return build_candidates_from_base_path(
         g,
         accepted,
         shortest.path,
         target,
+        weight_attr_id,
         weight_attr);
 }
 
@@ -255,6 +329,9 @@ yen_k_shortest_paths(
     {
         return A;
     }
+
+    const AttrId weight_attr_id =
+        g.attr_id(weight_attr);
 
     BidirectionalPathResult first_result =
         bidirectional_dijkstra(
@@ -279,8 +356,8 @@ yen_k_shortest_paths(
     std::priority_queue<
         PathResult,
         std::vector<PathResult>,
-        CandidateCompare
-    > B;
+        CandidateCompare>
+        B;
 
     PathSet seen;
     seen.insert(A.front().path);
@@ -295,6 +372,7 @@ yen_k_shortest_paths(
                 A,
                 prev.path,
                 target,
+                weight_attr_id,
                 weight_attr);
 
         for (auto& candidate : candidates)

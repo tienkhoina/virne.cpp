@@ -4,6 +4,7 @@
 #include <limits>
 #include <queue>
 #include <stdexcept>
+#include <unordered_set>
 
 namespace
 {
@@ -26,32 +27,32 @@ struct NodeStateGreater
 
 inline double fast_edge_weight(
     const RawNeighbor& edge,
-    const std::string& weight_attr)
+    AttrId weight_attr_id)
 {
     const auto& attrs =
         edge.get_property().attrs;
 
-    auto it =
-        attrs.find(weight_attr);
+    const AttrValue* value =
+        attrs.find(weight_attr_id);
 
-    if (it == attrs.end())
+    if (value == nullptr)
     {
         return 1.0;
     }
 
     if (std::holds_alternative<double>(
-            it->second))
+            *value))
     {
         return std::get<double>(
-            it->second);
+            *value);
     }
 
     if (std::holds_alternative<int64_t>(
-            it->second))
+            *value))
     {
         return static_cast<double>(
             std::get<int64_t>(
-                it->second));
+                *value));
     }
 
     throw std::runtime_error(
@@ -71,6 +72,33 @@ inline bool is_banned_edge(
         != banned_edges.end();
 }
 
+std::unordered_set<uint32_t> build_banned_edge_ids(
+    const Graph& g,
+    const EdgeSet& banned_edges)
+{
+    std::unordered_set<uint32_t> banned_ids;
+
+    banned_ids.reserve(
+        banned_edges.size());
+
+    for (const auto& key : banned_edges)
+    {
+        const Vertex u = key.first;
+        const Vertex v = key.second;
+
+        if (!g.has_edge(u, v))
+        {
+            continue;
+        }
+
+        Edge e = g.edge(u, v);
+        banned_ids.insert(
+            g.edge_id(e));
+    }
+
+    return banned_ids;
+}
+
 } // namespace
 
 BidirectionalPathResult
@@ -87,16 +115,16 @@ bidirectional_dijkstra(
     const size_t n =
         g.num_nodes();
 
-    if (source >= n
-        || target >= n)
+    if (source >= n ||
+        target >= n)
     {
         return out;
     }
 
     if (source == target)
     {
-        if (banned_vertices.find(source)
-            != banned_vertices.end())
+        if (banned_vertices.find(source) !=
+            banned_vertices.end())
         {
             return out;
         }
@@ -108,14 +136,22 @@ bidirectional_dijkstra(
         return out;
     }
 
-    if (banned_vertices.find(source)
-            != banned_vertices.end()
-        ||
-        banned_vertices.find(target)
-            != banned_vertices.end())
+    if (banned_vertices.find(source) !=
+            banned_vertices.end() ||
+        banned_vertices.find(target) !=
+            banned_vertices.end())
     {
         return out;
     }
+
+    const AttrId weight_attr_id =
+        g.attr_id(weight_attr);
+
+    const std::unordered_set<uint32_t>
+        banned_edge_ids =
+            build_banned_edge_ids(
+                g,
+                banned_edges);
 
     constexpr double INF =
         std::numeric_limits<double>::infinity();
@@ -161,38 +197,26 @@ bidirectional_dijkstra(
         target});
 
     bool have_best = false;
-
-    double best_cost =
-        INF;
-
-    Vertex best_meet =
-        source;
+    double best_cost = INF;
+    Vertex best_meet = source;
 
     auto update_best =
         [&](Vertex v)
         {
-            if (!seen_f[v]
-                ||
+            if (!seen_f[v] ||
                 !seen_b[v])
             {
                 return;
             }
 
             const double cand =
-                dist_f[v]
-                +
-                dist_b[v];
+                dist_f[v] + dist_b[v];
 
             if (cand < best_cost)
             {
-                best_cost =
-                    cand;
-
-                best_meet =
-                    v;
-
-                have_best =
-                    true;
+                best_cost = cand;
+                best_meet = v;
+                have_best = true;
             }
         };
 
@@ -201,16 +225,12 @@ bidirectional_dijkstra(
 
     int dir = 1;
 
-    while (!qf.empty()
-           &&
-           !qb.empty())
+    while (!qf.empty() && !qb.empty())
     {
         dir = 1 - dir;
 
         auto& q =
-            (dir == 0)
-            ? qf
-            : qb;
+            (dir == 0) ? qf : qb;
 
         NodeState state =
             q.top();
@@ -232,9 +252,7 @@ bidirectional_dijkstra(
 
             settled_f[u] = 1;
 
-            if (settled_b[u]
-                &&
-                have_best)
+            if (settled_b[u] && have_best)
             {
                 break;
             }
@@ -242,22 +260,23 @@ bidirectional_dijkstra(
             const auto& out_edges =
                 g.neighbors_fast(u);
 
-            for (const auto& edge :
-                 out_edges)
+            for (const auto& edge : out_edges)
             {
                 const Vertex v =
                     edge.get_target();
 
-                if (banned_vertices.find(v)
-                    != banned_vertices.end())
+                if (banned_vertices.find(v) !=
+                    banned_vertices.end())
                 {
                     continue;
                 }
 
-                if (is_banned_edge(
-                        u,
-                        v,
-                        banned_edges))
+                const uint32_t eid =
+                    edge.get_property().edge_id;
+
+                if (!banned_edge_ids.empty() &&
+                    banned_edge_ids.find(eid) !=
+                        banned_edge_ids.end())
                 {
                     continue;
                 }
@@ -265,7 +284,7 @@ bidirectional_dijkstra(
                 const double w =
                     fast_edge_weight(
                         edge,
-                        weight_attr);
+                        weight_attr_id);
 
                 if (w < 0.0)
                 {
@@ -278,14 +297,9 @@ bidirectional_dijkstra(
 
                 if (nd < dist_f[v])
                 {
-                    dist_f[v] =
-                        nd;
-
-                    parent_f[v] =
-                        u;
-
-                    seen_f[v] =
-                        1;
+                    dist_f[v] = nd;
+                    parent_f[v] = u;
+                    seen_f[v] = 1;
 
                     qf.push({
                         nd,
@@ -304,9 +318,7 @@ bidirectional_dijkstra(
 
             settled_b[u] = 1;
 
-            if (settled_f[u]
-                &&
-                have_best)
+            if (settled_f[u] && have_best)
             {
                 break;
             }
@@ -314,22 +326,23 @@ bidirectional_dijkstra(
             const auto& out_edges =
                 g.neighbors_fast(u);
 
-            for (const auto& edge :
-                 out_edges)
+            for (const auto& edge : out_edges)
             {
                 const Vertex v =
                     edge.get_target();
 
-                if (banned_vertices.find(v)
-                    != banned_vertices.end())
+                if (banned_vertices.find(v) !=
+                    banned_vertices.end())
                 {
                     continue;
                 }
 
-                if (is_banned_edge(
-                        u,
-                        v,
-                        banned_edges))
+                const uint32_t eid =
+                    edge.get_property().edge_id;
+
+                if (!banned_edge_ids.empty() &&
+                    banned_edge_ids.find(eid) !=
+                        banned_edge_ids.end())
                 {
                     continue;
                 }
@@ -337,7 +350,7 @@ bidirectional_dijkstra(
                 const double w =
                     fast_edge_weight(
                         edge,
-                        weight_attr);
+                        weight_attr_id);
 
                 if (w < 0.0)
                 {
@@ -350,14 +363,9 @@ bidirectional_dijkstra(
 
                 if (nd < dist_b[v])
                 {
-                    dist_b[v] =
-                        nd;
-
-                    parent_b[v] =
-                        u;
-
-                    seen_b[v] =
-                        1;
+                    dist_b[v] = nd;
+                    parent_b[v] = u;
+                    seen_b[v] = 1;
 
                     qb.push({
                         nd,
@@ -369,9 +377,7 @@ bidirectional_dijkstra(
         }
     }
 
-    if (!have_best
-        ||
-        best_cost == INF)
+    if (!have_best || best_cost == INF)
     {
         return out;
     }
@@ -396,30 +402,23 @@ bidirectional_dijkstra(
 
     std::vector<Vertex> right;
 
-    for (Vertex v = best_meet;
-         v != target;)
+    for (Vertex v = best_meet; v != target;)
     {
         Vertex nxt =
             parent_b[v];
 
         if (nxt == v)
         {
-            return {};
+            return out;
         }
 
-        right.push_back(
-            nxt);
-
+        right.push_back(nxt);
         v = nxt;
     }
 
     out.found = true;
-    out.cost =
-        best_cost;
-
-    out.path =
-        std::move(left);
-
+    out.cost = best_cost;
+    out.path = std::move(left);
     out.path.insert(
         out.path.end(),
         right.begin(),

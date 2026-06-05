@@ -4,6 +4,7 @@
 #include <limits>
 #include <queue>
 #include <stdexcept>
+#include <unordered_set>
 #include <utility>
 
 namespace
@@ -51,36 +52,68 @@ static DijkstraResult make_empty_result(
 
 inline double fast_edge_weight(
     const RawNeighbor& edge,
-    const std::string& weight_attr)
+    AttrId weight_attr_id)
 {
     const auto& attrs =
         edge.get_property().attrs;
 
-    auto it =
-        attrs.find(weight_attr);
+    const AttrValue* value =
+        attrs.find(weight_attr_id);
 
-    if (it == attrs.end())
+    if (value == nullptr)
     {
         return 1.0;
     }
 
     if (std::holds_alternative<double>(
-            it->second))
+            *value))
     {
         return std::get<double>(
-            it->second);
+            *value);
     }
 
     if (std::holds_alternative<int64_t>(
-            it->second))
+            *value))
     {
         return static_cast<double>(
             std::get<int64_t>(
-                it->second));
+                *value));
     }
 
     throw std::runtime_error(
         "Edge weight must be numeric");
+}
+
+static std::unordered_set<uint32_t>
+build_banned_edge_id_set(
+    const Graph& g,
+    const EdgeSet& banned_edges)
+{
+    std::unordered_set<uint32_t> banned_ids;
+
+    banned_ids.reserve(
+        banned_edges.size());
+
+    for (const auto& key : banned_edges)
+    {
+        const Vertex u =
+            key.first;
+        const Vertex v =
+            key.second;
+
+        if (!g.has_edge(u, v))
+        {
+            continue;
+        }
+
+        Edge e =
+            g.edge(u, v);
+
+        banned_ids.insert(
+            g.edge_id(e));
+    }
+
+    return banned_ids;
 }
 
 static DijkstraResult run_dijkstra(
@@ -88,7 +121,7 @@ static DijkstraResult run_dijkstra(
     Vertex source,
     const VertexSet* banned_vertices,
     const EdgeSet* banned_edges,
-    const std::string& weight_attr)
+    AttrId weight_attr_id)
 {
     DijkstraResult result =
         make_empty_result(g);
@@ -104,6 +137,16 @@ static DijkstraResult run_dijkstra(
         std::vector<HeapNode>,
         std::greater<HeapNode>>
         pq;
+
+    std::unordered_set<uint32_t> banned_edge_ids;
+    if (banned_edges != nullptr &&
+        !banned_edges->empty())
+    {
+        banned_edge_ids =
+            build_banned_edge_id_set(
+                g,
+                *banned_edges);
+    }
 
     dist[source] = 0.0;
     pred[source] = source;
@@ -134,28 +177,27 @@ static DijkstraResult run_dijkstra(
             g.neighbors_fast(
                 u);
 
-        for (const auto& edge :
-             out)
+        for (const auto& edge : out)
         {
             const Vertex v =
                 edge.get_target();
 
-            if (banned_vertices)
+            if (banned_vertices != nullptr)
             {
-                if (banned_vertices->find(v)
-                    != banned_vertices->end())
+                if (banned_vertices->find(v) !=
+                    banned_vertices->end())
                 {
                     continue;
                 }
             }
 
-            if (banned_edges)
+            if (!banned_edge_ids.empty())
             {
-                if (banned_edges->find(
-                        normalize_edge_key(
-                            u,
-                            v))
-                    != banned_edges->end())
+                const uint32_t eid =
+                    edge.get_property().edge_id;
+
+                if (banned_edge_ids.find(eid) !=
+                    banned_edge_ids.end())
                 {
                     continue;
                 }
@@ -164,7 +206,7 @@ static DijkstraResult run_dijkstra(
             const double w =
                 fast_edge_weight(
                     edge,
-                    weight_attr);
+                    weight_attr_id);
 
             const double nd =
                 du + w;
@@ -187,32 +229,32 @@ static DijkstraResult run_dijkstra(
 static double read_edge_weight(
     const Graph& g,
     Edge e,
-    const std::string& weight_attr)
+    AttrId weight_attr_id)
 {
     const auto& attrs =
         g.edge_attrs(e);
 
-    auto it =
-        attrs.find(weight_attr);
+    const AttrValue* value =
+        attrs.find(weight_attr_id);
 
-    if (it == attrs.end())
+    if (value == nullptr)
     {
         return 1.0;
     }
 
     if (std::holds_alternative<double>(
-            it->second))
+            *value))
     {
         return std::get<double>(
-            it->second);
+            *value);
     }
 
     if (std::holds_alternative<int64_t>(
-            it->second))
+            *value))
     {
         return static_cast<double>(
             std::get<int64_t>(
-                it->second));
+                *value));
     }
 
     throw std::runtime_error(
@@ -232,12 +274,15 @@ DijkstraResult dijkstra(
             "source vertex is out of range");
     }
 
+    const AttrId weight_attr_id =
+        g.attr_id(weight_attr);
+
     return run_dijkstra(
         g,
         source,
         nullptr,
         nullptr,
-        weight_attr);
+        weight_attr_id);
 }
 
 DijkstraResult dijkstra(
@@ -253,19 +298,22 @@ DijkstraResult dijkstra(
             "source vertex is out of range");
     }
 
-    if (banned_vertices.find(source)
-        != banned_vertices.end())
+    if (banned_vertices.find(source) !=
+        banned_vertices.end())
     {
         throw std::runtime_error(
             "source vertex cannot be banned");
     }
+
+    const AttrId weight_attr_id =
+        g.attr_id(weight_attr);
 
     return run_dijkstra(
         g,
         source,
         &banned_vertices,
         &banned_edges,
-        weight_attr);
+        weight_attr_id);
 }
 
 double edge_cost(
@@ -277,10 +325,13 @@ double edge_cost(
     Edge e =
         g.edge(u, v);
 
+    const AttrId weight_attr_id =
+        g.attr_id(weight_attr);
+
     return read_edge_weight(
         g,
         e,
-        weight_attr);
+        weight_attr_id);
 }
 
 double path_cost(
@@ -293,17 +344,24 @@ double path_cost(
         return 0.0;
     }
 
+    const AttrId weight_attr_id =
+        g.attr_id(weight_attr);
+
     double cost = 0.0;
 
     for (std::size_t i = 0;
          i + 1 < path.size();
          ++i)
     {
-        cost += edge_cost(
+        Edge e =
+            g.edge(
+                path[i],
+                path[i + 1]);
+
+        cost += read_edge_weight(
             g,
-            path[i],
-            path[i + 1],
-            weight_attr);
+            e,
+            weight_attr_id);
     }
 
     return cost;
@@ -324,6 +382,9 @@ std::vector<double> path_prefix_costs(
         return prefix;
     }
 
+    const AttrId weight_attr_id =
+        g.attr_id(weight_attr);
+
     prefix.push_back(
         0.0);
 
@@ -333,11 +394,15 @@ std::vector<double> path_prefix_costs(
          i + 1 < path.size();
          ++i)
     {
-        running += edge_cost(
+        Edge e =
+            g.edge(
+                path[i],
+                path[i + 1]);
+
+        running += read_edge_weight(
             g,
-            path[i],
-            path[i + 1],
-            weight_attr);
+            e,
+            weight_attr_id);
 
         prefix.push_back(
             running);
@@ -351,8 +416,8 @@ std::vector<Vertex> build_path(
     Vertex source,
     Vertex target)
 {
-    if (source >= result.predecessor.size()
-        || target >= result.predecessor.size())
+    if (source >= result.predecessor.size() ||
+        target >= result.predecessor.size())
     {
         return {};
     }
