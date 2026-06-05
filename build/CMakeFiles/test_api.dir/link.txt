@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/test_api.dir/test_api.cpp.o -o test_api  config/libconfig_lib.a libs/yaml-cpp/libyaml-cpp.a graph/libgraph_lib.a random/librandom_lib.a progress/libprogress_lib.a 

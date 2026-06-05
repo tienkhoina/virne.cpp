@@ -1,2 +1,0 @@
-/usr/bin/ar qc librandom_lib.a CMakeFiles/random_lib.dir/py_random.cpp.o
-/usr/bin/ranlib librandom_lib.a

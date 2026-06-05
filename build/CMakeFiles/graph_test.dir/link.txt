@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/graph_test.dir/graph_test.cpp.o -o graph_test  config/libconfig_lib.a libs/yaml-cpp/libyaml-cpp.a graph/libgraph_lib.a random/librandom_lib.a progress/libprogress_lib.a 
