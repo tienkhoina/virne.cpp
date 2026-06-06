@@ -51,6 +51,12 @@ add_subdirectory(
     progress
 )
 
+add_subdirectory(virne/core)
+add_subdirectory(virne/network)
+add_subdirectory(virne/solver)
+add_subdirectory(virne/system)
+add_subdirectory(virne/utils)
+
 #
 # Shared dependencies
 #

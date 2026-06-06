@@ -1,3 +1,141 @@
+# Nguyên Tắc Thiết Kế VirneCpp
+
+## Hiệu năng là ưu tiên số 1
+
+Mọi quyết định thiết kế phải hướng tới giảm chi phí runtime của solver và simulator.
+
+### 1. Lookup một lần
+
+Chỉ cho phép tra cứu bằng:
+
+```text
+string
+hash map
+registry
+yaml
+```
+
+ở giai đoạn khởi tạo.
+
+Sau khi chạy:
+
+```text
+string -> id
+```
+
+và chỉ làm việc với ID.
+
+---
+
+### 2. Thuộc tính tĩnh là field
+
+Không:
+
+```cpp
+solution["revenue"]
+network["num_nodes"]
+```
+
+Mà:
+
+```cpp
+solution.revenue
+network.num_nodes
+```
+
+Ưu tiên đọc thẳng bộ nhớ.
+
+---
+
+### 3. Thuộc tính động dùng ID
+
+Không:
+
+```cpp
+attrs["cpu"]
+```
+
+Mà:
+
+```cpp
+attrs[CPU_ID]
+```
+
+Mọi thuộc tính phải được ánh xạ sang ID càng sớm càng tốt.
+
+---
+
+### 4. Runtime không dùng hash map
+
+Thứ tự ưu tiên:
+
+```text
+Field
+>
+Array
+>
+Vector
+>
+ID Lookup
+>
+Hash Map
+>
+String Lookup
+```
+
+Hash map chỉ dùng ở giai đoạn cấu hình.
+
+---
+
+### 5. Cache các giá trị dùng nhiều
+
+Các giá trị truy cập thường xuyên:
+
+```text
+cpu
+bw
+degree
+centrality
+...
+```
+
+phải được lưu trực tiếp thay vì tính hoặc tra cứu lặp lại.
+
+---
+
+### 6. Port kiến trúc, không port workaround của Python
+
+Giữ:
+
+```text
+Thuật toán
+Cấu trúc dữ liệu
+Interface
+Kiến trúc
+```
+
+Không cố giữ:
+
+```text
+OmegaConf workaround
+NetworkX workaround
+Dynamic dict workaround
+```
+
+nếu chúng làm giảm hiệu năng.
+
+---
+
+## Triết lý
+
+```text
+Chuyển mọi thứ động thành tĩnh càng sớm càng tốt.
+
+Trả giá một lần khi khởi tạo.
+Không trả giá lần thứ hai trong runtime.
+```
+
+
 # Config
 
 ## Mục đích
@@ -1514,3 +1652,51 @@ nx::write_gml(
     graph,
     "graph.gml");
 ```
+## CSV
+
+### Create DataFrame
+
+```cpp
+csvio::DataFrame df;
+
+df.columns = {
+    "node",
+    "degree",
+    "score"
+};
+
+df.rows = {
+    {"0", "12", "0.85"},
+    {"1", "8",  "0.44"}
+};
+```
+
+### Write CSV
+
+```cpp
+csvio::write_csv(
+    "result.csv",
+    df);
+```
+
+### Read CSV
+
+```cpp
+auto df =
+    csvio::read_csv(
+        "result.csv");
+```
+
+### Print Table
+
+```cpp
+csvio::print_table(df);
+```
+
+### Metadata
+
+```cpp
+std::cout << df.nrows() << '\n';
+std::cout << df.ncols() << '\n';
+```
+

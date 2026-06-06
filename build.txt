@@ -1,0 +1,15 @@
+rm -rf build
+
+cmake -B build
+
+cmake --build build -j
+
+./build/main
+
+./build/graph_test
+
+./build/test_api
+
+./build/test_bfs_full
+
+./build/csv_test
