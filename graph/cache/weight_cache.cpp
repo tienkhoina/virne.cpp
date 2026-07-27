@@ -1,129 +1,127 @@
 #include "weight_cache.h"
 
+#include <algorithm>
 #include <stdexcept>
 
 namespace
 {
 
-double to_double(
-    const AttrValue& value)
+double to_double(const AttrValue& value)
 {
-    if (std::holds_alternative<double>(
-            value))
+    return attr_to_double(value);
+}
+
+template <typename GraphType>
+size_t edge_capacity(const GraphType& graph)
+{
+    size_t capacity = 0;
+    auto [it, end] = graph.edges();
+    for (; it != end; ++it)
     {
-        return std::get<double>(
-            value);
+        capacity = std::max(
+            capacity,
+            static_cast<size_t>(graph.edge_id(*it)) + 1);
+    }
+    return capacity;
+}
+
+template <typename GraphType>
+std::vector<double> make_values(
+    const GraphType& graph,
+    size_t edge_capacity_value,
+    size_t attr_count)
+{
+    std::vector<double> values(edge_capacity_value * attr_count, 0.0);
+    if (attr_count == 0)
+    {
+        return values;
     }
 
-    if (std::holds_alternative<int64_t>(
-            value))
+    auto [it, end] = graph.edges();
+    for (; it != end; ++it)
     {
-        return static_cast<double>(
-            std::get<int64_t>(
-                value));
+        const auto e = *it;
+        const size_t edge_id = graph.edge_id(e);
+        const auto& attrs = graph.edge_attrs(e);
+        for (AttrId attr_id : attrs.attribute_ids())
+        {
+            const AttrValue* value = attrs.find(attr_id);
+            if (value != nullptr)
+            {
+                values[edge_id * attr_count + attr_id] = to_double(*value);
+            }
+        }
     }
+    return values;
+}
 
-    return 0.0;
+double checked_value(
+    const std::vector<double>& values,
+    size_t edge_capacity_value,
+    size_t attr_count,
+    uint32_t edge_id,
+    AttrId attr_id)
+{
+    if (edge_id >= edge_capacity_value || attr_id >= attr_count)
+    {
+        throw std::out_of_range(
+            "WeightCache is a snapshot; rebuild it after graph/attribute changes");
+    }
+    return values[static_cast<size_t>(edge_id) * attr_count + attr_id];
 }
 
 } // namespace
 
-WeightCache::WeightCache(
-    const Graph& g)
-    :
-    graph_(&g),
-    edge_count_(
-        g.num_edges()),
-    attr_count_(
-        g.attribute_registry()
-            .size())
+WeightCache::WeightCache(const Graph& g)
+    : graph_(&g),
+      edge_capacity_(edge_capacity(g)),
+      attr_count_(g.attribute_registry().size()),
+      values_(make_values(g, edge_capacity_, attr_count_))
 {
-    values_.assign(
-        edge_count_ *
-            attr_count_,
-        0.0);
+}
 
-    auto [eit, eend] =
-        g.edges();
-
-    for (; eit != eend; ++eit)
+AttrId WeightCache::attribute_id(const std::string& name) const
+{
+    const auto id = graph_->attribute_registry().find(name);
+    if (!id || *id >= attr_count_)
     {
-        const Edge e =
-            *eit;
-
-        const uint32_t edge_id =
-            g.edge_id(e);
-
-        const auto& attrs =
-            g.edge_attrs(e);
-
-        for (const AttrId attr_id :
-             attrs.attribute_ids())
-        {
-            const AttrValue* value =
-                attrs.find(attr_id);
-
-            if (value == nullptr)
-            {
-                continue;
-            }
-
-            values_[
-                static_cast<size_t>(
-                    edge_id)
-                    *
-                    attr_count_
-                +
-                attr_id] =
-                to_double(
-                    *value);
-        }
+        throw std::out_of_range("attribute is not present in WeightCache snapshot");
     }
+    return *id;
 }
 
-AttrId WeightCache::attribute_id(
-    const std::string& name) const
+double WeightCache::value(Vertex u, Vertex v, AttrId attr_id) const
 {
-    return graph_->attr_id(
-        name);
+    const Edge e = graph_->edge(u, v);
+    return checked_value(
+        values_, edge_capacity_, attr_count_, graph_->edge_id(e), attr_id);
 }
 
-double WeightCache::value(
-    const RawNeighbor& edge,
-    AttrId attr_id) const
+DiWeightCache::DiWeightCache(const DiGraph& g)
+    : graph_(&g),
+      edge_capacity_(edge_capacity(g)),
+      attr_count_(g.attribute_registry().size()),
+      values_(make_values(g, edge_capacity_, attr_count_))
 {
-    const uint32_t edge_id =
-        edge.get_property()
-            .edge_id;
-
-    return values_[
-        static_cast<size_t>(
-            edge_id)
-            *
-            attr_count_
-        +
-        attr_id];
 }
 
-double WeightCache::value(
-    Vertex u,
-    Vertex v,
-    AttrId attr_id) const
+AttrId DiWeightCache::attribute_id(const std::string& name) const
 {
-    const Edge e =
-        graph_->edge(
-            u,
-            v);
+    const auto id = graph_->attribute_registry().find(name);
+    if (!id || *id >= attr_count_)
+    {
+        throw std::out_of_range("attribute is not present in DiWeightCache snapshot");
+    }
+    return *id;
+}
 
-    const uint32_t edge_id =
-        graph_->edge_id(
-            e);
-
-    return values_[
-        static_cast<size_t>(
-            edge_id)
-            *
-            attr_count_
-        +
-        attr_id];
+double DiWeightCache::value(Vertex u, Vertex v, AttrId attr_id) const
+{
+    const DiEdge e = graph_->edge(u, v);
+    return checked_value(
+        values_,
+        edge_capacity_,
+        attr_count_,
+        graph_->edge_id(e),
+        attr_id);
 }

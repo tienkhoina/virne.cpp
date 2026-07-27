@@ -1,9 +1,11 @@
 #include "waxman_generator.h"
 
 #include "../../random/py_random.h"
+#include "../../random/random_context.h"
 
 #include <algorithm>
 #include <cmath>
+#include <stdexcept>
 #include <vector>
 
 namespace
@@ -19,17 +21,23 @@ Graph
 WaxmanGenerator::generate(
     const WaxmanConfig& cfg)
 {
-    Graph g;
-
     PyRandom rng(
         cfg.seed);
 
-    const AttrId x_attr =
-        g.attr_id("x");
-    const AttrId y_attr =
-        g.attr_id("y");
-    const AttrId distance_attr =
-        g.attr_id("distance");
+    return generate(
+        cfg,
+        rng);
+}
+
+Graph
+WaxmanGenerator::generate(
+    const WaxmanConfig& cfg,
+    PyRandom& rng)
+{
+    Graph g;
+
+    const AttrId pos_attr =
+        g.attr_id("pos");
 
     std::vector<Vertex> vertices;
     std::vector<Point> points;
@@ -61,12 +69,10 @@ WaxmanGenerator::generate(
                 1.0);
 
         g.node_attrs(v).set(
-            x_attr,
-            x);
-
-        g.node_attrs(v).set(
-            y_attr,
-            y);
+            pos_attr,
+            make_attr_list({
+                AttrValue{x},
+                AttrValue{y}}));
 
         vertices.push_back(v);
         points.push_back(
@@ -106,9 +112,12 @@ WaxmanGenerator::generate(
         }
     }
 
-    if (L == 0.0)
+    if (points.size() < 2)
     {
-        return g;
+        // NetworkX computes max(pairwise distances) when L is omitted.
+        // For fewer than two positions that max is empty.
+        throw std::invalid_argument(
+            "waxman_graph requires at least two nodes when L is inferred");
     }
 
     //
@@ -135,25 +144,63 @@ WaxmanGenerator::generate(
                     dx * dx +
                     dy * dy);
 
+            // NetworkX evaluates seed.random() before the probability
+            // expression. Preserve that state consumption even when a zero
+            // denominator makes the Python expression raise.
+            const double draw = rng.random();
+            const double denominator = cfg.alpha * L;
+            if (denominator == 0.0)
+            {
+                throw std::invalid_argument(
+                    "waxman_graph probability denominator is zero");
+            }
+
             double p =
                 cfg.beta *
                 std::exp(
                     -d /
-                    (cfg.alpha * L));
+                    denominator);
 
-            if (rng.random() < p)
+            if (draw < p)
             {
-                auto e =
-                    g.add_edge(
-                        vertices[i],
-                        vertices[j]);
-
-                g.edge_attrs(e).set(
-                    distance_attr,
-                    d);
+                g.add_edge(
+                    vertices[i],
+                    vertices[j]);
             }
         }
     }
 
     return g;
 }
+
+namespace nx
+{
+
+Graph waxman_graph(
+    size_t num_nodes,
+    double beta,
+    double alpha)
+{
+    return waxman_graph(
+        num_nodes,
+        beta,
+        alpha,
+        global_py_random());
+}
+
+Graph waxman_graph(
+    size_t num_nodes,
+    double beta,
+    double alpha,
+    PyRandom& random)
+{
+    WaxmanConfig config;
+    config.num_nodes = num_nodes;
+    config.beta = beta;
+    config.alpha = alpha;
+    return WaxmanGenerator::generate(
+        config,
+        random);
+}
+
+} // namespace nx

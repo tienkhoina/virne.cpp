@@ -403,7 +403,8 @@ print_yen_section(
             g,
             source,
             target,
-            10);
+            10,
+            "weight");
 
     auto raw =
         yen_k_shortest_paths(
@@ -572,7 +573,8 @@ run_end_to_end()
                     g,
                     source,
                     target,
-                    10);
+                    10,
+                    "weight");
             });
 
     std::cout

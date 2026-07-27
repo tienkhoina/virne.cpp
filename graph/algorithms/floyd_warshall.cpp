@@ -6,8 +6,9 @@
 namespace
 {
 
+template <typename NeighborType>
 inline double fast_edge_weight(
-    const RawNeighbor& edge,
+    const NeighborType& edge,
     AttrId weight_attr_id)
 {
     const auto& attrs =
@@ -21,33 +22,16 @@ inline double fast_edge_weight(
         return 1.0;
     }
 
-    if (std::holds_alternative<double>(
-            *value))
-    {
-        return std::get<double>(
-            *value);
-    }
-
-    if (std::holds_alternative<int64_t>(
-            *value))
-    {
-        return static_cast<double>(
-            std::get<int64_t>(
-                *value));
-    }
-
-    throw std::runtime_error(
-        "Edge weight must be numeric");
+    return attr_to_double(*value);
 }
 
-} // namespace
-
-DistanceMatrix floyd_warshall(
-    const Graph& g,
+template <typename GraphType>
+DistanceMatrix floyd_warshall_impl(
+    const GraphType& g,
     const std::string& weight_attr)
 {
     constexpr double INF =
-        std::numeric_limits<double>::max();
+        std::numeric_limits<double>::infinity();
 
     const size_t n =
         g.num_nodes();
@@ -141,4 +125,24 @@ DistanceMatrix floyd_warshall(
     }
 
     return dist;
+}
+
+} // namespace
+
+DistanceMatrix floyd_warshall(
+    const Graph& g,
+    const std::string& weight_attr)
+{
+    return floyd_warshall_impl(
+        g,
+        weight_attr);
+}
+
+DistanceMatrix floyd_warshall(
+    const DiGraph& g,
+    const std::string& weight_attr)
+{
+    return floyd_warshall_impl(
+        g,
+        weight_attr);
 }

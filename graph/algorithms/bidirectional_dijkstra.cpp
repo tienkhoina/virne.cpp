@@ -1,4 +1,4 @@
-#include "bidirectional_dijkstra.h"
+#include "detail/bidirectional_dijkstra_by_id.h"
 
 #include <algorithm>
 #include <limits>
@@ -12,6 +12,7 @@ namespace
 struct NodeState
 {
     double dist;
+    uint64_t order;
     Vertex v;
 };
 
@@ -21,12 +22,17 @@ struct NodeStateGreater
         const NodeState& a,
         const NodeState& b) const noexcept
     {
-        return a.dist > b.dist;
+        if (a.dist != b.dist)
+        {
+            return a.dist > b.dist;
+        }
+        return a.order > b.order;
     }
 };
 
+template <typename NeighborType>
 inline double fast_edge_weight(
-    const RawNeighbor& edge,
+    const NeighborType& edge,
     AttrId weight_attr_id)
 {
     const auto& attrs =
@@ -40,40 +46,26 @@ inline double fast_edge_weight(
         return 1.0;
     }
 
-    if (std::holds_alternative<double>(
-            *value))
-    {
-        return std::get<double>(
-            *value);
-    }
-
-    if (std::holds_alternative<int64_t>(
-            *value))
-    {
-        return static_cast<double>(
-            std::get<int64_t>(
-                *value));
-    }
-
-    throw std::runtime_error(
-        "Edge weight must be numeric");
+    return attr_to_double(*value);
 }
 
-inline bool is_banned_edge(
-    Vertex u,
-    Vertex v,
-    const EdgeSet& banned_edges)
-{
-    return
-        banned_edges.find(
-            normalize_edge_key(
-                u,
-                v))
-        != banned_edges.end();
-}
-
-std::unordered_set<uint32_t> build_banned_edge_ids(
+const RawNeighborList& reverse_neighbors_fast(
     const Graph& g,
+    Vertex v)
+{
+    return g.neighbors_fast(v);
+}
+
+const DiRawInNeighborList& reverse_neighbors_fast(
+    const DiGraph& g,
+    Vertex v)
+{
+    return g.raw().m_vertices[v].m_in_edges;
+}
+
+template <typename GraphType>
+std::unordered_set<uint32_t> build_banned_edge_ids(
+    const GraphType& g,
     const EdgeSet& banned_edges)
 {
     std::unordered_set<uint32_t> banned_ids;
@@ -91,7 +83,7 @@ std::unordered_set<uint32_t> build_banned_edge_ids(
             continue;
         }
 
-        Edge e = g.edge(u, v);
+        const auto e = g.edge(u, v);
         banned_ids.insert(
             g.edge_id(e));
     }
@@ -99,16 +91,16 @@ std::unordered_set<uint32_t> build_banned_edge_ids(
     return banned_ids;
 }
 
-} // namespace
-
+template <typename GraphType, typename ResolveWeightAttr>
 BidirectionalPathResult
-bidirectional_dijkstra(
-    const Graph& g,
+bidirectional_dijkstra_impl(
+    const GraphType& g,
     Vertex source,
     Vertex target,
+    const SearchMask* mask,
     const VertexSet& banned_vertices,
     const EdgeSet& banned_edges,
-    const std::string& weight_attr)
+    ResolveWeightAttr resolve_weight_attr)
 {
     BidirectionalPathResult out;
 
@@ -117,6 +109,13 @@ bidirectional_dijkstra(
 
     if (source >= n ||
         target >= n)
+    {
+        return out;
+    }
+
+    if (mask != nullptr &&
+        (!mask->allows_node(source) ||
+         !mask->allows_node(target)))
     {
         return out;
     }
@@ -145,7 +144,7 @@ bidirectional_dijkstra(
     }
 
     const AttrId weight_attr_id =
-        g.attr_id(weight_attr);
+        resolve_weight_attr();
 
     const std::unordered_set<uint32_t>
         banned_edge_ids =
@@ -163,6 +162,10 @@ bidirectional_dijkstra(
     std::vector<Vertex>
         parent_f(n, source),
         parent_b(n, target);
+
+    std::vector<std::vector<Vertex>>
+        path_f(n),
+        path_b(n);
 
     std::vector<char>
         seen_f(n, 0),
@@ -185,20 +188,28 @@ bidirectional_dijkstra(
     parent_f[source] = source;
     parent_b[target] = target;
 
+    path_f[source] = {source};
+    path_b[target] = {target};
+
     seen_f[source] = 1;
     seen_b[target] = 1;
 
+    uint64_t push_order = 0;
+
     qf.push({
         0.0,
+        push_order++,
         source});
 
     qb.push({
         0.0,
+        push_order++,
         target});
 
     bool have_best = false;
     double best_cost = INF;
     Vertex best_meet = source;
+    std::vector<Vertex> best_path;
 
     auto update_best =
         [&](Vertex v)
@@ -217,6 +228,17 @@ bidirectional_dijkstra(
                 best_cost = cand;
                 best_meet = v;
                 have_best = true;
+
+                best_path = path_f[v];
+                std::vector<Vertex> reverse =
+                    path_b[v];
+                std::reverse(
+                    reverse.begin(),
+                    reverse.end());
+                best_path.insert(
+                    best_path.end(),
+                    reverse.begin() + 1,
+                    reverse.end());
             }
         };
 
@@ -274,6 +296,12 @@ bidirectional_dijkstra(
                 const uint32_t eid =
                     edge.get_property().edge_id;
 
+                if (mask != nullptr &&
+                    !mask->allows(u, v, eid))
+                {
+                    continue;
+                }
+
                 if (!banned_edge_ids.empty() &&
                     banned_edge_ids.find(eid) !=
                         banned_edge_ids.end())
@@ -301,8 +329,12 @@ bidirectional_dijkstra(
                     parent_f[v] = u;
                     seen_f[v] = 1;
 
+                    path_f[v] = path_f[u];
+                    path_f[v].push_back(v);
+
                     qf.push({
                         nd,
+                        push_order++,
                         v});
 
                     update_best(v);
@@ -323,10 +355,12 @@ bidirectional_dijkstra(
                 break;
             }
 
-            const auto& out_edges =
-                g.neighbors_fast(u);
+            const auto& in_edges =
+                reverse_neighbors_fast(
+                    g,
+                    u);
 
-            for (const auto& edge : out_edges)
+            for (const auto& edge : in_edges)
             {
                 const Vertex v =
                     edge.get_target();
@@ -339,6 +373,12 @@ bidirectional_dijkstra(
 
                 const uint32_t eid =
                     edge.get_property().edge_id;
+
+                if (mask != nullptr &&
+                    !mask->allows(v, u, eid))
+                {
+                    continue;
+                }
 
                 if (!banned_edge_ids.empty() &&
                     banned_edge_ids.find(eid) !=
@@ -367,8 +407,12 @@ bidirectional_dijkstra(
                     parent_b[v] = u;
                     seen_b[v] = 1;
 
+                    path_b[v] = path_b[u];
+                    path_b[v].push_back(v);
+
                     qb.push({
                         nd,
+                        push_order++,
                         v});
 
                     update_best(v);
@@ -382,47 +426,144 @@ bidirectional_dijkstra(
         return out;
     }
 
-    std::vector<Vertex> left;
-
-    for (Vertex v = best_meet;;)
-    {
-        left.push_back(v);
-
-        if (v == source)
-        {
-            break;
-        }
-
-        v = parent_f[v];
-    }
-
-    std::reverse(
-        left.begin(),
-        left.end());
-
-    std::vector<Vertex> right;
-
-    for (Vertex v = best_meet; v != target;)
-    {
-        Vertex nxt =
-            parent_b[v];
-
-        if (nxt == v)
-        {
-            return out;
-        }
-
-        right.push_back(nxt);
-        v = nxt;
-    }
-
     out.found = true;
     out.cost = best_cost;
-    out.path = std::move(left);
-    out.path.insert(
-        out.path.end(),
-        right.begin(),
-        right.end());
+    out.path = std::move(best_path);
 
     return out;
 }
+
+} // namespace
+
+BidirectionalPathResult
+bidirectional_dijkstra(
+    const Graph& g,
+    Vertex source,
+    Vertex target,
+    const VertexSet& banned_vertices,
+    const EdgeSet& banned_edges,
+    const std::string& weight_attr)
+{
+    return bidirectional_dijkstra_impl(
+        g,
+        source,
+        target,
+        nullptr,
+        banned_vertices,
+        banned_edges,
+        [&g, &weight_attr] {
+            return g.attr_id(weight_attr);
+        });
+}
+
+BidirectionalPathResult
+bidirectional_dijkstra(
+    const DiGraph& g,
+    Vertex source,
+    Vertex target,
+    const VertexSet& banned_vertices,
+    const EdgeSet& banned_edges,
+    const std::string& weight_attr)
+{
+    return bidirectional_dijkstra_impl(
+        g,
+        source,
+        target,
+        nullptr,
+        banned_vertices,
+        banned_edges,
+        [&g, &weight_attr] {
+            return g.attr_id(weight_attr);
+        });
+}
+
+BidirectionalPathResult
+bidirectional_dijkstra(
+    const Graph& g,
+    Vertex source,
+    Vertex target,
+    const SearchMask& mask,
+    const VertexSet& banned_vertices,
+    const EdgeSet& banned_edges,
+    const std::string& weight_attr)
+{
+    return bidirectional_dijkstra_impl(
+        g,
+        source,
+        target,
+        &mask,
+        banned_vertices,
+        banned_edges,
+        [&g, &weight_attr] {
+            return g.attr_id(weight_attr);
+        });
+}
+
+BidirectionalPathResult
+bidirectional_dijkstra(
+    const DiGraph& g,
+    Vertex source,
+    Vertex target,
+    const SearchMask& mask,
+    const VertexSet& banned_vertices,
+    const EdgeSet& banned_edges,
+    const std::string& weight_attr)
+{
+    return bidirectional_dijkstra_impl(
+        g,
+        source,
+        target,
+        &mask,
+        banned_vertices,
+        banned_edges,
+        [&g, &weight_attr] {
+            return g.attr_id(weight_attr);
+        });
+}
+
+namespace graph_detail
+{
+
+BidirectionalPathResult bidirectional_dijkstra_by_id(
+    const Graph& g,
+    Vertex source,
+    Vertex target,
+    const SearchMask* mask,
+    const VertexSet& banned_vertices,
+    const EdgeSet& banned_edges,
+    AttrId weight_attr_id)
+{
+    return bidirectional_dijkstra_impl(
+        g,
+        source,
+        target,
+        mask,
+        banned_vertices,
+        banned_edges,
+        [weight_attr_id] {
+            return weight_attr_id;
+        });
+}
+
+BidirectionalPathResult bidirectional_dijkstra_by_id(
+    const DiGraph& g,
+    Vertex source,
+    Vertex target,
+    const SearchMask* mask,
+    const VertexSet& banned_vertices,
+    const EdgeSet& banned_edges,
+    AttrId weight_attr_id)
+{
+    return bidirectional_dijkstra_impl(
+        g,
+        source,
+        target,
+        mask,
+        banned_vertices,
+        banned_edges,
+        [weight_attr_id] {
+            return weight_attr_id;
+        });
+}
+
+} // namespace graph_detail

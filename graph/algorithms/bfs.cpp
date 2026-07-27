@@ -1,14 +1,33 @@
 #include "bfs.h"
 
 #include <limits>
+#include <stdexcept>
 #include <vector>
 
-BFSResult bfs(
-    const Graph& g,
-    Vertex source)
+namespace
+{
+
+template <typename GraphType>
+BFSResult bfs_impl(
+    const GraphType& g,
+    Vertex source,
+    const SearchMask* mask)
 {
     const size_t n =
         g.num_nodes();
+
+    if (source >= n)
+    {
+        throw std::out_of_range(
+            "source vertex is out of range");
+    }
+
+    if (mask != nullptr &&
+        !mask->allows_node(source))
+    {
+        throw std::out_of_range(
+            "source vertex is filtered out");
+    }
 
     constexpr size_t INF =
         std::numeric_limits<size_t>::max();
@@ -23,26 +42,25 @@ BFSResult bfs(
         n,
         Vertex(-1));
 
+    result.discovery_order.reserve(n);
+
     auto* dist =
         result.distance.data();
 
     auto* pred =
         result.predecessor.data();
 
-    std::vector<Vertex> queue(n);
-
     size_t head = 0;
-    size_t tail = 0;
 
     dist[source] = 0;
     pred[source] = source;
 
-    queue[tail++] = source;
+    result.discovery_order.push_back(source);
 
-    while (head < tail)
+    while (head < result.discovery_order.size())
     {
         const Vertex u =
-            queue[head++];
+            result.discovery_order[head++];
 
         const size_t next_dist =
             dist[u] + 1;
@@ -55,6 +73,15 @@ BFSResult bfs(
             const Vertex v =
                 e.get_target();
 
+            if (mask != nullptr &&
+                !mask->allows(
+                    u,
+                    v,
+                    e.get_property().edge_id))
+            {
+                continue;
+            }
+
             if (dist[v] != INF)
             {
                 continue;
@@ -63,9 +90,53 @@ BFSResult bfs(
             dist[v] = next_dist;
             pred[v] = u;
 
-            queue[tail++] = v;
+            result.discovery_order.push_back(v);
         }
     }
 
     return result;
+}
+
+} // namespace
+
+BFSResult bfs(
+    const Graph& g,
+    Vertex source)
+{
+    return bfs_impl(
+        g,
+        source,
+        nullptr);
+}
+
+BFSResult bfs(
+    const DiGraph& g,
+    Vertex source)
+{
+    return bfs_impl(
+        g,
+        source,
+        nullptr);
+}
+
+BFSResult bfs(
+    const Graph& g,
+    Vertex source,
+    const SearchMask& mask)
+{
+    return bfs_impl(
+        g,
+        source,
+        &mask);
+}
+
+BFSResult bfs(
+    const DiGraph& g,
+    Vertex source,
+    const SearchMask& mask)
+{
+    return bfs_impl(
+        g,
+        source,
+        &mask);
 }

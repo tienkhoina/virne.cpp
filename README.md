@@ -1,12 +1,46 @@
 # Nguyên Tắc Thiết Kế VirneCpp
 
+## Bắt buộc đọc trước khi phát triển tiếp
+
+Mọi thay đổi production phải đọc các tài liệu canonical sau theo đúng
+thứ tự trước khi viết code:
+
+1. [`DEPENDENCIES.md`](DEPENDENCIES.md) — version pin, dependency chỉ trong
+   `libs/`, memory-layout hack và quy trình nâng cấp.
+2. [`graph/API.md`](graph/API.md) — Graph/DiGraph API, ngữ nghĩa NetworkX,
+   hot-path contract và stability boundary.
+3. [`random/README.md`](random/README.md) — toàn bộ Random API, fixed-width
+   contract, state consumption và oracle CPython/NumPy.
+4. [`benchmarks/README.md`](benchmarks/README.md) và
+   [`benchmarks/RESULTS.md`](benchmarks/RESULTS.md) — cách chạy gate và
+   baseline đã ghi nhận.
+5. [`API_MUST_BUILD.md`](API_MUST_BUILD.md) — public-surface checklist bắt buộc
+   compile, test và benchmark.
+
+README này là bản định hướng/quick start. Khi có khác biệt, tài
+liệu canonical theo từng subsystem và declaration trong public header là
+nguồn sự thật.
+
+Phiên bản và chính sách thư viện cục bộ được cố định tại
+[`DEPENDENCIES.md`](DEPENDENCIES.md); các dependency C++ chỉ được đặt trong
+`libs/` và link thủ công qua CMake. `libs/` không được Git track; clone
+mới phải tái tạo nó bằng archive/version trong
+[`DEPENDENCIES.md`](DEPENDENCIES.md) và checksum trong
+[`DEPENDENCIES.sha256`](DEPENDENCIES.sha256); tuyệt đối không fallback sang
+thư viện OS hay Conda.
+
+Các memory-layout hack được chấp nhận có baseline riêng: Boost 1.85.0 cho
+graph và GCC 11.4.0/libstdc++ 11 cho direct Random output. Rủi ro, fallback và
+quy trình nâng cấp nằm trong [`DEPENDENCIES.md`](DEPENDENCIES.md),
+[`graph/API.md`](graph/API.md) và [`random/README.md`](random/README.md).
+
 ## Hiệu năng là ưu tiên số 1
 
 Mọi quyết định thiết kế phải hướng tới giảm chi phí runtime của solver và simulator.
 
-### 1. Lookup một lần
+### 1. Bắt buộc resolve một lần trước hot loop
 
-Chỉ cho phép tra cứu bằng:
+Public API vẫn cho phép tra cứu bằng:
 
 ```text
 string
@@ -15,7 +49,11 @@ registry
 yaml
 ```
 
-ở giai đoạn khởi tạo.
+ở boundary/cấu hình. Mọi vòng lặp theo node, edge, neighbor, path,
+candidate, source hoặc sample **MUST** resolve tên thành ID đúng một lần
+trước khi vào vòng lặp. Trong hot loop **MUST NOT** gọi `attr_id`,
+`at("...")`, `find("...")`, `contains("...")`, YAML lookup hay string/hash
+lookup tương đương.
 
 Sau khi chạy:
 
@@ -23,7 +61,10 @@ Sau khi chạy:
 string -> id
 ```
 
-và chỉ làm việc với ID.
+và chỉ làm việc với ID. Callback/predicate được gọi lặp lại
+**MUST** capture ID đã resolve; thuật toán lồng nhau **MUST** truyền ID
+xuống helper thay vì resolve lại theo mỗi source/spur/candidate. Chuỗi chỉ
+được giữ ở public/config/YAML/GML boundary.
 
 ---
 
@@ -55,17 +96,17 @@ Không:
 attrs["cpu"]
 ```
 
-Mà:
+Trong hot loop dùng:
 
 ```cpp
-attrs[CPU_ID]
+attrs.at(CPU_ID)
 ```
 
 Mọi thuộc tính phải được ánh xạ sang ID càng sớm càng tốt.
 
 ---
 
-### 4. Runtime không dùng hash map
+### 4. Hot loop không dùng hash map
 
 Thứ tự ưu tiên:
 
@@ -83,7 +124,8 @@ Hash Map
 String Lookup
 ```
 
-Hash map chỉ dùng ở giai đoạn cấu hình.
+Hash map/string vẫn hợp lệ ở public boundary; resolve sang ID trước vòng lặp
+nhạy hiệu năng.
 
 ---
 
@@ -141,6 +183,9 @@ Không trả giá lần thứ hai trong runtime.
 ## Mục đích
 
 Load YAML, override từ CLI và truy cập cấu hình theo path.
+
+Chi tiết composition, interpolation, kiểu override và phạm vi tương thích
+Hydra được khóa tại [config/README.md](config/README.md).
 
 ---
 
@@ -233,128 +278,25 @@ experiment:
 
 # Random
 
-## Mục đích
-
-Tương thích hành vi với:
-
-```python
-random.Random
-```
-
-Đảm bảo Python và C++ sinh cùng kết quả với cùng seed.
-
----
-
-## Khởi tạo
+`PyRandom` và `NumpyRandomState` là hai stream độc lập, tương thích bit/state
+với subset CPython 3.10 và NumPy `RandomState` 1.26.4 mà Virne sử dụng. Ví dụ
+khởi tạo stream CPython-compatible:
 
 ```cpp
 PyRandom rng(42);
 ```
 
----
-
-## random
-
-```cpp
-double random();
-```
-
-Output:
-
-```cpp
-[0,1)
-```
-
----
-
-## uniform
-
-```cpp
-double uniform(
-    double a,
-    double b);
-```
-
-Output:
-
-```cpp
-[a,b]
-```
-
----
-
-## getrandbits32
-
-```cpp
-uint32_t getrandbits32();
-```
-
----
-
-## randrange
-
-```cpp
-uint64_t randrange(
-    uint64_t stop);
-```
-
-Output:
-
-```cpp
-[0,stop)
-```
-
----
-
-## choice
-
-```cpp
-template<typename T>
-T& choice(
-    std::vector<T>& v);
-```
-
----
-
-## shuffle
-
-```cpp
-template<typename T>
-void shuffle(
-    std::vector<T>& v);
-```
-
----
-
-## API
-
-```cpp
-explicit PyRandom(
-    uint64_t seed);
-
-double random();
-
-double uniform(
-    double a,
-    double b);
-
-uint32_t getrandbits32();
-
-uint64_t randrange(
-    uint64_t stop);
-
-template<typename T>
-T& choice(
-    std::vector<T>& v);
-
-template<typename T>
-void shuffle(
-    std::vector<T>& v);
-```
+Toàn bộ chữ ký/default, công thức `uniform`, validation, fixed-width domain,
+quy tắc state consumption, memory-layout hack và oracle nằm duy nhất tại
+[`random/README.md`](random/README.md). Phát triển Random **MUST** đọc tài liệu
+canonical đó; README gốc không lặp lại một inventory dễ lệch phiên bản.
 
 ---
 
 # Progress
+
+Quy tắc throttle, TTY/non-TTY và benchmark hot path được ghi tại
+[progress/README.md](progress/README.md).
 
 ## Khởi tạo
 
@@ -439,11 +381,16 @@ Thư viện đồ thị C++ lấy cảm hứng từ NetworkX.
 * Reinforcement Learning (RL)
 * Các bài toán tối ưu trên đồ thị
 
-Đồ thị hiện tại:
+Các loại đồ thị hiện tại:
 
 ```text
-Undirected Graph
+Graph   (undirected)
+DiGraph (directed)
 ```
+
+Hợp đồng API đầy đủ, ngữ nghĩa có hướng, version pin và quy tắc hot-path được
+ghi tại [`graph/API.md`](graph/API.md). Bộ đối chiếu NetworkX/benchmark được
+ghi tại [`benchmarks/README.md`](benchmarks/README.md).
 
 ---
 
@@ -490,13 +437,13 @@ Không nên cache lâu dài sau các thao tác chỉnh sửa đồ thị.
 
 ---
 
-## EdgeId
+## Edge ID
 
-ID ổn định của cạnh.
+ID ổn định của cạnh, biểu diễn trực tiếp bằng `uint32_t` trong API hiện tại.
 
 ```cpp
-using EdgeId =
-    uint32_t;
+uint32_t id =
+    g.edge_id(edge);
 ```
 
 Mỗi cạnh được gán một ID duy nhất khi được tạo.
@@ -516,7 +463,13 @@ int64_t
 double
 bool
 std::string
+AttrListPtr
+AttrObjectPtr
 ```
+
+Scalar được giữ inline cho hot path. `AttrListPtr`/`AttrObjectPtr` dành cho
+metadata lồng nhau (ví dụ GML/position); thuật toán hiệu năng cao vẫn phải
+resolve scalar attribute sang `AttrId` trước vòng lặp.
 
 ---
 
@@ -547,7 +500,7 @@ Graph quản lý toàn bộ thuộc tính thông qua registry.
 
 ```cpp
 AttrId attr_id(
-    std::string_view name);
+    std::string_view name) const;
 
 std::string_view attr_name(
     AttrId id) const;
@@ -563,13 +516,12 @@ AttrId bw =
     g.attr_id("bw");
 ```
 
-Mỗi tên thuộc tính chỉ được hash một lần.
-
-Sau đó toàn bộ hệ thống sử dụng AttrId.
+Mỗi lần gọi API bằng chuỗi vẫn cần lookup/hash. Vì vậy hãy resolve tên một lần
+thành `AttrId`, sau đó dùng `at`, `find` hoặc `set` với ID trong hot loop.
 
 ---
 
-## AttrStore
+## AttrMap
 
 Node và edge lưu dữ liệu bằng mảng.
 
@@ -609,6 +561,30 @@ trong runtime.
 Graph g;
 ```
 
+`DiGraph` cung cấp cùng tập chữ ký public cho đồ thị có hướng:
+
+```cpp
+DiGraph g;
+
+DiEdge uv = g.add_edge(u, v);
+bool reverse_exists = g.has_edge(v, u);
+```
+
+Có thể dựng trực tiếp từ edge list, edge list kèm attribute, hoặc ma trận kề
+dày hình vuông:
+
+```cpp
+Graph g_from_edges(edge_list);
+DiGraph dg_from_matrix(adjacency, "weight");
+```
+
+Constructor ma trận tạo đủ node theo số hàng, bỏ ô bằng `0`, giữ self-loop và
+lưu ô khác `0` dưới tên weight đã chọn. `add_edge(u, v)` tự tạo mọi chỉ số node
+liên tiếp đến `max(u, v)`; `add_nodes_from` chỉ nhận phần mở rộng liên tiếp.
+
+`neighbors(v)` và `neighbors_fast(v)` của `DiGraph` chỉ duyệt successor/cung
+đi ra. `degree(v)` là tổng in-degree và out-degree.
+
 ---
 
 ### Thêm node
@@ -627,6 +603,12 @@ Edge e =
     g.add_edge(
         u,
         v);
+```
+
+Gắn attribute ngay khi thêm cạnh:
+
+```cpp
+Edge e = g.add_edge(u, v, attrs);
 ```
 
 ---
@@ -668,6 +650,9 @@ Edge e =
 ```cpp
 size_t n =
     g.num_nodes();
+
+size_t nx_n =
+    g.number_of_nodes();
 ```
 
 ---
@@ -677,6 +662,9 @@ size_t n =
 ```cpp
 size_t m =
     g.num_edges();
+
+size_t nx_m =
+    g.number_of_edges();
 ```
 
 ---
@@ -727,6 +715,16 @@ for (; it != end; ++it)
 {
     Edge e =
         *it;
+}
+```
+
+`g.edges()` là range descriptor dành cho thuật toán thấp tầng. Public
+`g.edge_view()` duyệt trực tiếp cặp endpoint `(u, v)` theo thứ tự NetworkX;
+`edge_view().descriptors()` là escape hatch khi thực sự cần descriptor.
+
+```cpp
+for (auto [u, v] : g.edge_view())
+{
 }
 ```
 
@@ -795,6 +793,12 @@ auto [u, v] =
 BGLGraph& bg =
     g.raw();
 ```
+
+`raw()` chỉ là escape hatch đọc cho hot path đã profile. Không mutate qua BGL:
+việc đó bỏ qua registry, edge ID, simple-edge invariant và bookkeeping. Boost
+1.85.0 cùng layout nội bộ được pin tại [`graph/API.md`](graph/API.md); mọi
+boundary nên dùng API checked, còn vòng lặp nóng dùng dense index,
+`neighbors_fast()` và `AttrId`.
 
 ---
 
@@ -953,6 +957,12 @@ Graph g =
 Graph g =
     GmlLoader::load(
         "graph.gml");
+```
+
+```cpp
+DiGraph g =
+    GmlLoader::load_directed(
+        "directed.gml");
 ```
 
 ---
@@ -1215,7 +1225,13 @@ paths[i].cost;
 
 ---
 
-# NetworkX Compatible APIs
+# NetworkX-Compatible C++ Subset
+
+Các hàm `nx::*` dưới đây cố định API C++ hiện có và đối chiếu
+giá trị với NetworkX 3.4.2 trong phạm vi được hỗ trợ. Chúng không sao
+chép các chữ ký Python động, option chỉ có trên Python hay biến thể
+kiểu trả về. Chi tiết default và edge-case được đóng băng tại
+[`graph/API.md`](graph/API.md).
 
 ## shortest_path_length
 
@@ -1241,14 +1257,34 @@ auto path =
 
 ---
 
+## all_shortest_paths
+
+```cpp
+auto paths =
+    nx::all_shortest_paths(
+        g,
+        source,
+        target,
+        std::nullopt);
+```
+
+Đối số thứ tư là `std::optional<std::string_view>`: `std::nullopt` tương ứng
+`weight=None`, chuỗi tương ứng tên edge attribute.
+
+---
+
 ## single_source_shortest_path_length
 
 ```cpp
 auto dist =
     nx::single_source_shortest_path_length(
         g,
-        source);
+        source,
+        4.0);
 ```
+
+`cutoff` là `std::optional<double>` mặc định `std::nullopt`, đúng thứ tự public
+của NetworkX.
 
 ---
 
@@ -1262,6 +1298,9 @@ auto path =
         target,
         "weight");
 ```
+
+`weight` có kiểu `std::optional<std::string_view>`, mặc định là `"weight"`;
+dùng `std::nullopt` để biểu diễn chính xác `NetworkX weight=None`.
 
 ---
 
@@ -1285,8 +1324,14 @@ auto dist =
     nx::single_source_dijkstra_path_length(
         g,
         source,
+        4.0,
         "weight");
 ```
+
+Chữ ký public giữ thứ tự NetworkX:
+`(graph, source, cutoff = std::nullopt, weight = "weight")`. Muốn bỏ cutoff
+nhưng vẫn truyền tên weight, dùng `std::nullopt` ở đối số thứ ba; overload ba
+đối số nhận `string_view` cũ vẫn được giữ để tương thích mã Virne hiện hữu.
 
 ### bfs_nx
 
@@ -1304,14 +1349,10 @@ Khác với BFS tổng quát, `bfs_nx` duyệt theo từng mức (level) và ch�
 
 **Hiệu năng**
 
-Trên đồ thị 1000 đỉnh, ~56k cạnh:
-
-```text
-BFS thường   ~1543 ms
-bfs_nx       ~450 ms
-```
-
-Nhanh hơn khoảng **3.4 lần** so với BFS tổng quát.
+`bfs` và `bfs_nx` trả về cấu trúc dữ liệu khác nhau nên không dùng một con số
+cũ để khẳng định API nào luôn nhanh hơn API kia. Số đo Release hiện hành cho
+cả hai, cùng toàn bộ thuật toán Graph/DiGraph, được lưu tại
+[`benchmarks/RESULTS.md`](benchmarks/RESULTS.md).
 
 **Sử dụng cho**
 
@@ -1341,6 +1382,19 @@ auto dist =
 
 ## shortest_simple_paths
 
+Lazy, theo chữ ký NetworkX `(graph, source, target, weight=None)`:
+
+```cpp
+auto generator =
+    nx::shortest_simple_paths(
+        g,
+        source,
+        target,
+        std::optional<std::string_view>{"weight"});
+```
+
+Convenience API của Virne để materialize `k` path đầu:
+
 ```cpp
 auto paths =
     nx::shortest_simple_paths(
@@ -1360,6 +1414,12 @@ auto paths =
 ```cpp
 WeightCache cache(
     g);
+```
+
+Với `DiGraph`, dùng snapshot tương ứng:
+
+```cpp
+DiWeightCache cache(g);
 ```
 
 ---
@@ -1439,6 +1499,8 @@ nx::set_node_attributes(
     cpu);
 ```
 
+Entry có node index không tồn tại được bỏ qua giống NetworkX.
+
 ---
 
 ## get_edge_attributes
@@ -1448,6 +1510,12 @@ auto attrs =
     nx::get_edge_attributes(
         g,
         "bw");
+
+for (const auto& [edge, value] : attrs)
+{
+    Vertex u = edge.first;
+    Vertex v = edge.second;
+}
 ```
 
 ```cpp
@@ -1461,11 +1529,23 @@ auto attrs =
         bw);
 ```
 
+Cả overload theo tên và `AttrId` đều duyệt key endpoint `(u, v)` theo thứ tự
+edge của NetworkX. `attrs.at(edge_id)`, `find(edge_id)` và `contains(edge_id)`
+là accessor tương thích cho code đã resolve stable ID; không dùng lookup
+string trong hot loop.
+
 ---
 
 ## set_edge_attributes
 
 ```cpp
+std::unordered_map<
+    EdgeEndpoints,
+    AttrValue,
+    nx::EdgeEndpointHash> values;
+
+values[{u, v}] = 100.0;
+
 nx::set_edge_attributes(
     g,
     values,
@@ -1477,11 +1557,18 @@ AttrId bw =
     g.attr_id(
         "bw");
 
+std::unordered_map<uint32_t, AttrValue> values_by_id;
+values_by_id[edge_id] = 100.0;
+
 nx::set_edge_attributes(
     g,
-    values,
+    values_by_id,
     bw);
 ```
+
+Setter endpoint bỏ qua cặp không tồn tại giống NetworkX. Overload
+`unordered_map<uint32_t, AttrValue>` và `set_edge_attributes_by_id` dành cho
+đường indexed; ID thiếu/stale là lỗi.
 
 ## nx.adjacency_matrix
 
@@ -1520,6 +1607,11 @@ SparseMatrix A =
         graph,
         weight);
 ```
+
+`adjacency_matrix` lỗi trên graph rỗng và dùng `1.0` khi thiếu `weight`.
+`attr_sparse_matrix` chỉ dùng default `1.0` cho attribute có tên `"weight"`;
+thiếu custom attribute trên bất kỳ edge nào là lỗi. COO/CSR được sắp theo
+row/column giống SciPy để kiểm tra thứ tự đầu ra chính xác.
 
 ---
 
@@ -1699,4 +1791,3 @@ csvio::print_table(df);
 std::cout << df.nrows() << '\n';
 std::cout << df.ncols() << '\n';
 ```
-

@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <optional>
 #include <queue>
 #include <stdexcept>
 #include <unordered_set>
@@ -16,17 +17,23 @@ constexpr double INF =
 struct HeapNode
 {
     double dist;
+    uint64_t order;
     Vertex vertex;
 
     bool operator>(
         const HeapNode& other) const noexcept
     {
-        return dist > other.dist;
+        if (dist != other.dist)
+        {
+            return dist > other.dist;
+        }
+        return order > other.order;
     }
 };
 
+template <typename GraphType>
 static DijkstraResult make_empty_result(
-    const Graph& g)
+    const GraphType& g)
 {
     DijkstraResult result;
 
@@ -40,6 +47,8 @@ static DijkstraResult make_empty_result(
     result.predecessor.resize(
         n);
 
+    result.settled_order.reserve(n);
+
     for (Vertex v = 0;
          v < n;
          ++v)
@@ -50,8 +59,9 @@ static DijkstraResult make_empty_result(
     return result;
 }
 
+template <typename NeighborType>
 inline double fast_edge_weight(
-    const RawNeighbor& edge,
+    const NeighborType& edge,
     AttrId weight_attr_id)
 {
     const auto& attrs =
@@ -65,28 +75,13 @@ inline double fast_edge_weight(
         return 1.0;
     }
 
-    if (std::holds_alternative<double>(
-            *value))
-    {
-        return std::get<double>(
-            *value);
-    }
-
-    if (std::holds_alternative<int64_t>(
-            *value))
-    {
-        return static_cast<double>(
-            std::get<int64_t>(
-                *value));
-    }
-
-    throw std::runtime_error(
-        "Edge weight must be numeric");
+    return attr_to_double(*value);
 }
 
+template <typename GraphType>
 static std::unordered_set<uint32_t>
 build_banned_edge_id_set(
-    const Graph& g,
+    const GraphType& g,
     const EdgeSet& banned_edges)
 {
     std::unordered_set<uint32_t> banned_ids;
@@ -106,7 +101,7 @@ build_banned_edge_id_set(
             continue;
         }
 
-        Edge e =
+        const auto e =
             g.edge(u, v);
 
         banned_ids.insert(
@@ -116,12 +111,15 @@ build_banned_edge_id_set(
     return banned_ids;
 }
 
+template <typename GraphType>
 static DijkstraResult run_dijkstra(
-    const Graph& g,
+    const GraphType& g,
     Vertex source,
+    const SearchMask* mask,
     const VertexSet* banned_vertices,
     const EdgeSet* banned_edges,
-    AttrId weight_attr_id)
+    AttrId weight_attr_id,
+    std::optional<double> cutoff)
 {
     DijkstraResult result =
         make_empty_result(g);
@@ -150,9 +148,11 @@ static DijkstraResult run_dijkstra(
 
     dist[source] = 0.0;
     pred[source] = source;
+    uint64_t push_order = 0;
 
     pq.push({
         0.0,
+        push_order++,
         source});
 
     while (!pq.empty())
@@ -173,6 +173,8 @@ static DijkstraResult run_dijkstra(
             continue;
         }
 
+        result.settled_order.push_back(u);
+
         const auto& out =
             g.neighbors_fast(
                 u);
@@ -181,6 +183,15 @@ static DijkstraResult run_dijkstra(
         {
             const Vertex v =
                 edge.get_target();
+
+            if (mask != nullptr &&
+                !mask->allows(
+                    u,
+                    v,
+                    edge.get_property().edge_id))
+            {
+                continue;
+            }
 
             if (banned_vertices != nullptr)
             {
@@ -208,8 +219,19 @@ static DijkstraResult run_dijkstra(
                     edge,
                     weight_attr_id);
 
+            if (w < 0.0)
+            {
+                throw std::runtime_error(
+                    "Negative edge weights are not supported");
+            }
+
             const double nd =
                 du + w;
+
+            if (cutoff && nd > *cutoff)
+            {
+                continue;
+            }
 
             if (nd < dist[v])
             {
@@ -218,6 +240,7 @@ static DijkstraResult run_dijkstra(
 
                 pq.push({
                     nd,
+                    push_order++,
                     v});
             }
         }
@@ -226,9 +249,10 @@ static DijkstraResult run_dijkstra(
     return result;
 }
 
+template <typename GraphType, typename EdgeType>
 static double read_edge_weight(
-    const Graph& g,
-    Edge e,
+    const GraphType& g,
+    EdgeType e,
     AttrId weight_attr_id)
 {
     const auto& attrs =
@@ -242,36 +266,28 @@ static double read_edge_weight(
         return 1.0;
     }
 
-    if (std::holds_alternative<double>(
-            *value))
-    {
-        return std::get<double>(
-            *value);
-    }
-
-    if (std::holds_alternative<int64_t>(
-            *value))
-    {
-        return static_cast<double>(
-            std::get<int64_t>(
-                *value));
-    }
-
-    throw std::runtime_error(
-        "Edge weight must be numeric");
+    return attr_to_double(*value);
 }
 
-} // namespace
-
-DijkstraResult dijkstra(
-    const Graph& g,
+template <typename GraphType>
+DijkstraResult dijkstra_impl(
+    const GraphType& g,
     Vertex source,
-    const std::string& weight_attr)
+    const SearchMask* mask,
+    const std::string& weight_attr,
+    std::optional<double> cutoff = std::nullopt)
 {
     if (source >= g.num_nodes())
     {
         throw std::out_of_range(
             "source vertex is out of range");
+    }
+
+    if (mask != nullptr &&
+        !mask->allows_node(source))
+    {
+        throw std::runtime_error(
+            "source vertex is filtered out");
     }
 
     const AttrId weight_attr_id =
@@ -280,14 +296,18 @@ DijkstraResult dijkstra(
     return run_dijkstra(
         g,
         source,
+        mask,
         nullptr,
         nullptr,
-        weight_attr_id);
+        weight_attr_id,
+        cutoff);
 }
 
-DijkstraResult dijkstra(
-    const Graph& g,
+template <typename GraphType>
+DijkstraResult dijkstra_masked_impl(
+    const GraphType& g,
     Vertex source,
+    const SearchMask* mask,
     const VertexSet& banned_vertices,
     const EdgeSet& banned_edges,
     const std::string& weight_attr)
@@ -296,6 +316,13 @@ DijkstraResult dijkstra(
     {
         throw std::out_of_range(
             "source vertex is out of range");
+    }
+
+    if (mask != nullptr &&
+        !mask->allows_node(source))
+    {
+        throw std::runtime_error(
+            "source vertex is filtered out");
     }
 
     if (banned_vertices.find(source) !=
@@ -311,18 +338,21 @@ DijkstraResult dijkstra(
     return run_dijkstra(
         g,
         source,
+        mask,
         &banned_vertices,
         &banned_edges,
-        weight_attr_id);
+        weight_attr_id,
+        std::nullopt);
 }
 
-double edge_cost(
-    const Graph& g,
+template <typename GraphType>
+double edge_cost_impl(
+    const GraphType& g,
     Vertex u,
     Vertex v,
     const std::string& weight_attr)
 {
-    Edge e =
+    const auto e =
         g.edge(u, v);
 
     const AttrId weight_attr_id =
@@ -334,8 +364,9 @@ double edge_cost(
         weight_attr_id);
 }
 
-double path_cost(
-    const Graph& g,
+template <typename GraphType>
+double path_cost_impl(
+    const GraphType& g,
     const std::vector<Vertex>& path,
     const std::string& weight_attr)
 {
@@ -353,7 +384,7 @@ double path_cost(
          i + 1 < path.size();
          ++i)
     {
-        Edge e =
+        const auto e =
             g.edge(
                 path[i],
                 path[i + 1]);
@@ -367,15 +398,15 @@ double path_cost(
     return cost;
 }
 
-std::vector<double> path_prefix_costs(
-    const Graph& g,
+template <typename GraphType>
+std::vector<double> path_prefix_costs_impl(
+    const GraphType& g,
     const std::vector<Vertex>& path,
     const std::string& weight_attr)
 {
     std::vector<double> prefix;
 
-    prefix.reserve(
-        path.size());
+    prefix.reserve(path.size());
 
     if (path.empty())
     {
@@ -385,8 +416,7 @@ std::vector<double> path_prefix_costs(
     const AttrId weight_attr_id =
         g.attr_id(weight_attr);
 
-    prefix.push_back(
-        0.0);
+    prefix.push_back(0.0);
 
     double running = 0.0;
 
@@ -394,7 +424,7 @@ std::vector<double> path_prefix_costs(
          i + 1 < path.size();
          ++i)
     {
-        Edge e =
+        const auto e =
             g.edge(
                 path[i],
                 path[i + 1]);
@@ -404,11 +434,241 @@ std::vector<double> path_prefix_costs(
             e,
             weight_attr_id);
 
-        prefix.push_back(
-            running);
+        prefix.push_back(running);
     }
 
     return prefix;
+}
+
+} // namespace
+
+DijkstraResult dijkstra(
+    const Graph& g,
+    Vertex source,
+    const std::string& weight_attr)
+{
+    return dijkstra_impl(
+        g,
+        source,
+        nullptr,
+        weight_attr);
+}
+
+DijkstraResult dijkstra(
+    const DiGraph& g,
+    Vertex source,
+    const std::string& weight_attr)
+{
+    return dijkstra_impl(
+        g,
+        source,
+        nullptr,
+        weight_attr);
+}
+
+DijkstraResult dijkstra_with_cutoff(
+    const Graph& g,
+    Vertex source,
+    std::optional<double> cutoff,
+    const std::string& weight_attr)
+{
+    return dijkstra_impl(
+        g, source, nullptr, weight_attr, cutoff);
+}
+
+DijkstraResult dijkstra_with_cutoff(
+    const DiGraph& g,
+    Vertex source,
+    std::optional<double> cutoff,
+    const std::string& weight_attr)
+{
+    return dijkstra_impl(
+        g, source, nullptr, weight_attr, cutoff);
+}
+
+DijkstraResult dijkstra_with_cutoff(
+    const Graph& g,
+    Vertex source,
+    const SearchMask& mask,
+    std::optional<double> cutoff,
+    const std::string& weight_attr)
+{
+    return dijkstra_impl(
+        g, source, &mask, weight_attr, cutoff);
+}
+
+DijkstraResult dijkstra_with_cutoff(
+    const DiGraph& g,
+    Vertex source,
+    const SearchMask& mask,
+    std::optional<double> cutoff,
+    const std::string& weight_attr)
+{
+    return dijkstra_impl(
+        g, source, &mask, weight_attr, cutoff);
+}
+
+DijkstraResult dijkstra(
+    const Graph& g,
+    Vertex source,
+    const SearchMask& mask,
+    const std::string& weight_attr)
+{
+    return dijkstra_impl(
+        g,
+        source,
+        &mask,
+        weight_attr);
+}
+
+DijkstraResult dijkstra(
+    const DiGraph& g,
+    Vertex source,
+    const SearchMask& mask,
+    const std::string& weight_attr)
+{
+    return dijkstra_impl(
+        g,
+        source,
+        &mask,
+        weight_attr);
+}
+
+DijkstraResult dijkstra(
+    const Graph& g,
+    Vertex source,
+    const VertexSet& banned_vertices,
+    const EdgeSet& banned_edges,
+    const std::string& weight_attr)
+{
+    return dijkstra_masked_impl(
+        g,
+        source,
+        nullptr,
+        banned_vertices,
+        banned_edges,
+        weight_attr);
+}
+
+DijkstraResult dijkstra(
+    const DiGraph& g,
+    Vertex source,
+    const VertexSet& banned_vertices,
+    const EdgeSet& banned_edges,
+    const std::string& weight_attr)
+{
+    return dijkstra_masked_impl(
+        g,
+        source,
+        nullptr,
+        banned_vertices,
+        banned_edges,
+        weight_attr);
+}
+
+
+DijkstraResult dijkstra(
+    const Graph& g,
+    Vertex source,
+    const SearchMask& mask,
+    const VertexSet& banned_vertices,
+    const EdgeSet& banned_edges,
+    const std::string& weight_attr)
+{
+    return dijkstra_masked_impl(
+        g,
+        source,
+        &mask,
+        banned_vertices,
+        banned_edges,
+        weight_attr);
+}
+
+DijkstraResult dijkstra(
+    const DiGraph& g,
+    Vertex source,
+    const SearchMask& mask,
+    const VertexSet& banned_vertices,
+    const EdgeSet& banned_edges,
+    const std::string& weight_attr)
+{
+    return dijkstra_masked_impl(
+        g,
+        source,
+        &mask,
+        banned_vertices,
+        banned_edges,
+        weight_attr);
+}
+
+double edge_cost(
+    const Graph& g,
+    Vertex u,
+    Vertex v,
+    const std::string& weight_attr)
+{
+    return edge_cost_impl(
+        g,
+        u,
+        v,
+        weight_attr);
+}
+
+double edge_cost(
+    const DiGraph& g,
+    Vertex u,
+    Vertex v,
+    const std::string& weight_attr)
+{
+    return edge_cost_impl(
+        g,
+        u,
+        v,
+        weight_attr);
+}
+
+double path_cost(
+    const Graph& g,
+    const std::vector<Vertex>& path,
+    const std::string& weight_attr)
+{
+    return path_cost_impl(
+        g,
+        path,
+        weight_attr);
+}
+
+double path_cost(
+    const DiGraph& g,
+    const std::vector<Vertex>& path,
+    const std::string& weight_attr)
+{
+    return path_cost_impl(
+        g,
+        path,
+        weight_attr);
+}
+
+std::vector<double> path_prefix_costs(
+    const Graph& g,
+    const std::vector<Vertex>& path,
+    const std::string& weight_attr)
+{
+    return path_prefix_costs_impl(
+        g,
+        path,
+        weight_attr);
+}
+
+std::vector<double> path_prefix_costs(
+    const DiGraph& g,
+    const std::vector<Vertex>& path,
+    const std::string& weight_attr)
+{
+    return path_prefix_costs_impl(
+        g,
+        path,
+        weight_attr);
 }
 
 std::vector<Vertex> build_path(

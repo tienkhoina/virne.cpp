@@ -1,2 +1,9 @@
 /build/
+# C++ dependency payloads are reconstructed only from DEPENDENCIES.md and
+# DEPENDENCIES.sha256; never resolve these paths from an OS/Conda install.
 /libs/
+/.deps-cache/
+# Test-only NetworkX oracle.
+/.venv/
+__pycache__/
+*.py[cod]

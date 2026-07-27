@@ -1,68 +1,137 @@
 // progress.cpp
 #include "progress.h"
+
+#include <algorithm>
+#include <array>
+#include <charconv>
+#include <cmath>
+#include <cstdint>
+#include <cstdio>
+#include <ctime>
 #include <iomanip>
 #include <iostream>
-#include <sstream>
-#include <chrono>
-#include <ctime>
-#include <cstdio>
+#include <limits>
+#include <string_view>
+#include <system_error>
+#include <type_traits>
 
 #ifdef _WIN32
-    #include <windows.h>
+#include <io.h>
+#include <windows.h>
 #else
-    #include <unistd.h>
+#include <unistd.h>
 #endif
 
-// ============================================================================
-// Hỗ trợ định dạng thời gian
-// ============================================================================
 namespace
 {
-    std::string format_time(double seconds)
-    {
-        if (seconds < 0) seconds = 0;
-        const int s = static_cast<int>(seconds);
-        const int h = s / 3600;
-        const int m = (s % 3600) / 60;
-        const int sec = s % 60;
+    constexpr std::size_t kBarWidth = 30;
+    constexpr double kMinUpdateInterval = 0.05;
 
-        std::ostringstream oss;
-        if (h > 0)
-            oss << std::setw(2) << std::setfill('0') << h << ":";
-        oss << std::setw(2) << std::setfill('0') << m << ":"
-            << std::setw(2) << std::setfill('0') << sec;
-        return oss.str();
+    template <typename Integer>
+    void append_integer(std::string& output, Integer value)
+    {
+        std::array<char, std::numeric_limits<Integer>::digits10 + 4> buffer{};
+        const auto result = std::to_chars(buffer.data(), buffer.data() + buffer.size(), value);
+        if (result.ec == std::errc{}) {
+            output.append(buffer.data(), result.ptr);
+        }
     }
 
-    bool is_interactive_terminal()
+    void append_fixed(std::string& output, double value, int precision)
     {
-        #ifdef _WIN32
+        std::array<char, 96> buffer{};
+        const auto result = std::to_chars(
+            buffer.data(), buffer.data() + buffer.size(), value,
+            std::chars_format::fixed, precision);
+        if (result.ec == std::errc{}) {
+            output.append(buffer.data(), result.ptr);
+            return;
+        }
+
+        // All finite progress values fit above. Keep exceptional values usable
+        // on older standard libraries without allocating an iostream.
+        const int count = std::snprintf(
+            buffer.data(), buffer.size(), "%.*f", precision, value);
+        if (count > 0) {
+            output.append(buffer.data(), std::min<std::size_t>(
+                static_cast<std::size_t>(count), buffer.size() - 1));
+        }
+    }
+
+    void append_two_digits(std::string& output, std::uint64_t value)
+    {
+        output.push_back(static_cast<char>('0' + ((value / 10) % 10)));
+        output.push_back(static_cast<char>('0' + (value % 10)));
+    }
+
+    void append_time(std::string& output, double seconds)
+    {
+        if (!std::isfinite(seconds) || seconds < 0.0) {
+            seconds = 0.0;
+        }
+
+        const double maximum_seconds = static_cast<double>(
+            std::numeric_limits<std::uint64_t>::max());
+        const auto whole_seconds = seconds >= maximum_seconds
+            ? std::numeric_limits<std::uint64_t>::max()
+            : static_cast<std::uint64_t>(seconds);
+        const std::uint64_t hours = whole_seconds / 3600;
+        const std::uint64_t minutes = (whole_seconds / 60) % 60;
+        const std::uint64_t remaining_seconds = whole_seconds % 60;
+
+        if (hours > 0) {
+            if (hours < 10) {
+                output.push_back('0');
+            }
+            append_integer(output, hours);
+            output.push_back(':');
+        }
+        append_two_digits(output, minutes);
+        output.push_back(':');
+        append_two_digits(output, remaining_seconds);
+    }
+
+    bool is_interactive_terminal() noexcept
+    {
+#ifdef _WIN32
+        const int descriptor = ::_fileno(stdout);
+        if (descriptor < 0 || ::_isatty(descriptor) == 0) {
             return false;
-        #else
-            return isatty(fileno(stdout)) != 0;
-        #endif
+        }
+        const auto handle = reinterpret_cast<HANDLE>(::_get_osfhandle(descriptor));
+        DWORD mode = 0;
+        return handle != INVALID_HANDLE_VALUE && ::GetConsoleMode(handle, &mode) != 0;
+#else
+        return ::isatty(::fileno(stdout)) != 0;
+#endif
+    }
+
+    void write_spaces(std::ostream& output, std::size_t count)
+    {
+        static constexpr std::string_view spaces =
+            "                                                                ";
+        while (count > 0) {
+            const std::size_t chunk = std::min(count, spaces.size());
+            output.write(spaces.data(), static_cast<std::streamsize>(chunk));
+            count -= chunk;
+        }
     }
 }
 
-// ============================================================================
-// Constructor
-// ============================================================================
 Progress::Progress(std::size_t total, const std::string& desc)
     : total_(total)
     , desc_(desc)
-    , start_(std::chrono::steady_clock::now())
+    , start_(Clock::now())
     , last_update_time_(start_)
-    , min_update_interval_(0.05)
-    , first_line_printed_(false)
+    , next_update_time_(start_ + std::chrono::duration_cast<Clock::duration>(
+          std::chrono::duration<double>(kMinUpdateInterval)))
+    , min_update_interval_(kMinUpdateInterval)
+    , interactive_terminal_(is_interactive_terminal())
 {
-    if (total_ == 0) {
-        log_error("Progress: total is zero, progress will be meaningless.");
-    }
+    line_buffer_.reserve(desc_.size() + 128);
+    postfix_buffer_.reserve(64);
 }
 
-// ============================================================================
-// Destructor
-// ============================================================================
 Progress::~Progress()
 {
     try {
@@ -72,156 +141,184 @@ Progress::~Progress()
     } catch (...) {}
 }
 
-// ============================================================================
-// Cập nhật postfix
-// ============================================================================
 void Progress::set_postfix(const ProgressDict& values)
 {
+    if (finished_ || postfix_ == values) {
+        return;
+    }
+
     postfix_ = values;
-    // Ngay lập tức cập nhật hiển thị
-    if (current_ > 0 || first_line_printed_) {
-        refresh_display();
-    }
+    postfix_dirty_ = true;
+    display_dirty_ = true;
+
+    // Rendering is intentionally deferred to update()/finish(). Typical loops
+    // set metrics immediately before update(); drawing here would format and
+    // flush twice and would bypass the update-rate limit.
 }
 
-// ============================================================================
-// Định dạng postfix
-// ============================================================================
-std::string Progress::format_postfix() const
+void Progress::format_postfix()
 {
-    std::ostringstream oss;
+    if (!postfix_dirty_) {
+        return;
+    }
+
+    postfix_keys_.clear();
+    postfix_keys_.reserve(postfix_.size());
+    for (const auto& entry : postfix_) {
+        postfix_keys_.push_back(entry.first);
+    }
+    std::sort(postfix_keys_.begin(), postfix_keys_.end());
+
+    postfix_buffer_.clear();
     bool first = true;
-    for (const auto& [key, value] : postfix_)
-    {
-        if (!first) oss << ", ";
+    for (const auto& key : postfix_keys_) {
+        if (!first) {
+            postfix_buffer_.append(", ");
+        }
         first = false;
-        oss << key << "=";
-        std::visit([&oss](const auto& v) { 
-            oss << std::fixed << std::setprecision(4) << v; 
-        }, value);
+        postfix_buffer_.append(key);
+        postfix_buffer_.push_back('=');
+        std::visit(
+            [this](const auto& value) {
+                using Value = std::decay_t<decltype(value)>;
+                if constexpr (std::is_same_v<Value, double>) {
+                    append_fixed(postfix_buffer_, value, 4);
+                } else if constexpr (std::is_same_v<Value, std::string>) {
+                    postfix_buffer_.append(value);
+                } else {
+                    append_integer(postfix_buffer_, value);
+                }
+            },
+            postfix_.at(key));
     }
-    return oss.str();
+    postfix_dirty_ = false;
 }
 
-// ============================================================================
-// Xây dựng dòng thanh tiến trình
-// ============================================================================
-std::string Progress::build_line(std::size_t current) const
+void Progress::build_line(std::size_t current, Clock::time_point now)
 {
-    if (total_ == 0) {
-        return desc_ + ": 100%|" + std::string(20, '#') + "| ?/? [--:--<--:--, --it/s]";
-    }
-
-    constexpr int BAR_WIDTH = 30;  // Tăng lên cho đẹp
-    const double progress = static_cast<double>(current) / static_cast<double>(total_);
-    const int filled = static_cast<int>(BAR_WIDTH * progress);
-    const int safe_filled = (filled < 0) ? 0 : (filled > BAR_WIDTH ? BAR_WIDTH : filled);
+    const double progress = total_ == 0
+        ? 1.0
+        : static_cast<double>(current) / static_cast<double>(total_);
+    const std::size_t filled = std::min<std::size_t>(
+        kBarWidth, static_cast<std::size_t>(kBarWidth * progress));
 
     const auto elapsed_sec = std::chrono::duration<double>(
-        std::chrono::steady_clock::now() - start_).count();
+        now - start_).count();
 
-    const double ips = (elapsed_sec > 1e-9) ? (current / elapsed_sec) : 0.0;
-    const double eta = (ips > 1e-9) ? ((total_ - current) / ips) : 0.0;
+    const double ips = elapsed_sec > 1e-9
+        ? static_cast<double>(current) / elapsed_sec
+        : 0.0;
+    const double eta = ips > 1e-9
+        ? static_cast<double>(total_ - current) / ips
+        : 0.0;
 
-    std::ostringstream bar_stream;
-    for (int i = 0; i < BAR_WIDTH; ++i) {
-        bar_stream << (i < safe_filled ? '=' : ' ');
+    line_buffer_.clear();
+    line_buffer_.append(desc_);
+    line_buffer_.append(": ");
+    const int percentage = static_cast<int>(progress * 100.0);
+    if (percentage < 10) {
+        line_buffer_.append("  ");
+    } else if (percentage < 100) {
+        line_buffer_.push_back(' ');
     }
-    std::string bar = bar_stream.str();
-    
-    // Thêm mũi tên ở cuối thanh nếu chưa hoàn thành
-    if (current < total_ && safe_filled > 0 && safe_filled < BAR_WIDTH) {
-        bar[safe_filled - 1] = '>';
+    append_integer(line_buffer_, percentage);
+    line_buffer_.append("%|");
+
+    const std::size_t bar_start = line_buffer_.size();
+    line_buffer_.append(kBarWidth, ' ');
+    std::fill_n(line_buffer_.begin() + static_cast<std::ptrdiff_t>(bar_start), filled, '=');
+    if (current < total_ && filled > 0 && filled < kBarWidth) {
+        line_buffer_[bar_start + filled - 1] = '>';
     }
+    line_buffer_.append("| ");
+    append_integer(line_buffer_, current);
+    line_buffer_.push_back('/');
+    append_integer(line_buffer_, total_);
+    line_buffer_.append(" [");
+    append_time(line_buffer_, elapsed_sec);
+    line_buffer_.push_back('<');
+    append_time(line_buffer_, eta);
+    line_buffer_.append(", ");
+    append_fixed(line_buffer_, ips, 2);
+    line_buffer_.append("it/s");
 
-    std::ostringstream oss;
-    oss << "\r" << desc_ << ": "
-        << std::setw(3) << static_cast<int>(progress * 100.0) << "%|"
-        << bar << "| "
-        << current << "/" << total_
-        << " [" << format_time(elapsed_sec) << "<" << format_time(eta)
-        << ", " << std::fixed << std::setprecision(2) << ips << "it/s";
-
-    const std::string postfix_str = format_postfix();
-    if (!postfix_str.empty()) {
-        oss << " | " << postfix_str;
+    format_postfix();
+    if (!postfix_buffer_.empty()) {
+        line_buffer_.append(" | ");
+        line_buffer_.append(postfix_buffer_);
     }
-
-    oss << "  ";  // Thêm spaces để xóa các ký tự thừa
-    return oss.str();
 }
 
-// ============================================================================
-// Làm mới hiển thị (quan trọng nhất)
-// ============================================================================
-void Progress::refresh_display()
+void Progress::refresh_display(Clock::time_point now)
 {
-    const std::string line = build_line(current_);
-    
-    // Sử dụng ANSI escape codes để đảm bảo luôn trên cùng một dòng
-    if (first_line_printed_) {
-        // Move cursor to beginning of line and clear line
-        std::cout << "\033[1A\r\033[2K";
+    build_line(current_, now);
+
+    if (interactive_terminal_) {
+        std::cout.put('\r');
+        std::cout.write(line_buffer_.data(), static_cast<std::streamsize>(line_buffer_.size()));
+        if (last_length_ > line_buffer_.size()) {
+            write_spaces(std::cout, last_length_ - line_buffer_.size());
+        }
+        std::cout.flush();
+    } else {
+        // Logs and redirected streams must never receive cursor-control bytes.
+        std::cout.write(line_buffer_.data(), static_cast<std::streamsize>(line_buffer_.size()));
+        std::cout.put('\n');
     }
-    
-    std::cout << line << std::flush;
+
     first_line_printed_ = true;
-    last_length_ = line.size();
+    last_length_ = line_buffer_.size();
+    display_dirty_ = false;
 }
 
-// ============================================================================
-// Kiểm tra có nên update không
-// ============================================================================
-bool Progress::should_update(double& elapsed_since_last) const
+bool Progress::should_update(Clock::time_point now) const
 {
-    if (last_update_time_.time_since_epoch().count() == 0) {
-        elapsed_since_last = min_update_interval_ + 1.0;
-        return true;
+    if (!display_dirty_) {
+        return false;
     }
-
-    auto now = std::chrono::steady_clock::now();
-    elapsed_since_last = std::chrono::duration<double>(now - last_update_time_).count();
-
-    return (current_ >= total_) || (elapsed_since_last >= min_update_interval_);
+    return current_ >= total_ || now >= next_update_time_;
 }
 
-// ============================================================================
-// Ghi log lỗi
-// ============================================================================
 void Progress::log_error(const std::string& msg) const
 {
     auto now = std::chrono::system_clock::now();
     auto now_c = std::chrono::system_clock::to_time_t(now);
-    std::clog << "["
-              << std::put_time(std::localtime(&now_c), "%Y-%m-%d %H:%M:%S")
-              << "] ERROR: " << msg << std::endl;
+    std::tm local{};
+#ifdef _WIN32
+    ::localtime_s(&local, &now_c);
+#else
+    ::localtime_r(&now_c, &local);
+#endif
+    std::clog << '[' << std::put_time(&local, "%Y-%m-%d %H:%M:%S")
+              << "] ERROR: " << msg << '\n';
 }
 
-// ============================================================================
-// update() - phiên bản chính
-// ============================================================================
 void Progress::update(std::size_t current)
 {
-    current_ = current;
-    
-    double elapsed_since_last = 0.0;
-    if (!should_update(elapsed_since_last) && current < total_) {
+    if (finished_) {
         return;
     }
-    
-    refresh_display();
-    last_update_time_ = std::chrono::steady_clock::now();
+
+    const std::size_t clamped = std::min(current, total_);
+    if (clamped != current_) {
+        current_ = clamped;
+        display_dirty_ = true;
+    }
+
+    const auto now = Clock::now();
+    if (!should_update(now)) {
+        return;
+    }
+
+    refresh_display(now);
+    last_update_time_ = now;
+    next_update_time_ = now + std::chrono::duration_cast<Clock::duration>(
+        std::chrono::duration<double>(min_update_interval_));
 }
 
-// ============================================================================
-// update_safe() - phiên bản an toàn
-// ============================================================================
 bool Progress::update_safe(std::size_t current, bool verbose)
 {
-    if (finished_) return false;
-    
-    if (total_ == 0) {
-        log_error("update_safe: total_ is zero");
+    if (finished_) {
         return false;
     }
 
@@ -237,22 +334,29 @@ bool Progress::update_safe(std::size_t current, bool verbose)
         return false;
     }
 
-    current_ = current;
-    
-    double elapsed_since_last = 0.0;
-    bool need_display = should_update(elapsed_since_last);
-    
-    if (!need_display && current < total_) {
+    if (current != current_) {
+        current_ = current;
+        display_dirty_ = true;
+    }
+
+    const auto now = Clock::now();
+    const bool need_display = should_update(now);
+
+    if (!need_display) {
         if (verbose) {
+            const double elapsed_since_last = std::chrono::duration<double>(
+                now - last_update_time_).count();
             std::clog << "[Progress] Skip update: elapsed = " << elapsed_since_last
                       << "s < " << min_update_interval_ << "s\n";
         }
         return true;
     }
     
-    refresh_display();
-    last_update_time_ = std::chrono::steady_clock::now();
-    
+    refresh_display(now);
+    last_update_time_ = now;
+    next_update_time_ = now + std::chrono::duration_cast<Clock::duration>(
+        std::chrono::duration<double>(min_update_interval_));
+
     if (verbose) {
         std::clog << "[Progress] Updated to " << current_ << "/" << total_ << "\n";
     }
@@ -260,15 +364,97 @@ bool Progress::update_safe(std::size_t current, bool verbose)
     return true;
 }
 
-// ============================================================================
-// finish() - hoàn thành
-// ============================================================================
+void Progress::advance(std::size_t delta)
+{
+    if (finished_)
+        return;
+
+    const std::size_t remaining = total_ - current_;
+    update(delta >= remaining ? total_ : current_ + delta);
+}
+
 void Progress::finish()
 {
-    if (finished_) return;
+    if (finished_) {
+        return;
+    }
     finished_ = true;
-    
-    current_ = total_;
-    refresh_display();
-    std::cout << std::endl;
+
+    if (current_ != total_) {
+        current_ = total_;
+        display_dirty_ = true;
+    }
+
+    const auto now = Clock::now();
+    if (display_dirty_ || !first_line_printed_) {
+        refresh_display(now);
+    }
+    if (interactive_terminal_ && first_line_printed_) {
+        std::cout.put('\n');
+    }
+    // A completed progress object is a synchronization point even for a
+    // redirected, fully buffered stdout stream.
+    std::cout.flush();
+}
+
+void Progress::close()
+{
+    finish();
+}
+
+std::size_t Progress::current() const noexcept
+{
+    return current_;
+}
+
+std::size_t Progress::total() const noexcept
+{
+    return total_;
+}
+
+bool Progress::finished() const noexcept
+{
+    return finished_;
+}
+
+TqdmProgress::TqdmProgress(
+    std::size_t total,
+    const std::string& desc)
+    : progress_(total, desc)
+{
+}
+
+void TqdmProgress::update(std::size_t delta)
+{
+    progress_.advance(delta);
+}
+
+void TqdmProgress::set_postfix(const ProgressDict& values)
+{
+    progress_.set_postfix(values);
+}
+
+void TqdmProgress::close()
+{
+    progress_.finish();
+}
+
+void TqdmProgress::finish()
+{
+    progress_.finish();
+}
+
+std::size_t TqdmProgress::current() const noexcept
+{
+    return progress_.current();
+}
+
+std::size_t TqdmProgress::total() const noexcept
+{
+    return progress_.total();
+}
+
+bool TqdmProgress::finished() const noexcept
+{
+    return progress_.finished();
 }

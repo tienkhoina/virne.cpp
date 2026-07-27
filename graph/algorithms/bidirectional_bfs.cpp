@@ -2,13 +2,31 @@
 
 #include <algorithm>
 #include <limits>
-#include <queue>
 
-BidirectionalBFSResult
-bidirectional_bfs(
+namespace
+{
+
+const RawNeighborList& reverse_neighbors_fast(
     const Graph& g,
+    Vertex v)
+{
+    return g.neighbors_fast(v);
+}
+
+const DiRawInNeighborList& reverse_neighbors_fast(
+    const DiGraph& g,
+    Vertex v)
+{
+    return g.raw().m_vertices[v].m_in_edges;
+}
+
+template <typename GraphType>
+BidirectionalBFSResult
+bidirectional_bfs_impl(
+    const GraphType& g,
     Vertex source,
-    Vertex target)
+    Vertex target,
+    const SearchMask* mask)
 {
     BidirectionalBFSResult out;
 
@@ -18,6 +36,13 @@ bidirectional_bfs(
     if (source >= n
         ||
         target >= n)
+    {
+        return out;
+    }
+
+    if (mask != nullptr &&
+        (!mask->allows_node(source) ||
+         !mask->allows_node(target)))
     {
         return out;
     }
@@ -39,18 +64,14 @@ bidirectional_bfs(
         parent_f(n),
         parent_b(n);
 
-    std::queue<Vertex>
-        qf,
-        qb;
-
     seen_f[source] = 1;
     seen_b[target] = 1;
 
     parent_f[source] = source;
     parent_b[target] = target;
 
-    qf.push(source);
-    qb.push(target);
+    std::vector<Vertex> forward_fringe{source};
+    std::vector<Vertex> reverse_fringe{target};
 
     Vertex meet =
         source;
@@ -58,105 +79,98 @@ bidirectional_bfs(
     bool found =
         false;
 
-    while (!qf.empty()
-           &&
-           !qb.empty()
-           &&
+    while (!forward_fringe.empty() &&
+           !reverse_fringe.empty() &&
            !found)
     {
-        const size_t forward_size =
-            qf.size();
-
-        for (size_t i = 0;
-             i < forward_size;
-             ++i)
+        if (forward_fringe.size() <=
+            reverse_fringe.size())
         {
-            Vertex u =
-                qf.front();
-
-            qf.pop();
-
-            const auto& out_edges =
-                g.neighbors_fast(u);
-
-            for (const auto& edge :
-                 out_edges)
+            std::vector<Vertex> next_fringe;
+            for (const Vertex u : forward_fringe)
             {
-                Vertex v =
-                    edge.get_target();
-
-                if (seen_f[v])
+                for (const auto& edge :
+                     g.neighbors_fast(u))
                 {
-                    continue;
+                    const Vertex v =
+                        edge.get_target();
+
+                    if (mask != nullptr &&
+                        !mask->allows(
+                            u,
+                            v,
+                            edge.get_property().edge_id))
+                    {
+                        continue;
+                    }
+
+                    if (!seen_f[v])
+                    {
+                        seen_f[v] = 1;
+                        parent_f[v] = u;
+                        next_fringe.push_back(v);
+                    }
+
+                    if (seen_b[v])
+                    {
+                        meet = v;
+                        found = true;
+                        break;
+                    }
                 }
 
-                seen_f[v] = 1;
-                parent_f[v] = u;
-
-                if (seen_b[v])
+                if (found)
                 {
-                    meet = v;
-                    found = true;
                     break;
                 }
-
-                qf.push(v);
             }
-
-            if (found)
-            {
-                break;
-            }
+            forward_fringe =
+                std::move(next_fringe);
         }
-
-        if (found)
+        else
         {
-            break;
-        }
-
-        const size_t backward_size =
-            qb.size();
-
-        for (size_t i = 0;
-             i < backward_size;
-             ++i)
-        {
-            Vertex u =
-                qb.front();
-
-            qb.pop();
-
-            const auto& out_edges =
-                g.neighbors_fast(u);
-
-            for (const auto& edge :
-                 out_edges)
+            std::vector<Vertex> next_fringe;
+            for (const Vertex u : reverse_fringe)
             {
-                Vertex v =
-                    edge.get_target();
+                const auto& in_edges =
+                    reverse_neighbors_fast(g, u);
 
-                if (seen_b[v])
+                for (const auto& edge : in_edges)
                 {
-                    continue;
+                    const Vertex v =
+                        edge.get_target();
+
+                    if (mask != nullptr &&
+                        !mask->allows(
+                            v,
+                            u,
+                            edge.get_property().edge_id))
+                    {
+                        continue;
+                    }
+
+                    if (!seen_b[v])
+                    {
+                        seen_b[v] = 1;
+                        parent_b[v] = u;
+                        next_fringe.push_back(v);
+                    }
+
+                    if (seen_f[v])
+                    {
+                        meet = v;
+                        found = true;
+                        break;
+                    }
                 }
 
-                seen_b[v] = 1;
-                parent_b[v] = u;
-
-                if (seen_f[v])
+                if (found)
                 {
-                    meet = v;
-                    found = true;
                     break;
                 }
-
-                qb.push(v);
             }
-
-            if (found)
-            {
-                break;
-            }
+            reverse_fringe =
+                std::move(next_fringe);
         }
     }
 
@@ -208,4 +222,60 @@ bidirectional_bfs(
         true;
 
     return out;
+}
+
+} // namespace
+
+BidirectionalBFSResult
+bidirectional_bfs(
+    const Graph& g,
+    Vertex source,
+    Vertex target)
+{
+    return bidirectional_bfs_impl(
+        g,
+        source,
+        target,
+        nullptr);
+}
+
+BidirectionalBFSResult
+bidirectional_bfs(
+    const DiGraph& g,
+    Vertex source,
+    Vertex target)
+{
+    return bidirectional_bfs_impl(
+        g,
+        source,
+        target,
+        nullptr);
+}
+
+BidirectionalBFSResult
+bidirectional_bfs(
+    const Graph& g,
+    Vertex source,
+    Vertex target,
+    const SearchMask& mask)
+{
+    return bidirectional_bfs_impl(
+        g,
+        source,
+        target,
+        &mask);
+}
+
+BidirectionalBFSResult
+bidirectional_bfs(
+    const DiGraph& g,
+    Vertex source,
+    Vertex target,
+    const SearchMask& mask)
+{
+    return bidirectional_bfs_impl(
+        g,
+        source,
+        target,
+        &mask);
 }

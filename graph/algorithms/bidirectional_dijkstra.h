@@ -21,3 +21,29 @@ BidirectionalPathResult bidirectional_dijkstra(
     const VertexSet& banned_vertices = {},
     const EdgeSet& banned_edges = {},
     const std::string& weight_attr = "weight");
+
+BidirectionalPathResult bidirectional_dijkstra(
+    const DiGraph& g,
+    Vertex source,
+    Vertex target,
+    const VertexSet& banned_vertices = {},
+    const EdgeSet& banned_edges = {},
+    const std::string& weight_attr = "weight");
+
+BidirectionalPathResult bidirectional_dijkstra(
+    const Graph& g,
+    Vertex source,
+    Vertex target,
+    const SearchMask& mask,
+    const VertexSet& banned_vertices = {},
+    const EdgeSet& banned_edges = {},
+    const std::string& weight_attr = "weight");
+
+BidirectionalPathResult bidirectional_dijkstra(
+    const DiGraph& g,
+    Vertex source,
+    Vertex target,
+    const SearchMask& mask,
+    const VertexSet& banned_vertices = {},
+    const EdgeSet& banned_edges = {},
+    const std::string& weight_attr = "weight");

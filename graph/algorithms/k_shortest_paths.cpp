@@ -1,12 +1,14 @@
 #include "k_shortest_paths.h"
 
-#include "bidirectional_dijkstra.h"
+#include "bidirectional_bfs.h"
+#include "detail/bidirectional_dijkstra_by_id.h"
 
 #include <algorithm>
 #include <queue>
 #include <stdexcept>
 #include <unordered_set>
 #include <utility>
+#include <variant>
 
 namespace
 {
@@ -77,13 +79,14 @@ static std::vector<Vertex> path_prefix(
         path.begin() + end_exclusive);
 }
 
+template <typename GraphType>
 static double edge_cost_by_id(
-    const Graph& g,
+    const GraphType& g,
     Vertex u,
     Vertex v,
     AttrId weight_attr_id)
 {
-    Edge e =
+    const auto e =
         g.edge(u, v);
 
     const auto& attrs =
@@ -97,25 +100,15 @@ static double edge_cost_by_id(
         return 1.0;
     }
 
-    if (std::holds_alternative<double>(*value))
-    {
-        return std::get<double>(*value);
-    }
-
-    if (std::holds_alternative<int64_t>(*value))
-    {
-        return static_cast<double>(
-            std::get<int64_t>(*value));
-    }
-
-    throw std::runtime_error(
-        "Edge weight must be numeric");
+    return attr_to_double(*value);
 }
 
+template <typename GraphType>
 static std::vector<double> path_prefix_costs_by_id(
-    const Graph& g,
+    const GraphType& g,
     const std::vector<Vertex>& path,
-    AttrId weight_attr_id)
+    AttrId weight_attr_id,
+    bool unweighted)
 {
     std::vector<double> prefix;
     prefix.reserve(path.size());
@@ -133,11 +126,13 @@ static std::vector<double> path_prefix_costs_by_id(
          i + 1 < path.size();
          ++i)
     {
-        running += edge_cost_by_id(
-            g,
-            path[i],
-            path[i + 1],
-            weight_attr_id);
+        running += unweighted
+            ? 1.0
+            : edge_cost_by_id(
+                  g,
+                  path[i],
+                  path[i + 1],
+                  weight_attr_id);
 
         prefix.push_back(running);
     }
@@ -145,14 +140,137 @@ static std::vector<double> path_prefix_costs_by_id(
     return prefix;
 }
 
+EdgeKey blocked_edge_key(
+    const Graph&,
+    Vertex u,
+    Vertex v)
+{
+    return normalize_edge_key(u, v);
+}
+
+EdgeKey blocked_edge_key(
+    const DiGraph&,
+    Vertex u,
+    Vertex v)
+{
+    return {u, v};
+}
+
+template <typename GraphType>
+static SearchMask combined_search_mask(
+    const GraphType& g,
+    const SearchMask* base_mask,
+    const VertexSet& banned_vertices,
+    const EdgeSet& banned_edges)
+{
+    SearchMask combined(
+        g.num_nodes(),
+        g.edge_id_capacity(),
+        true);
+
+    for (Vertex v = 0;
+         v < g.num_nodes();
+         ++v)
+    {
+        if ((base_mask != nullptr &&
+             !base_mask->allows_node(v)) ||
+            banned_vertices.find(v) !=
+                banned_vertices.end())
+        {
+            combined.set_node(v, false);
+        }
+    }
+
+    const auto [edge_begin, edge_end] =
+        g.edges();
+
+    for (auto it = edge_begin;
+         it != edge_end;
+         ++it)
+    {
+        const auto edge = *it;
+        const Vertex u = g.source(edge);
+        const Vertex v = g.target(edge);
+        const uint32_t edge_id =
+            g.edge_id(edge);
+
+        bool allowed =
+            base_mask == nullptr ||
+            base_mask->allows(u, v, edge_id);
+
+        if (allowed && !banned_edges.empty())
+        {
+            allowed =
+                banned_edges.find(
+                    blocked_edge_key(g, u, v)) ==
+                banned_edges.end();
+        }
+
+        if (!allowed)
+        {
+            combined.set_edge(edge_id, false);
+        }
+    }
+
+    return combined;
+}
+
+template <typename GraphType>
+static BidirectionalPathResult shortest_path_with_bans(
+    const GraphType& g,
+    Vertex source,
+    Vertex target,
+    const SearchMask* mask,
+    const VertexSet& banned_vertices,
+    const EdgeSet& banned_edges,
+    AttrId weight_attr_id,
+    bool weighted)
+{
+    if (weighted)
+    {
+        return graph_detail::bidirectional_dijkstra_by_id(
+            g,
+            source,
+            target,
+            mask,
+            banned_vertices,
+            banned_edges,
+            weight_attr_id);
+    }
+
+    const SearchMask combined =
+        combined_search_mask(
+            g,
+            mask,
+            banned_vertices,
+            banned_edges);
+
+    const BidirectionalBFSResult bfs =
+        bidirectional_bfs(
+            g,
+            source,
+            target,
+            combined);
+
+    BidirectionalPathResult out;
+    out.found = bfs.found;
+    out.cost = bfs.found
+        ? static_cast<double>(bfs.distance)
+        : std::numeric_limits<double>::infinity();
+    out.path = bfs.path;
+    return out;
+}
+
+template <typename GraphType>
 static std::vector<PathResult>
 build_candidates_from_base_path(
-    const Graph& g,
+    const GraphType& g,
+    const SearchMask* mask,
     const std::vector<PathResult>& accepted_paths,
     const std::vector<Vertex>& base_path,
     Vertex target,
     AttrId weight_attr_id,
-    const std::string& weight_attr)
+    bool weighted)
 {
     std::vector<PathResult> candidates;
 
@@ -165,7 +283,8 @@ build_candidates_from_base_path(
         path_prefix_costs_by_id(
             g,
             base_path,
-            weight_attr_id);
+            weight_attr_id,
+            !weighted);
 
     PathSet local_seen;
     local_seen.reserve(base_path.size());
@@ -207,19 +326,22 @@ build_candidates_from_base_path(
             }
 
             banned_edges.insert(
-                normalize_edge_key(
+                blocked_edge_key(
+                    g,
                     accepted.path[spur_idx],
                     accepted.path[spur_idx + 1]));
         }
 
-        BidirectionalPathResult spur_result =
-            bidirectional_dijkstra(
+        const BidirectionalPathResult spur_result =
+            shortest_path_with_bans(
                 g,
                 spur_node,
                 target,
+                mask,
                 banned_vertices,
                 banned_edges,
-                weight_attr);
+                weight_attr_id,
+                weighted);
 
         if (!spur_result.found)
         {
@@ -254,7 +376,409 @@ build_candidates_from_base_path(
     return candidates;
 }
 
+template <typename GraphType>
+std::vector<PathResult> generate_candidates_impl(
+    const GraphType& g,
+    const PathResult& shortest,
+    Vertex target,
+    const std::string& weight_attr)
+{
+    std::vector<PathResult> accepted;
+    accepted.push_back(shortest);
+
+    const bool weighted =
+        !weight_attr.empty();
+    const AttrId weight_attr_id =
+        !weighted
+            ? AttrId{0}
+            : g.attr_id(weight_attr);
+
+    return build_candidates_from_base_path(
+        g,
+        nullptr,
+        accepted,
+        shortest.path,
+        target,
+        weight_attr_id,
+        weighted);
+}
+
+template <typename GraphType>
+std::vector<PathResult> yen_k_shortest_paths_impl(
+    const GraphType& g,
+    Vertex source,
+    Vertex target,
+    const SearchMask* mask,
+    size_t k,
+    const std::string& weight_attr)
+{
+    std::vector<PathResult> accepted;
+
+    if (k == 0)
+    {
+        return accepted;
+    }
+
+    const bool weighted =
+        !weight_attr.empty();
+    const AttrId weight_attr_id =
+        !weighted
+            ? AttrId{0}
+            : g.attr_id(weight_attr);
+
+    const BidirectionalPathResult first_result =
+        shortest_path_with_bans(
+            g,
+            source,
+            target,
+            mask,
+            VertexSet{},
+            EdgeSet{},
+            weight_attr_id,
+            weighted);
+
+    if (!first_result.found)
+    {
+        return accepted;
+    }
+
+    PathResult first;
+    first.path = std::move(first_result.path);
+    first.cost = first_result.cost;
+
+    accepted.push_back(std::move(first));
+
+    std::priority_queue<
+        PathResult,
+        std::vector<PathResult>,
+        CandidateCompare>
+        candidates_queue;
+
+    PathSet seen;
+    seen.insert(accepted.front().path);
+    uint64_t next_insertion_order = 0;
+
+    while (accepted.size() < k)
+    {
+        const auto& previous =
+            accepted.back();
+
+        auto candidates =
+            build_candidates_from_base_path(
+                g,
+                mask,
+                accepted,
+                previous.path,
+                target,
+                weight_attr_id,
+                weighted);
+
+        for (auto& candidate : candidates)
+        {
+            if (!seen.insert(candidate.path).second)
+            {
+                continue;
+            }
+
+            candidate.insertion_order =
+                next_insertion_order++;
+
+            candidates_queue.push(
+                std::move(candidate));
+        }
+
+        if (candidates_queue.empty())
+        {
+            break;
+        }
+
+        accepted.push_back(
+            candidates_queue.top());
+        candidates_queue.pop();
+    }
+
+    return accepted;
+}
+
 } // namespace
+
+struct ShortestSimplePathGenerator::Impl
+{
+    std::variant<
+        const Graph*,
+        const DiGraph*>
+        graph;
+
+    Vertex source;
+    Vertex target;
+    ShortestSimplePathOptions options;
+    AttrId weight_attr_id;
+    std::optional<SearchMask> mask;
+
+    std::vector<PathResult> accepted;
+
+    std::priority_queue<
+        PathResult,
+        std::vector<PathResult>,
+        CandidateCompare>
+        candidates;
+
+    PathSet seen;
+    size_t yielded_count = 0;
+    uint64_t next_insertion_order = 0;
+    bool exhausted = false;
+
+    Impl(
+        const Graph* graph_value,
+        Vertex source_value,
+        Vertex target_value,
+        ShortestSimplePathOptions options_value,
+        std::optional<SearchMask> mask_value)
+        :
+        graph(graph_value),
+        source(source_value),
+        target(target_value),
+        options(std::move(options_value)),
+        weight_attr_id(
+            options.weight_attr.empty()
+                ? AttrId{0}
+                : graph_value->attr_id(
+                      options.weight_attr)),
+        mask(std::move(mask_value))
+    {
+    }
+
+    Impl(
+        const DiGraph* graph_value,
+        Vertex source_value,
+        Vertex target_value,
+        ShortestSimplePathOptions options_value,
+        std::optional<SearchMask> mask_value)
+        :
+        graph(graph_value),
+        source(source_value),
+        target(target_value),
+        options(std::move(options_value)),
+        weight_attr_id(
+            options.weight_attr.empty()
+                ? AttrId{0}
+                : graph_value->attr_id(
+                      options.weight_attr)),
+        mask(std::move(mask_value))
+    {
+    }
+
+    template <typename GraphType>
+    std::optional<PathResult> next_for(
+        const GraphType& graph_value)
+    {
+        if (exhausted ||
+            (options.max_paths.has_value() &&
+             yielded_count >= *options.max_paths))
+        {
+            return std::nullopt;
+        }
+
+        const SearchMask* mask_ptr =
+            mask.has_value()
+                ? &*mask
+                : nullptr;
+        const bool weighted =
+            !options.weight_attr.empty();
+
+        while (true)
+        {
+            PathResult next_path;
+
+            if (accepted.empty())
+            {
+                const BidirectionalPathResult first =
+                    shortest_path_with_bans(
+                        graph_value,
+                        source,
+                        target,
+                        mask_ptr,
+                        VertexSet{},
+                        EdgeSet{},
+                        weight_attr_id,
+                        weighted);
+
+                if (!first.found)
+                {
+                    exhausted = true;
+                    return std::nullopt;
+                }
+
+                next_path.path =
+                    std::move(first.path);
+                next_path.cost = first.cost;
+
+                accepted.push_back(next_path);
+                seen.insert(next_path.path);
+            }
+            else
+            {
+                auto generated =
+                    build_candidates_from_base_path(
+                        graph_value,
+                        mask_ptr,
+                        accepted,
+                        accepted.back().path,
+                        target,
+                        weight_attr_id,
+                        weighted);
+
+                for (auto& candidate : generated)
+                {
+                    if (!seen.insert(
+                            candidate.path).second)
+                    {
+                        continue;
+                    }
+
+                    candidate.insertion_order =
+                        next_insertion_order++;
+
+                    candidates.push(
+                        std::move(candidate));
+                }
+
+                if (candidates.empty())
+                {
+                    exhausted = true;
+                    return std::nullopt;
+                }
+
+                next_path = candidates.top();
+                candidates.pop();
+                accepted.push_back(next_path);
+            }
+
+            if (next_path.cost > options.max_cost)
+            {
+                // Yen emits non-decreasing costs, so no later path can pass
+                // this bound.
+                exhausted = true;
+                return std::nullopt;
+            }
+
+            const size_t hops =
+                next_path.path.empty()
+                    ? 0
+                    : next_path.path.size() - 1;
+
+            if (options.max_hops.has_value() &&
+                hops > *options.max_hops)
+            {
+                // Hop count is not monotonic under weighted ordering. Keep
+                // the path internally for Yen expansion, but do not yield it.
+                continue;
+            }
+
+            ++yielded_count;
+            return next_path;
+        }
+    }
+
+    std::optional<PathResult> next()
+    {
+        return std::visit(
+            [this](const auto* graph_value)
+            {
+                return next_for(*graph_value);
+            },
+            graph);
+    }
+};
+
+ShortestSimplePathGenerator::ShortestSimplePathGenerator(
+    const Graph& graph,
+    Vertex source,
+    Vertex target,
+    ShortestSimplePathOptions options)
+    :
+    impl_(std::make_unique<Impl>(
+        &graph,
+        source,
+        target,
+        std::move(options),
+        std::nullopt))
+{
+}
+
+ShortestSimplePathGenerator::ShortestSimplePathGenerator(
+    const DiGraph& graph,
+    Vertex source,
+    Vertex target,
+    ShortestSimplePathOptions options)
+    :
+    impl_(std::make_unique<Impl>(
+        &graph,
+        source,
+        target,
+        std::move(options),
+        std::nullopt))
+{
+}
+
+ShortestSimplePathGenerator::ShortestSimplePathGenerator(
+    const Graph& graph,
+    Vertex source,
+    Vertex target,
+    const SearchMask& mask,
+    ShortestSimplePathOptions options)
+    :
+    impl_(std::make_unique<Impl>(
+        &graph,
+        source,
+        target,
+        std::move(options),
+        mask))
+{
+}
+
+ShortestSimplePathGenerator::ShortestSimplePathGenerator(
+    const DiGraph& graph,
+    Vertex source,
+    Vertex target,
+    const SearchMask& mask,
+    ShortestSimplePathOptions options)
+    :
+    impl_(std::make_unique<Impl>(
+        &graph,
+        source,
+        target,
+        std::move(options),
+        mask))
+{
+}
+
+ShortestSimplePathGenerator::~ShortestSimplePathGenerator() = default;
+
+ShortestSimplePathGenerator::ShortestSimplePathGenerator(
+    ShortestSimplePathGenerator&&) noexcept = default;
+
+ShortestSimplePathGenerator&
+ShortestSimplePathGenerator::operator=(
+    ShortestSimplePathGenerator&&) noexcept = default;
+
+std::optional<PathResult>
+ShortestSimplePathGenerator::next()
+{
+    if (!impl_)
+    {
+        return std::nullopt;
+    }
+
+    return impl_->next();
+}
+
+size_t ShortestSimplePathGenerator::yielded() const noexcept
+{
+    return impl_
+        ? impl_->yielded_count
+        : 0;
+}
 
 std::vector<Vertex>
 join_paths(
@@ -300,18 +824,24 @@ generate_candidates(
     Vertex target,
     const std::string& weight_attr)
 {
-    std::vector<PathResult> accepted;
-    accepted.push_back(shortest);
-
-    const AttrId weight_attr_id =
-        g.attr_id(weight_attr);
-
-    return build_candidates_from_base_path(
+    return generate_candidates_impl(
         g,
-        accepted,
-        shortest.path,
+        shortest,
         target,
-        weight_attr_id,
+        weight_attr);
+}
+
+std::vector<PathResult>
+generate_candidates(
+    const DiGraph& g,
+    const PathResult& shortest,
+    Vertex target,
+    const std::string& weight_attr)
+{
+    return generate_candidates_impl(
+        g,
+        shortest,
+        target,
         weight_attr);
 }
 
@@ -323,76 +853,64 @@ yen_k_shortest_paths(
     size_t k,
     const std::string& weight_attr)
 {
-    std::vector<PathResult> A;
+    return yen_k_shortest_paths_impl(
+        g,
+        source,
+        target,
+        nullptr,
+        k,
+        weight_attr);
+}
 
-    if (k == 0)
-    {
-        return A;
-    }
+std::vector<PathResult>
+yen_k_shortest_paths(
+    const DiGraph& g,
+    Vertex source,
+    Vertex target,
+    size_t k,
+    const std::string& weight_attr)
+{
+    return yen_k_shortest_paths_impl(
+        g,
+        source,
+        target,
+        nullptr,
+        k,
+        weight_attr);
+}
 
-    const AttrId weight_attr_id =
-        g.attr_id(weight_attr);
+std::vector<PathResult>
+yen_k_shortest_paths(
+    const Graph& g,
+    Vertex source,
+    Vertex target,
+    const SearchMask& mask,
+    size_t k,
+    const std::string& weight_attr)
+{
+    return yen_k_shortest_paths_impl(
+        g,
+        source,
+        target,
+        &mask,
+        k,
+        weight_attr);
+}
 
-    BidirectionalPathResult first_result =
-        bidirectional_dijkstra(
-            g,
-            source,
-            target,
-            VertexSet{},
-            EdgeSet{},
-            weight_attr);
-
-    if (!first_result.found)
-    {
-        return A;
-    }
-
-    PathResult first;
-    first.path = std::move(first_result.path);
-    first.cost = first_result.cost;
-
-    A.push_back(std::move(first));
-
-    std::priority_queue<
-        PathResult,
-        std::vector<PathResult>,
-        CandidateCompare>
-        B;
-
-    PathSet seen;
-    seen.insert(A.front().path);
-
-    while (A.size() < k)
-    {
-        const auto& prev = A.back();
-
-        auto candidates =
-            build_candidates_from_base_path(
-                g,
-                A,
-                prev.path,
-                target,
-                weight_attr_id,
-                weight_attr);
-
-        for (auto& candidate : candidates)
-        {
-            if (!seen.insert(candidate.path).second)
-            {
-                continue;
-            }
-
-            B.push(std::move(candidate));
-        }
-
-        if (B.empty())
-        {
-            break;
-        }
-
-        A.push_back(B.top());
-        B.pop();
-    }
-
-    return A;
+std::vector<PathResult>
+yen_k_shortest_paths(
+    const DiGraph& g,
+    Vertex source,
+    Vertex target,
+    const SearchMask& mask,
+    size_t k,
+    const std::string& weight_attr)
+{
+    return yen_k_shortest_paths_impl(
+        g,
+        source,
+        target,
+        &mask,
+        k,
+        weight_attr);
 }

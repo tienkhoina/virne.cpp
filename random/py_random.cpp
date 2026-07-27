@@ -118,11 +118,18 @@ PyRandom::init_by_array(
 }
 
 PyRandom::PyRandom(
-    uint64_t seed)
+    uint64_t seed_value)
+{
+    seed(seed_value);
+}
+
+void
+PyRandom::seed(
+    uint64_t seed_value)
 {
     std::vector<uint32_t> key;
 
-    uint64_t n = seed;
+    uint64_t n = seed_value;
 
     do
     {
@@ -297,27 +304,42 @@ uint64_t
 PyRandom::getrandbits(
     int k)
 {
-    uint64_t result = 0;
-    int bits = 0;
-
-    while(bits < k)
+    if (k < 0 || k > 64)
     {
-        result =
-            (result << 32)
-            |
-            static_cast<uint64_t>(
-                genrand_uint32());
-
-        bits += 32;
+        throw std::invalid_argument(
+            "getrandbits supports 0 <= k <= 64");
     }
 
-    if(bits > k)
+    if (k == 0)
     {
-        result >>=
-            (bits - k);
+        return 0;
     }
 
-    return result;
+    // CPython emits the first MT word into the least-significant limb.  The
+    // final partial word is shifted down before it becomes the high limb.
+    if (k <= 32)
+    {
+        return static_cast<uint64_t>(
+            genrand_uint32() >> (32 - k));
+    }
+
+    uint64_t result =
+        static_cast<uint64_t>(
+            genrand_uint32());
+
+    const int high_bits =
+        k - 32;
+
+    uint64_t high =
+        static_cast<uint64_t>(
+            genrand_uint32());
+
+    if (high_bits < 32)
+    {
+        high >>= (32 - high_bits);
+    }
+
+    return result | (high << 32);
 }
 
 uint64_t
@@ -326,19 +348,25 @@ PyRandom::randrange(
 {
     if(stop == 0)
     {
-        return 0;
+        throw std::invalid_argument(
+            "empty range for randrange()");
     }
 
+    // Python's _randbelow_with_getrandbits uses stop.bit_length(), including
+    // the extra rejection bit for exact powers of two.  That state
+    // consumption is essential for choice()/shuffle() parity.
     int k = 0;
 
-    uint64_t n =
-        stop - 1;
-
+#if defined(__GNUC__) || defined(__clang__)
+    k = 64 - __builtin_clzll(stop);
+#else
+    uint64_t n = stop;
     while(n)
     {
         ++k;
         n >>= 1;
     }
+#endif
 
     while(true)
     {
@@ -350,4 +378,119 @@ PyRandom::randrange(
             return r;
         }
     }
+}
+
+int64_t
+PyRandom::randrange(
+    int64_t start,
+    int64_t stop)
+{
+    return randrange(
+        start,
+        stop,
+        1);
+}
+
+int64_t
+PyRandom::randrange(
+    int64_t start,
+    int64_t stop,
+    int64_t step)
+{
+    if (step == 0)
+    {
+        throw std::invalid_argument(
+            "zero step for randrange()");
+    }
+
+    using Wide = __int128_t;
+    using UWide = __uint128_t;
+
+    const Wide wide_start =
+        static_cast<Wide>(start);
+    const Wide width =
+        static_cast<Wide>(stop)
+        - wide_start;
+    const Wide wide_step =
+        static_cast<Wide>(step);
+
+    Wide count = 0;
+
+    if (wide_step > 0)
+    {
+        if (width <= 0)
+        {
+            throw std::invalid_argument(
+                "empty range for randrange()");
+        }
+
+        count =
+            (width - 1) / wide_step + 1;
+    }
+    else
+    {
+        if (width >= 0)
+        {
+            throw std::invalid_argument(
+                "empty range for randrange()");
+        }
+
+        count =
+            ((-width) - 1) / (-wide_step) + 1;
+    }
+
+    if (static_cast<UWide>(count)
+        > static_cast<UWide>(
+            std::numeric_limits<uint64_t>::max()))
+    {
+        throw std::overflow_error(
+            "randrange width exceeds the fixed 64-bit compatibility boundary");
+    }
+
+    const uint64_t offset =
+        randrange(
+            static_cast<uint64_t>(count));
+
+    const Wide result =
+        wide_start
+        + wide_step
+        * static_cast<Wide>(offset);
+
+    return static_cast<int64_t>(result);
+}
+
+int64_t
+PyRandom::randint(
+    int64_t a,
+    int64_t b)
+{
+    if (b < a)
+    {
+        throw std::invalid_argument(
+            "empty range for randint()");
+    }
+
+    using Wide = __int128_t;
+    using UWide = __uint128_t;
+
+    const Wide width =
+        static_cast<Wide>(b)
+        - static_cast<Wide>(a)
+        + 1;
+
+    if (static_cast<UWide>(width)
+        > static_cast<UWide>(
+            std::numeric_limits<uint64_t>::max()))
+    {
+        throw std::overflow_error(
+            "randint interval exceeds the fixed 64-bit compatibility boundary");
+    }
+
+    const uint64_t offset =
+        randrange(
+            static_cast<uint64_t>(width));
+
+    return static_cast<int64_t>(
+        static_cast<Wide>(a)
+        + static_cast<Wide>(offset));
 }

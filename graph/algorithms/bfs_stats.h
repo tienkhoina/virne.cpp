@@ -30,3 +30,9 @@ bfs_stats(
     const Graph& g,
     Vertex source,
     BFSWorkspace& ws);
+
+BFSStats
+bfs_stats(
+    const DiGraph& g,
+    Vertex source,
+    BFSWorkspace& ws);

@@ -3,6 +3,7 @@
 #include "csr_matrix.h"
 
 #include <cstddef>
+#include <utility>
 #include <vector>
 
 struct SparseMatrix
@@ -57,6 +58,40 @@ struct SparseMatrix
     {
         return value.empty();
     }
+
+    // SciPy-compatible boundary helpers used by the original Virne code.
+    // The matrix is already stored in COO form, so tocoo() is allocation
+    // free. Hot loops should keep using row/col/value directly.
+    const SparseMatrix& tocoo() const noexcept
+    {
+        return *this;
+    }
+
+    SparseMatrix& tocoo() noexcept
+    {
+        return *this;
+    }
+
+    const std::vector<double>& data() const noexcept
+    {
+        return value;
+    }
+
+    std::vector<double>& data() noexcept
+    {
+        return value;
+    }
+
+    std::pair<size_t, size_t> shape() const noexcept
+    {
+        return {rows, cols};
+    }
+
+    std::vector<std::vector<double>>
+    toarray() const;
+
+    std::pair<std::vector<size_t>, std::vector<size_t>>
+    nonzero() const;
 
     CSRMatrix
     to_csr() const;

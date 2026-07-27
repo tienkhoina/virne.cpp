@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../graph.h"
+#include "search_mask.h"
 
 #include <vector>
 
@@ -18,3 +19,23 @@ bidirectional_bfs(
     const Graph& g,
     Vertex source,
     Vertex target);
+
+BidirectionalBFSResult
+bidirectional_bfs(
+    const DiGraph& g,
+    Vertex source,
+    Vertex target);
+
+BidirectionalBFSResult
+bidirectional_bfs(
+    const Graph& g,
+    Vertex source,
+    Vertex target,
+    const SearchMask& mask);
+
+BidirectionalBFSResult
+bidirectional_bfs(
+    const DiGraph& g,
+    Vertex source,
+    Vertex target,
+    const SearchMask& mask);

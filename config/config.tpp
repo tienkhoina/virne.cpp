@@ -6,7 +6,7 @@ T Config::get(
 {
     auto node = get_node(path);
 
-    if (!node)
+    if (!node.IsDefined())
     {
         throw std::runtime_error(
             "Missing config key: " + path);
@@ -22,7 +22,7 @@ T Config::get(
 {
     auto node = get_node(path);
 
-    if (!node)
+    if (!node.IsDefined() || node.IsNull())
         return default_value;
 
     return node.as<T>();

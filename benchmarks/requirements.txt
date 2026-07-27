@@ -1,0 +1,4 @@
+# Keep the oracle reproducible on the project's Python 3.10 baseline.
+networkx==3.4.2
+numpy==1.26.4
+scipy==1.15.3

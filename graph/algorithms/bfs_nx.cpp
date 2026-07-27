@@ -1,22 +1,28 @@
 
 #include "bfs_nx.h"
 
+#include <stdexcept>
 #include <vector>
 
-std::unordered_map<
-    Vertex,
-    size_t>
-bfs_nx(
-    const Graph& g,
+namespace
+{
+
+template <typename GraphType>
+nx::OrderedVertexMap<size_t>
+bfs_nx_impl(
+    const GraphType& g,
     Vertex source)
 {
-    std::unordered_map<
-        Vertex,
-        size_t>
-        result;
+    nx::OrderedVertexMap<size_t> result;
 
     const size_t n =
         g.num_nodes();
+
+    if (source >= n)
+    {
+        throw std::out_of_range(
+            "source vertex is out of range");
+    }
 
     result.reserve(
         n);
@@ -91,3 +97,20 @@ bfs_nx(
     return result;
 }
 
+} // namespace
+
+nx::OrderedVertexMap<size_t>
+bfs_nx(
+    const Graph& g,
+    Vertex source)
+{
+    return bfs_nx_impl(g, source);
+}
+
+nx::OrderedVertexMap<size_t>
+bfs_nx(
+    const DiGraph& g,
+    Vertex source)
+{
+    return bfs_nx_impl(g, source);
+}

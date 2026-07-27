@@ -19,6 +19,9 @@ NodeScores
 degree_centrality(
     const Graph& g);
 
+NodeScores degree_centrality(
+    const DiGraph& g);
+
 //
 // Eigenvector
 //
@@ -26,7 +29,12 @@ degree_centrality(
 NodeScores
 eigenvector_centrality(
     const Graph& g,
-    size_t max_iter = 10000,
+    size_t max_iter = 100,
+    double tol = 1e-6);
+
+NodeScores eigenvector_centrality(
+    const DiGraph& g,
+    size_t max_iter = 100,
     double tol = 1e-6);
 
 //
@@ -37,6 +45,9 @@ NodeScores
 closeness_centrality(
     const Graph& g);
 
+NodeScores closeness_centrality(
+    const DiGraph& g);
+
 //
 // Betweenness (Brandes)
 //
@@ -45,6 +56,11 @@ NodeScores
 betweenness_centrality(
     const Graph& g,
     const std::string& weight_attr =
-        "weight");
+        "");
+
+NodeScores betweenness_centrality(
+    const DiGraph& g,
+    const std::string& weight_attr =
+        "");
 
 } // namespace nx
