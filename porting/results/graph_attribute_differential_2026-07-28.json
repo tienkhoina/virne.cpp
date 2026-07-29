@@ -1,0 +1,21 @@
+{
+  "base_source_sha256": "103c5c16126ca76e782c2191ff0811b95ed88a0c3637f3a61e84c0b22df42e8e",
+  "dataset_source_sha256": "269650ebcc373d7bdf79fa17346bd6f847973f17e60c1ac9bcae7cfd97bf936f",
+  "differential_cases": 45,
+  "harness_sha256": "283b794f445c5727bf7d9420a74737f414089e0c6b6029ca3cb5e406afb681bc",
+  "method_source_sha256": "e17499af8e6ffbdb12f2100dd58abeab48dd06d92feb442ef192f8b9310b6b4f",
+  "native_extension_cases": 4,
+  "networkx_version": "3.4.2",
+  "numpy_version": "2.2.6",
+  "python_boundary_cases": 5,
+  "python_boundary_names": [
+    "none_name",
+    "arbitrary_object",
+    "unbounded_integer",
+    "duplicate_originator_argument",
+    "reflection_mutation"
+  ],
+  "result": "PASS",
+  "source_sha256": "dfa858918068a792cb0a673b400ee6f3f93107f1d17baad28f72546f50fbcede",
+  "total_cases": 54
+}

@@ -1,0 +1,13 @@
+{
+  "component": "core.controller.ResourceUpdator",
+  "native_unit_case_groups": 7,
+  "python_only_boundaries": {
+    "assert_optimization": "Python -O can disable operator/owner/safety asserts; native typed validation is stable in every build.",
+    "cold_strings": "Python owner/operator/attribute strings remain compatibility inputs; native operations are enums and prepared resource IDs.",
+    "dynamic_protocols": "Python accepts arbitrary mappings, numeric objects, monkey patches, and truthiness; native values use frozen bool/int64/double lanes.",
+    "unbounded_values": "Python integers and node labels are unbounded; native range failures are typed and never invoke signed-overflow UB."
+  },
+  "shared_case_count": 10,
+  "source_sha256": "9B7C14F8C6EAA5E8BC50A723B727FEC7EFF8F1C7D05F7BEF0DA0CC941C15AC85",
+  "status": "PASS"
+}

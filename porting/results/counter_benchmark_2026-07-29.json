@@ -1,0 +1,54 @@
+{
+  "benchmark_sha256": "A02016E7390D366D99A601B7458E622E683E7DDFA5D53743AE912ECC0A41C02F",
+  "case": "mixed_whole_network_resource_sum",
+  "component": "core.Counter",
+  "cpp": [
+    {
+      "cpp_median_ns": 23527090,
+      "speedup_vs_python": 3.6141722584476024,
+      "workers": 1
+    },
+    {
+      "cpp_median_ns": 17587600,
+      "speedup_vs_python": 4.83471059155314,
+      "workers": 2
+    },
+    {
+      "cpp_median_ns": 19448487,
+      "speedup_vs_python": 4.372111619788213,
+      "workers": 8
+    }
+  ],
+  "fingerprint": {
+    "checksum": 3910809078534895256,
+    "output_bytes": 22
+  },
+  "oracle": {
+    "fake_boundary": "FakeAttribute plus FakeNetwork resource-major row getters only; no BaseNetwork, graph, Solution, Pandas, solver, or system emulation",
+    "loader": "exact single-class AST isolation",
+    "numpy_version": "2.2.6"
+  },
+  "protocol": {
+    "entry_count": 786429,
+    "fingerprint_excluded": true,
+    "fixture_and_prepare_excluded": true,
+    "native_timed_loop_uses_only_prepared_ids": true,
+    "node_count": 131072,
+    "process_startup_excluded": true,
+    "repetitions": 3,
+    "result_gate": "CounterNumber lane plus raw64 bits/FNV/output bytes",
+    "warmups": 1,
+    "workers": [
+      1,
+      2,
+      8
+    ]
+  },
+  "python_median_ns": 85030956,
+  "runtime": {
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+    "python": "3.10.20"
+  },
+  "source_sha256": "574745F86E99CD656CB0165330E3196B4F5EBF4EAA0687B076B8D9602DB4D637",
+  "status": "PASS"
+}

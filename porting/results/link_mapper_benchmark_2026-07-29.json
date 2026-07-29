@@ -1,0 +1,67 @@
+{
+  "benchmark_sha256": "953a42b31874b21345397a8ce7d87f571781e9e530e74ec412d2c31a0599975e",
+  "protocol": {
+    "allow_constraint_violation": false,
+    "caller_configured_candidate_workers": true,
+    "candidate_paths": 1024,
+    "complete_route_state_gate_before_timing": true,
+    "cpp_process_startup_excluded": true,
+    "fingerprint_excluded": true,
+    "fixture_and_preparation_excluded": true,
+    "physical_edges": 2048,
+    "record_constraint_violation": true,
+    "repetitions": 3,
+    "shortest_method": "all_shortest",
+    "topology_constraint_workers": 1,
+    "warmups": 1,
+    "workers": [
+      1,
+      2,
+      8
+    ]
+  },
+  "result": "PASS",
+  "rows": [
+    {
+      "candidate_paths": 1024,
+      "candidate_workers": 1,
+      "checksum": 14052633754962558449,
+      "cpp_median_ms": 0.628866,
+      "kind": "link_mapper_safe_all_shortest",
+      "output_bytes": 27830,
+      "physical_edges": 2048,
+      "python_median_ms": 8.861967,
+      "speedup": 14.091979849443284,
+      "type_tag": "ordered_link_route_state_v1"
+    },
+    {
+      "candidate_paths": 1024,
+      "candidate_workers": 2,
+      "checksum": 14052633754962558449,
+      "cpp_median_ms": 0.987043,
+      "kind": "link_mapper_safe_all_shortest",
+      "output_bytes": 27830,
+      "physical_edges": 2048,
+      "python_median_ms": 8.861967,
+      "speedup": 8.978298817782001,
+      "type_tag": "ordered_link_route_state_v1"
+    },
+    {
+      "candidate_paths": 1024,
+      "candidate_workers": 8,
+      "checksum": 14052633754962558449,
+      "cpp_median_ms": 1.720057,
+      "kind": "link_mapper_safe_all_shortest",
+      "output_bytes": 27830,
+      "physical_edges": 2048,
+      "python_median_ms": 8.861967,
+      "speedup": 5.15213565596954,
+      "type_tag": "ordered_link_route_state_v1"
+    }
+  ],
+  "runtime": {
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+    "python": "3.10.20"
+  },
+  "source_sha256": "e7e5fb542d6fca6a5c9a8bebace2c82e9bfedef1628cd8adbb065c4f95d40237"
+}

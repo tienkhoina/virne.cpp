@@ -1,0 +1,33 @@
+{
+  "base_source_sha256": "94cb1185b5e6f0046d9393f97af1ee0dd1c0d688596b102a0ec3cc98314addce",
+  "case_count": 19,
+  "native_extension_cases": [
+    "native_clone_move"
+  ],
+  "networkx_version": "3.4.2",
+  "numpy_version": "2.2.6",
+  "python_only_boundaries": {
+    "arbitrary_gml_labels": "Python accepts arbitrary hashable labels; the frozen native loader uses dense label=id.",
+    "arbitrary_mapping_truthiness": "Dynamic mapping protocols and truthiness remain a cold Python-only boundary.",
+    "dictconfig_mutation": "Python mutates DictConfig topology.num_nodes; native input documents are immutable.",
+    "networkx_private_storage": "Python replaces private NetworkX storage with observable partial mutation on failure.",
+    "python_dataset_roundtrip_bug": "Python cannot round-trip its own empty or non-empty attribute-setting GML spelling; native keeps valid typed GML.",
+    "stdout_diagnostics": "Python prints load/warning diagnostics; native exposes a typed build report.",
+    "torch_seed_side_effects": "Torch/CUDA seeding is intentionally deferred with the ML boundary."
+  },
+  "result": "PASS",
+  "shared_cases": [
+    "generated_w0",
+    "generated_w1",
+    "generated_w2",
+    "generated_w8",
+    "continued",
+    "loaded",
+    "loaded_empty",
+    "broken_fallback",
+    "missing_fallback",
+    "broken_missing_num",
+    "dataset_load"
+  ],
+  "source_sha256": "e37d48b2c1651b503931597b6cca5620a413a11c3d003cf8c70af89246e4ca5a"
+}

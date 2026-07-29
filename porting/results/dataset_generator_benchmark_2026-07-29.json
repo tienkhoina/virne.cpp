@@ -1,0 +1,102 @@
+{
+  "benchmark_sha256": "991ece64defb328f8a8ad46a92a91998dd3dd651f517e1cbb74e740bf1cf7983",
+  "protocol": {
+    "binary_output_gate_before_acceptance": true,
+    "caller_configured_workers": true,
+    "count": 512,
+    "cpp_process_startup_excluded": true,
+    "fingerprint_excluded": true,
+    "fixture_creation_excluded": true,
+    "per_request_attribute_workers": 1,
+    "per_request_factory_workers": 1,
+    "repetitions": 3,
+    "warmups": 1,
+    "worker_auto_tuning": false,
+    "worker_fields": [
+      "virtual_simulation.arrangement_workers",
+      "virtual_simulation.event_workers"
+    ],
+    "workers": [
+      1,
+      2,
+      8
+    ]
+  },
+  "result": "PASS",
+  "rows": [
+    {
+      "checksum": 12807557851346020205,
+      "count": 512,
+      "cpp_median_ms": 15.149291,
+      "entry_count": 512,
+      "kind": "dataset_generator_ordinary",
+      "output_bytes": 70266,
+      "python_median_ms": 27.879044,
+      "speedup": 1.8402870470967916,
+      "workers": 1
+    },
+    {
+      "checksum": 12807557851346020205,
+      "count": 512,
+      "cpp_median_ms": 14.365843,
+      "entry_count": 512,
+      "kind": "dataset_generator_ordinary",
+      "output_bytes": 70266,
+      "python_median_ms": 27.879044,
+      "speedup": 1.9406479661513774,
+      "workers": 2
+    },
+    {
+      "checksum": 12807557851346020205,
+      "count": 512,
+      "cpp_median_ms": 13.911506,
+      "entry_count": 512,
+      "kind": "dataset_generator_ordinary",
+      "output_bytes": 70266,
+      "python_median_ms": 27.879044,
+      "speedup": 2.004027745091006,
+      "workers": 8
+    },
+    {
+      "checksum": 16807312341349659821,
+      "count": 512,
+      "cpp_median_ms": 52.036351,
+      "entry_count": 512,
+      "kind": "dataset_generator_changeable",
+      "output_bytes": 71875,
+      "python_median_ms": 144.576812,
+      "speedup": 2.7783810590408233,
+      "workers": 1
+    },
+    {
+      "checksum": 16807312341349659821,
+      "count": 512,
+      "cpp_median_ms": 52.492845,
+      "entry_count": 512,
+      "kind": "dataset_generator_changeable",
+      "output_bytes": 71875,
+      "python_median_ms": 144.576812,
+      "speedup": 2.7542193988533104,
+      "workers": 2
+    },
+    {
+      "checksum": 16807312341349659821,
+      "count": 512,
+      "cpp_median_ms": 57.798831,
+      "entry_count": 512,
+      "kind": "dataset_generator_changeable",
+      "output_bytes": 71875,
+      "python_median_ms": 144.576812,
+      "speedup": 2.5013795175199998,
+      "workers": 8
+    }
+  ],
+  "runtime": {
+    "numpy": "2.2.6",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+    "python": "3.10.20"
+  },
+  "simulator_source_sha256": "970e63f9dac59f60e2ed1786606dc87d3271af062ba1d8d6c67aef8d3c7478e1",
+  "source_sha256": "43d5dbe625fcd15f273067700b3c9d0b69cf931e064f6542c65802b0a4ba4e5c",
+  "torch_seed_calls": 0
+}

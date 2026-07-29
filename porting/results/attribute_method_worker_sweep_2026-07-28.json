@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "raw_artifact_sha256": "85fe984a3da9d4fa52177ec5cdc2e0f3fdb554b74e74aa06723777f511f5777d",
+  "python_source_sha256": "e17499af8e6ffbdb12f2100dd58abeab48dd06d92feb442ef192f8b9310b6b4f",
+  "harness_sha256": "640f6db56ae35bd88d1370e7eefe47d910e054334eba9fc926b10cf37bd2a782",
+  "kind": "hard_le_double",
+  "count": 4000000,
+  "warmups": 1,
+  "samples": 3,
+  "configured_workers": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+  "checksum": 16492953567995315926,
+  "all_python_checksums_exact": true,
+  "sequential_median_ms": 7.079821,
+  "best_configured_workers": 2,
+  "best_median_ms": 6.074713,
+  "best_vs_sequential": 1.165458,
+  "configuration_policy": "caller supplied; zero and one are sequential; count and affinity capped"
+}

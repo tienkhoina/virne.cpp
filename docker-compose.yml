@@ -1,0 +1,16 @@
+services:
+  virne-cpp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: virne-cpp-toolchain:gcc11.4
+    container_name: virne-cpp-dev
+    working_dir: /work
+    volumes:
+      # Bind-mount the repository itself: the container compiles in place and
+      # every artifact (build/, libs/, .deps-cache/) is written to the host.
+      - .:/work
+    # Keep the container alive so `docker exec` can be used for build/test runs.
+    command: ["sleep", "infinity"]
+    tty: true
+    stdin_open: true

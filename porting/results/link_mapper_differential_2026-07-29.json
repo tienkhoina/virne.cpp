@@ -1,0 +1,12 @@
+{
+  "component": "core.controller.LinkMapper",
+  "python_only_boundaries": {
+    "broken_unsafe_whole_mapping": "Pinned Python non-empty unsafe link_mapping passes an unsupported pruning_ratio keyword, followed by tuple arithmetic and a self-reference bug; native rejects it before mutation.",
+    "deferred_mcf_solver": "route_v_links_with_mcf dynamically imports OR-Tools/SCIP and is a deferred solver surface outside this graph/controller leaf.",
+    "dynamic_protocols": "Python accepts arbitrary mappings, callback objects, monkey patches, custom numerics, and unbounded labels; native uses frozen typed networks, values, and ranker input.",
+    "native_candidate_workers": "Configured candidate workers preserve Python path order but are a native throughput extension; Python checks candidates sequentially."
+  },
+  "shared_case_count": 17,
+  "source_sha256": "E7E5FB542D6FCA6A5C9A8BEBACE2C82E9BFEDEF1628CD8ADBB065C4F95D40237",
+  "status": "PASS"
+}

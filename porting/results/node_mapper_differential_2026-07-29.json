@@ -1,0 +1,12 @@
+{
+  "component": "core.controller.NodeMapper",
+  "python_only_boundaries": {
+    "dynamic_protocols": "Python accepts arbitrary mappings, custom numeric objects, monkey patches, and unbounded node labels; native preparation accepts frozen typed networks and values.",
+    "invalid_mapping_inputs": "Python exposes assertion or unbound-local failures for invalid methods and empty/incomplete candidates; native reports deterministic typed errors.",
+    "native_candidate_workers": "Configured candidate workers preserve Python candidate order but are a native throughput extension; Python evaluates candidates sequentially.",
+    "unsupported_unsafe_mapping": "Both implementations reject allow-violation whole-network mapping; native reports a typed unsupported-operation error before mutation."
+  },
+  "shared_case_count": 12,
+  "source_sha256": "8AD2AE077E61732DCB77FFA08269AAB630BDB6DF29969C983D09A3565BA860F9",
+  "status": "PASS"
+}

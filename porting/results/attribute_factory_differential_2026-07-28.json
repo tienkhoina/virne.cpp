@@ -1,0 +1,35 @@
+{
+  "dependency_sha256": {
+    "attribute_method.py": "e17499af8e6ffbdb12f2100dd58abeab48dd06d92feb442ef192f8b9310b6b4f",
+    "base_attribute.py": "103c5c16126ca76e782c2191ff0811b95ed88a0c3637f3a61e84c0b22df42e8e",
+    "graph_attribute.py": "dfa858918068a792cb0a673b400ee6f3f93107f1d17baad28f72546f50fbcede",
+    "link_attribute.py": "a95cfd2b8e2b46d4de23f70934ca942de502e674e2a7eaa139482df640e8646f",
+    "node_attribute.py": "e90e286320e59ebbba9957b701f6f12acdc1785e4821de80ccc5a0ab0f3ee56a"
+  },
+  "differential_cases": 29,
+  "harness_sha256": "ec25a6e44ca7eeb92ba60dcc5a9bc859ab08b31db60fc72dd0c13a0d25ff574a",
+  "native_extension_cases": 3,
+  "numpy_version": "2.2.6",
+  "python_boundary_cases": 7,
+  "python_boundary_descriptions": {
+    "arbitrary_extra_attribute": "Python reflects arbitrary kwargs; C++ stores only documented fixed fields.",
+    "duplicate_checking_level_call_binding": "A flat checking_level is re-forwarded by Python as a duplicate kwarg; C++ validates and stores the checking enum directly.",
+    "duplicate_restriction_call_binding": "Flat restriction plus constraint_restrictions reaches Python as duplicate restriction kwargs and raises TypeError; C++ resolves precedence once.",
+    "dynamic_key_stringified_once": "Python stringifies an arbitrary dynamic key once; C++ accepts fixed setting keys.",
+    "integer_generative_coercion": "Python retains integer 1; the typed C++ setting boundary requires bool.",
+    "nested_python_config": "Python expands a dynamic nested config; repository settings use flat fields.",
+    "non_string_name": "Python retains a non-string name; the typed C++ registry owns strings."
+  },
+  "python_boundary_names": [
+    "integer_generative_coercion",
+    "non_string_name",
+    "arbitrary_extra_attribute",
+    "nested_python_config",
+    "duplicate_restriction_call_binding",
+    "duplicate_checking_level_call_binding",
+    "dynamic_key_stringified_once"
+  ],
+  "result": "PASS",
+  "source_sha256": "11ac0c2235ba02f6538427f3774c93766820ea640531c97c94f4b4daf2d7b010",
+  "total_cases": 39
+}

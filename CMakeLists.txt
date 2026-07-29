@@ -130,6 +130,10 @@ add_subdirectory(virne/solver)
 add_subdirectory(virne/system)
 add_subdirectory(virne/utils)
 
+# Cross-language port verification targets live outside the frozen graph,
+# config/YAML and CSV modules.
+add_subdirectory(porting)
+
 #
 # Helper
 #

@@ -1,0 +1,410 @@
+{
+  "harness_sha256": "104474c2e434db8fdf723890c3a39ed46cce23f4d33c8e583ed386f0319875d2",
+  "numpy_version": "2.2.6",
+  "protocol": {
+    "allocation_generation_and_cast_included": true,
+    "checksum_and_continuation_excluded": true,
+    "paired_alternating_order": true,
+    "performance_gate": false,
+    "process_startup_excluded": true,
+    "repetitions": 31,
+    "rng_construction_and_seed_excluded": true,
+    "scale": 2.0,
+    "seed": 123,
+    "thread_creation_and_join_included": true,
+    "warmups": 5,
+    "worker_policy_gate": true,
+    "worker_width_order_rotated_and_reversed": true,
+    "worker_widths_interleaved": true,
+    "workers": [
+      1,
+      0,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  "rows": [
+    {
+      "checksum": 1534881458,
+      "count": 600000,
+      "cpp": {
+        "mad_ms": 0.6111110000000011,
+        "median_ms": 8.111355,
+        "p95_ms": 18.975545
+      },
+      "kind": "exponential_int",
+      "normal_bits": "bfdd891d991e12f9",
+      "output_bytes": 4800000,
+      "python": {
+        "mad_ms": 0.7476540000000007,
+        "median_ms": 15.827698,
+        "p95_ms": 19.373307
+      },
+      "random_bits": "3fd4d27072474fb4",
+      "speedup": 1.9513013547058415,
+      "workers": 1
+    },
+    {
+      "checksum": 1534881458,
+      "count": 600000,
+      "cpp": {
+        "mad_ms": 0.4735680000000002,
+        "median_ms": 5.420485,
+        "p95_ms": 7.454832
+      },
+      "kind": "exponential_int",
+      "normal_bits": "bfdd891d991e12f9",
+      "output_bytes": 4800000,
+      "python": {
+        "mad_ms": 0.4067980000000002,
+        "median_ms": 15.712863,
+        "p95_ms": 22.786593
+      },
+      "random_bits": "3fd4d27072474fb4",
+      "speedup": 2.8987928201996684,
+      "workers": 0
+    },
+    {
+      "checksum": 1534881458,
+      "count": 600000,
+      "cpp": {
+        "mad_ms": 0.41932800000000015,
+        "median_ms": 6.193224,
+        "p95_ms": 7.475852
+      },
+      "kind": "exponential_int",
+      "normal_bits": "bfdd891d991e12f9",
+      "output_bytes": 4800000,
+      "python": {
+        "mad_ms": 0.5360500000000012,
+        "median_ms": 15.749356,
+        "p95_ms": 17.877355
+      },
+      "random_bits": "3fd4d27072474fb4",
+      "speedup": 2.542997960351507,
+      "workers": 2
+    },
+    {
+      "checksum": 1534881458,
+      "count": 600000,
+      "cpp": {
+        "mad_ms": 0.3456759999999992,
+        "median_ms": 5.590907,
+        "p95_ms": 6.813723
+      },
+      "kind": "exponential_int",
+      "normal_bits": "bfdd891d991e12f9",
+      "output_bytes": 4800000,
+      "python": {
+        "mad_ms": 0.7738429999999994,
+        "median_ms": 15.944241,
+        "p95_ms": 20.739322
+      },
+      "random_bits": "3fd4d27072474fb4",
+      "speedup": 2.8518165299476457,
+      "workers": 3
+    },
+    {
+      "checksum": 1534881458,
+      "count": 600000,
+      "cpp": {
+        "mad_ms": 0.28876100000000005,
+        "median_ms": 5.567351,
+        "p95_ms": 6.487361
+      },
+      "kind": "exponential_int",
+      "normal_bits": "bfdd891d991e12f9",
+      "output_bytes": 4800000,
+      "python": {
+        "mad_ms": 0.5256959999999999,
+        "median_ms": 15.67419,
+        "p95_ms": 18.480412
+      },
+      "random_bits": "3fd4d27072474fb4",
+      "speedup": 2.81537664860721,
+      "workers": 4
+    },
+    {
+      "checksum": 1534881458,
+      "count": 600000,
+      "cpp": {
+        "mad_ms": 0.2269760000000005,
+        "median_ms": 5.377518,
+        "p95_ms": 6.464342
+      },
+      "kind": "exponential_int",
+      "normal_bits": "bfdd891d991e12f9",
+      "output_bytes": 4800000,
+      "python": {
+        "mad_ms": 0.9136919999999993,
+        "median_ms": 15.95929,
+        "p95_ms": 18.373795
+      },
+      "random_bits": "3fd4d27072474fb4",
+      "speedup": 2.967779931187585,
+      "workers": 5
+    },
+    {
+      "checksum": 1534881458,
+      "count": 600000,
+      "cpp": {
+        "mad_ms": 0.5458630000000007,
+        "median_ms": 5.45687,
+        "p95_ms": 7.980852
+      },
+      "kind": "exponential_int",
+      "normal_bits": "bfdd891d991e12f9",
+      "output_bytes": 4800000,
+      "python": {
+        "mad_ms": 0.7066459999999992,
+        "median_ms": 15.784693,
+        "p95_ms": 21.932141
+      },
+      "random_bits": "3fd4d27072474fb4",
+      "speedup": 2.892627641853297,
+      "workers": 6
+    },
+    {
+      "checksum": 1534881458,
+      "count": 600000,
+      "cpp": {
+        "mad_ms": 0.3687269999999998,
+        "median_ms": 5.214415,
+        "p95_ms": 7.78666
+      },
+      "kind": "exponential_int",
+      "normal_bits": "bfdd891d991e12f9",
+      "output_bytes": 4800000,
+      "python": {
+        "mad_ms": 0.3891639999999992,
+        "median_ms": 15.659013,
+        "p95_ms": 20.308889
+      },
+      "random_bits": "3fd4d27072474fb4",
+      "speedup": 3.003023925023229,
+      "workers": 7
+    },
+    {
+      "checksum": 1534881458,
+      "count": 600000,
+      "cpp": {
+        "mad_ms": 0.3466269999999998,
+        "median_ms": 5.561907,
+        "p95_ms": 6.674968
+      },
+      "kind": "exponential_int",
+      "normal_bits": "bfdd891d991e12f9",
+      "output_bytes": 4800000,
+      "python": {
+        "mad_ms": 0.9217670000000009,
+        "median_ms": 16.06249,
+        "p95_ms": 22.924118
+      },
+      "random_bits": "3fd4d27072474fb4",
+      "speedup": 2.8879465262543946,
+      "workers": 8
+    },
+    {
+      "checksum": 2378704968,
+      "count": 600000,
+      "cpp": {
+        "mad_ms": 0.17055800000000065,
+        "median_ms": 6.111475,
+        "p95_ms": 10.236897
+      },
+      "kind": "exponential_bool",
+      "normal_bits": "bfdd891d991e12f9",
+      "output_bytes": 600000,
+      "python": {
+        "mad_ms": 0.6851890000000012,
+        "median_ms": 14.426925,
+        "p95_ms": 18.511433
+      },
+      "random_bits": "3fd4d27072474fb4",
+      "speedup": 2.3606289807288747,
+      "workers": 1
+    },
+    {
+      "checksum": 2378704968,
+      "count": 600000,
+      "cpp": {
+        "mad_ms": 0.6223990000000001,
+        "median_ms": 4.044105,
+        "p95_ms": 5.531581
+      },
+      "kind": "exponential_bool",
+      "normal_bits": "bfdd891d991e12f9",
+      "output_bytes": 600000,
+      "python": {
+        "mad_ms": 0.7651569999999985,
+        "median_ms": 14.551875,
+        "p95_ms": 44.318962
+      },
+      "random_bits": "3fd4d27072474fb4",
+      "speedup": 3.598293071025604,
+      "workers": 0
+    },
+    {
+      "checksum": 2378704968,
+      "count": 600000,
+      "cpp": {
+        "mad_ms": 1.12873,
+        "median_ms": 5.638961,
+        "p95_ms": 11.647157
+      },
+      "kind": "exponential_bool",
+      "normal_bits": "bfdd891d991e12f9",
+      "output_bytes": 600000,
+      "python": {
+        "mad_ms": 1.0351119999999998,
+        "median_ms": 14.572322,
+        "p95_ms": 19.678198
+      },
+      "random_bits": "3fd4d27072474fb4",
+      "speedup": 2.584221100305535,
+      "workers": 2
+    },
+    {
+      "checksum": 2378704968,
+      "count": 600000,
+      "cpp": {
+        "mad_ms": 0.46705100000000055,
+        "median_ms": 4.261529,
+        "p95_ms": 8.590703
+      },
+      "kind": "exponential_bool",
+      "normal_bits": "bfdd891d991e12f9",
+      "output_bytes": 600000,
+      "python": {
+        "mad_ms": 0.7279900000000001,
+        "median_ms": 14.360151,
+        "p95_ms": 18.958898
+      },
+      "random_bits": "3fd4d27072474fb4",
+      "speedup": 3.3697180049695774,
+      "workers": 3
+    },
+    {
+      "checksum": 2378704968,
+      "count": 600000,
+      "cpp": {
+        "mad_ms": 0.31392100000000056,
+        "median_ms": 4.604408,
+        "p95_ms": 6.862007
+      },
+      "kind": "exponential_bool",
+      "normal_bits": "bfdd891d991e12f9",
+      "output_bytes": 600000,
+      "python": {
+        "mad_ms": 0.7047190000000008,
+        "median_ms": 14.419607,
+        "p95_ms": 17.307291
+      },
+      "random_bits": "3fd4d27072474fb4",
+      "speedup": 3.131696191996886,
+      "workers": 4
+    },
+    {
+      "checksum": 2378704968,
+      "count": 600000,
+      "cpp": {
+        "mad_ms": 0.22069600000000023,
+        "median_ms": 4.09181,
+        "p95_ms": 7.243757
+      },
+      "kind": "exponential_bool",
+      "normal_bits": "bfdd891d991e12f9",
+      "output_bytes": 600000,
+      "python": {
+        "mad_ms": 0.5720869999999998,
+        "median_ms": 14.600292,
+        "p95_ms": 18.533463
+      },
+      "random_bits": "3fd4d27072474fb4",
+      "speedup": 3.5681744753544278,
+      "workers": 5
+    },
+    {
+      "checksum": 2378704968,
+      "count": 600000,
+      "cpp": {
+        "mad_ms": 0.5477880000000002,
+        "median_ms": 4.119709,
+        "p95_ms": 5.926166
+      },
+      "kind": "exponential_bool",
+      "normal_bits": "bfdd891d991e12f9",
+      "output_bytes": 600000,
+      "python": {
+        "mad_ms": 0.6579370000000004,
+        "median_ms": 14.850731,
+        "p95_ms": 18.284225
+      },
+      "random_bits": "3fd4d27072474fb4",
+      "speedup": 3.604800970165611,
+      "workers": 6
+    },
+    {
+      "checksum": 2378704968,
+      "count": 600000,
+      "cpp": {
+        "mad_ms": 0.5813280000000001,
+        "median_ms": 4.347696,
+        "p95_ms": 6.072074
+      },
+      "kind": "exponential_bool",
+      "normal_bits": "bfdd891d991e12f9",
+      "output_bytes": 600000,
+      "python": {
+        "mad_ms": 0.7000960000000003,
+        "median_ms": 14.652448,
+        "p95_ms": 24.61769
+      },
+      "random_bits": "3fd4d27072474fb4",
+      "speedup": 3.370163875303149,
+      "workers": 7
+    },
+    {
+      "checksum": 2378704968,
+      "count": 600000,
+      "cpp": {
+        "mad_ms": 0.5022599999999997,
+        "median_ms": 4.302173,
+        "p95_ms": 6.689796
+      },
+      "kind": "exponential_bool",
+      "normal_bits": "bfdd891d991e12f9",
+      "output_bytes": 600000,
+      "python": {
+        "mad_ms": 0.5339710000000011,
+        "median_ms": 14.374899,
+        "p95_ms": 18.057139
+      },
+      "random_bits": "3fd4d27072474fb4",
+      "speedup": 3.3413112396921276,
+      "workers": 8
+    }
+  ],
+  "runtime": {
+    "cpu_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "cpus_visible": 8,
+    "implementation": "CPython",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+    "python": "3.10.20"
+  },
+  "source_sha256": "269650ebcc373d7bdf79fa17346bd6f847973f17e60c1ac9bcae7cfd97bf936f"
+}

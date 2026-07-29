@@ -1,0 +1,12 @@
+{
+  "component": "core.Counter",
+  "python_only_boundaries": {
+    "dynamic_protocols": "Python accepts arbitrary mappings, custom numerics, monkey patches, and arbitrary-precision aggregate integers; native Counter uses frozen typed IDs and int64/double lanes.",
+    "legacy_summary_csv": "Python summary_csv reaches an unbound instance-method call after CSV parsing; the native legacy CSV behavior is covered by its focused unit gate.",
+    "native_workers": "Configured deterministic gather workers are a native extension; the pinned Python methods expose scalar execution only.",
+    "pandas_summary_records": "The pinned oracle image has no Pandas; summary_records parity is classified here and covered by the native typed-record unit gate."
+  },
+  "shared_case_count": 20,
+  "source_sha256": "574745F86E99CD656CB0165330E3196B4F5EBF4EAA0687B076B8D9602DB4D637",
+  "status": "PASS"
+}

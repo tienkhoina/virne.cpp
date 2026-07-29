@@ -1,0 +1,79 @@
+{
+  "benchmark_sha256": "2c1474369bd84c12222540e97e7dd51fe1fb10f99529bab1c7053964e446e52f",
+  "oracle_loader_sha256": "b5da7a347700d5c566c39bc4d5501d631fe2483fec20331051f106f2624676aa",
+  "protocol": {
+    "allow_constraint_violation": false,
+    "caller_configured_candidate_workers": true,
+    "cpp_process_startup_excluded": true,
+    "fingerprint_excluded": true,
+    "fixture_and_preparation_excluded": true,
+    "inplace": true,
+    "low_candidates": 2048,
+    "matching_method": "greedy",
+    "minimum_candidate_checks": 65568,
+    "ordered_numeric_output_gate_before_timing": true,
+    "physical_nodes": 2080,
+    "repetitions": 3,
+    "reusable": false,
+    "virtual_nodes": 32,
+    "warmups": 1,
+    "workers": [
+      1,
+      2,
+      8
+    ]
+  },
+  "result": "PASS",
+  "rows": [
+    {
+      "candidate_workers": 1,
+      "checksum": 15604526718891224062,
+      "cpp_median_ms": 3.289713,
+      "entry_count": 2208,
+      "kind": "node_mapper_greedy",
+      "low_candidates": 2048,
+      "minimum_candidate_checks": 65568,
+      "output_bytes": 9744,
+      "physical_nodes": 2080,
+      "python_median_ms": 61.280082,
+      "speedup": 18.62778971904236,
+      "type_tag": "ordered_numeric_mapping_v1",
+      "virtual_nodes": 32
+    },
+    {
+      "candidate_workers": 2,
+      "checksum": 15604526718891224062,
+      "cpp_median_ms": 16.008148,
+      "entry_count": 2208,
+      "kind": "node_mapper_greedy",
+      "low_candidates": 2048,
+      "minimum_candidate_checks": 65568,
+      "output_bytes": 9744,
+      "physical_nodes": 2080,
+      "python_median_ms": 61.280082,
+      "speedup": 3.828055687641069,
+      "type_tag": "ordered_numeric_mapping_v1",
+      "virtual_nodes": 32
+    },
+    {
+      "candidate_workers": 8,
+      "checksum": 15604526718891224062,
+      "cpp_median_ms": 19.88603,
+      "entry_count": 2208,
+      "kind": "node_mapper_greedy",
+      "low_candidates": 2048,
+      "minimum_candidate_checks": 65568,
+      "output_bytes": 9744,
+      "physical_nodes": 2080,
+      "python_median_ms": 61.280082,
+      "speedup": 3.081564394703216,
+      "type_tag": "ordered_numeric_mapping_v1",
+      "virtual_nodes": 32
+    }
+  ],
+  "runtime": {
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+    "python": "3.10.20"
+  },
+  "source_sha256": "8ad2ae077e61732dcb77ffa08269aab630bdb6df29969c983d09a3565ba860f9"
+}

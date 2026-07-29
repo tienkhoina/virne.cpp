@@ -1,0 +1,58 @@
+{
+  "protocol": {
+    "binary_output_gate_before_acceptance": true,
+    "caller_configured_workers": true,
+    "count": 32768,
+    "fingerprint_excluded": true,
+    "fixture_creation_excluded": true,
+    "process_startup_excluded": true,
+    "repetitions": 3,
+    "warmups": 1,
+    "worker_auto_tuning": false,
+    "workers": [
+      1,
+      2,
+      8
+    ]
+  },
+  "result": "PASS",
+  "rows": [
+    {
+      "checksum": 4149871601928940857,
+      "count": 32768,
+      "cpp_median_ms": 50.235216,
+      "entry_count": 32768,
+      "feasible_count": 17476,
+      "kind": "solution_lifecycle",
+      "output_bytes": 2097152,
+      "python_median_ms": 339.608407,
+      "speedup": 6.760365218694392,
+      "workers": 1
+    },
+    {
+      "checksum": 4149871601928940857,
+      "count": 32768,
+      "cpp_median_ms": 56.554575,
+      "entry_count": 32768,
+      "feasible_count": 17476,
+      "kind": "solution_lifecycle",
+      "output_bytes": 2097152,
+      "python_median_ms": 339.608407,
+      "speedup": 6.004967891633878,
+      "workers": 2
+    },
+    {
+      "checksum": 4149871601928940857,
+      "count": 32768,
+      "cpp_median_ms": 52.906065,
+      "entry_count": 32768,
+      "feasible_count": 17476,
+      "kind": "solution_lifecycle",
+      "output_bytes": 2097152,
+      "python_median_ms": 339.608407,
+      "speedup": 6.419082708192341,
+      "workers": 8
+    }
+  ],
+  "source_sha256": "ec5d64ef6695350f718a818461fbf60934b5077d8add39bb7ee8be18cfe1e78b"
+}

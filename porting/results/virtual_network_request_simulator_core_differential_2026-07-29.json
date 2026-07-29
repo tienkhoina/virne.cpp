@@ -1,0 +1,37 @@
+{
+  "case_count": 24,
+  "native_extension_cases": [
+    "native_invalid_size_kind",
+    "native_invalid_enum_lookup"
+  ],
+  "numpy_version": "2.2.6",
+  "python_only_boundaries": {
+    "arbitrary_setting_protocols": "Dynamic mapping, DictConfig, reflection, and mutation protocols stay at the Python boundary.",
+    "persistence_io": "GML/YAML persistence belongs to the already frozen network, dataset, and setting components.",
+    "stochastic_topologies": "Random and Waxman topology RNG behavior is frozen by the dedicated topology differential; this leaf uses path.",
+    "torch_seed_side_effects": "Torch/CUDA seeding is deliberately excluded with the deferred ML boundary."
+  },
+  "result": "PASS",
+  "shared_cases": [
+    "arrange_integer_w0",
+    "arrange_integer_w1",
+    "arrange_integer_w2",
+    "arrange_integer_w8",
+    "arrange_floating_w0",
+    "arrange_floating_w1",
+    "arrange_floating_w2",
+    "arrange_floating_w8",
+    "arrange_boolean_w0",
+    "arrange_boolean_w1",
+    "arrange_boolean_w2",
+    "arrange_boolean_w8",
+    "renew_path_w0",
+    "renew_path_w1",
+    "renew_path_w2",
+    "renew_path_w8",
+    "tie_order",
+    "loaded_index"
+  ],
+  "source_sha256": "970e63f9dac59f60e2ed1786606dc87d3271af062ba1d8d6c67aef8d3c7478e1",
+  "torch_imported": false
+}

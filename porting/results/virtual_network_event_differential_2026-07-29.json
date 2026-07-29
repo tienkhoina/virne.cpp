@@ -1,0 +1,31 @@
+{
+  "case_count": 20,
+  "native_extension_cases": [
+    "native_nan_rejected"
+  ],
+  "python_only_boundaries": {
+    "arbitrary_comparison_protocols": "User-defined equality/order side effects remain outside the fixed native scalar domain.",
+    "dynamic_getitem": "Python getattr accepts arbitrary dynamic keys; native fixed fields use direct accessors.",
+    "dynamic_setitem": "Python setattr can add fields and bypass validation; native setters preserve invariants.",
+    "numeric_type_equality": "Python accepts False/True and 0.0/1.0 as event types; native uses an enum.",
+    "python_nan_time": "Python accepts NaN because NaN < 0 is false; native rejects NaN for sortable events.",
+    "unvalidated_python_id": "Python does not validate event id; native VirtualEventId is non-negative size_t."
+  },
+  "result": "PASS",
+  "shared_cases": [
+    "ordinary",
+    "negative_zero",
+    "infinity",
+    "invalid_type",
+    "negative_vnet",
+    "negative_time",
+    "validation_order",
+    "typed_setters",
+    "batch_w0",
+    "batch_w1",
+    "batch_w2",
+    "batch_w8",
+    "stable_ties"
+  ],
+  "source_sha256": "970e63f9dac59f60e2ed1786606dc87d3271af062ba1d8d6c67aef8d3c7478e1"
+}

@@ -1,0 +1,18 @@
+{
+  "differential_cases": 19,
+  "harness_sha256": "5828a6a89cce620988ae041813b18f1b097f2918ed92808213ba84133116e1dd",
+  "native_extension_cases": 7,
+  "numpy_version": "2.2.6",
+  "python_boundary_cases": 6,
+  "python_boundary_names": [
+    "dynamic_str_fallback",
+    "non_string_key",
+    "arbitrary_numpy_dtype",
+    "ragged_array",
+    "unbounded_integer_to_infinity",
+    "base_network_empty_filter"
+  ],
+  "result": "PASS",
+  "source_sha256": "8ad9bab52a40342eaf331e3ac71b3d5f6db0326742d3d3c7c6aad7d34ad52d9e",
+  "total_cases": 32
+}

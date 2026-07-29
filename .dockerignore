@@ -1,0 +1,3 @@
+# The image COPYs nothing: the workspace is bind-mounted at /work. Keep the
+# build context empty so `docker build` never uploads the repo payload.
+*

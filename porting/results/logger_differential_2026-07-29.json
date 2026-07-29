@@ -1,0 +1,18 @@
+{
+  "component": "core.Logger",
+  "native_workers": [
+    1,
+    2,
+    8
+  ],
+  "python_only_boundaries": {
+    "backend_shim": "The class is AST-isolated and receives Python stdlib logging, a narrowly equivalent ColoredFormatter, and an LF-pinned FileHandler matching the Docker oracle because colorlog is an eager import and host Windows otherwise translates log newlines.",
+    "dynamic_protocols": "Python accepts arbitrary levels, mappings, values, handlers, and filesystem objects; native Logger uses fixed level/backend fields and pre-registered dense metric IDs.",
+    "native_schema_lock": "Native Logger rejects metric-schema growth after the first CSV row; Python can silently misalign later dict keys. The typed safety deviation belongs to the unit gate.",
+    "native_workers": "Python exposes scalar log calls only. Native log_batch workers 1/2/8 are compared with the same ordered Python scalar sequence.",
+    "optional_sinks": "WandB, TensorBoard, Torch, RL/training integration, and network sinks are deliberately excluded; the native cold LoggerSink seam prepares those future modules."
+  },
+  "shared_case_count": 9,
+  "source_sha256": "274189AF7211ABA134C4696B2DA8190F743B2F59D4287CF56843510F0B2C7083",
+  "status": "PASS"
+}

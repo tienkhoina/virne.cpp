@@ -1,0 +1,52 @@
+{
+  "cases": 92,
+  "harness_sha256": "104474c2e434db8fdf723890c3a39ed46cce23f4d33c8e583ed386f0319875d2",
+  "numpy_version": "2.2.6",
+  "python_warning_cases": {
+    "exponential_nan_int": [
+      [
+        "RuntimeWarning",
+        "invalid value encountered in cast"
+      ]
+    ],
+    "exponential_positive_inf_int": [
+      [
+        "RuntimeWarning",
+        "invalid value encountered in cast"
+      ]
+    ],
+    "normal_huge_int": [
+      [
+        "RuntimeWarning",
+        "invalid value encountered in cast"
+      ]
+    ],
+    "normal_int_lower_outside": [
+      [
+        "RuntimeWarning",
+        "invalid value encountered in cast"
+      ]
+    ],
+    "normal_int_upper_limit": [
+      [
+        "RuntimeWarning",
+        "invalid value encountered in cast"
+      ]
+    ],
+    "normal_nan_int": [
+      [
+        "RuntimeWarning",
+        "invalid value encountered in cast"
+      ]
+    ],
+    "normal_positive_inf_int": [
+      [
+        "RuntimeWarning",
+        "invalid value encountered in cast"
+      ]
+    ]
+  },
+  "source_sha256": "269650ebcc373d7bdf79fa17346bd6f847973f17e60c1ac9bcae7cfd97bf936f",
+  "status": "PASS",
+  "torch_backend": "controlled-fake-only"
+}

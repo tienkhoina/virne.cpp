@@ -1,0 +1,9 @@
+{
+  "binary64_str_cases": 16395,
+  "compatibility_cases": 60,
+  "harness_sha256": "622a778a47a0f300bc99a80fe74a8993dc20a5b49acef8556b76d34dde9e9b28",
+  "source_sha256": "269650ebcc373d7bdf79fa17346bd6f847973f17e60c1ac9bcae7cfd97bf936f",
+  "source_size": 9635,
+  "status": "PASS",
+  "torch_backend": "controlled-fake-only"
+}

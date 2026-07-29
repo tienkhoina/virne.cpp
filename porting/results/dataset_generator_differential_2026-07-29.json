@@ -1,0 +1,32 @@
+{
+  "case_count": 19,
+  "native_extension_cases": [],
+  "numpy_version": "2.2.6",
+  "python_only_boundaries": {
+    "native_seed_width": "RandomContext deliberately accepts the frozen non-negative uint32 seed domain rather than Python arbitrary integers.",
+    "persistence_filesystem": "Save-path composition and filesystem effects are covered by the Generator unit plus frozen dataset/network persistence gates.",
+    "torch_seed_boundary": "The unused eager torch import and Torch/CUDA global seeding remain deferred with the ML adapter.",
+    "typed_config_boundary": "Arbitrary mappings and DictConfig reflection are replaced by the completed Config API and one resolved subtree snapshot."
+  },
+  "result": "PASS",
+  "shared_cases": [
+    "selection_none",
+    "selection_physical",
+    "selection_virtual",
+    "selection_both",
+    "selection_both_w0",
+    "selection_both_w2",
+    "selection_both_w8",
+    "absent_seed_both",
+    "composed_seed_virtual",
+    "changeable_w0",
+    "changeable_w1",
+    "changeable_w2",
+    "changeable_w8",
+    "missing_subtree",
+    "invalid_changeable_count"
+  ],
+  "simulator_source_sha256": "970e63f9dac59f60e2ed1786606dc87d3271af062ba1d8d6c67aef8d3c7478e1",
+  "source_sha256": "43d5dbe625fcd15f273067700b3c9d0b69cf931e064f6542c65802b0a4ba4e5c",
+  "torch_seed_calls": 0
+}

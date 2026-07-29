@@ -1,0 +1,1250 @@
+{
+  "harness_sha256": "104474c2e434db8fdf723890c3a39ed46cce23f4d33c8e583ed386f0319875d2",
+  "numpy_version": "2.2.6",
+  "protocol": {
+    "allocation_generation_and_cast_included": true,
+    "checksum_and_continuation_excluded": true,
+    "paired_alternating_order": true,
+    "performance_gate": true,
+    "process_startup_excluded": true,
+    "repetitions": 31,
+    "rng_construction_and_seed_excluded": true,
+    "scale": 1.0,
+    "seed": 123,
+    "thread_creation_and_join_included": true,
+    "warmups": 5,
+    "worker_policy_gate": false,
+    "worker_width_order_rotated_and_reversed": true,
+    "worker_widths_interleaved": true,
+    "workers": [
+      1,
+      0,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  "rows": [
+    {
+      "checksum": 2096938232,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.2943549999999999,
+        "median_ms": 3.854504,
+        "p95_ms": 5.371471
+      },
+      "kind": "normal_float",
+      "normal_bits": "3fe272f31911677b",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.7590160000000008,
+        "median_ms": 10.732661,
+        "p95_ms": 14.573369
+      },
+      "random_bits": "3fee650e696754b9",
+      "speedup": 2.7844467148042913,
+      "workers": 1
+    },
+    {
+      "checksum": 3391141343,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.06370100000000001,
+        "median_ms": 1.161703,
+        "p95_ms": 1.48662
+      },
+      "kind": "uniform_float",
+      "normal_bits": "3fd0a54beb7c1918",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.48248400000000036,
+        "median_ms": 6.688779,
+        "p95_ms": 9.49592
+      },
+      "random_bits": "3fe0ba49e174c912",
+      "speedup": 5.757735841260633,
+      "workers": 1
+    },
+    {
+      "checksum": 1440505673,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.03666899999999995,
+        "median_ms": 0.777697,
+        "p95_ms": 1.015635
+      },
+      "kind": "uniform_int",
+      "normal_bits": "3fec775c2ad7e597",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.4226870000000007,
+        "median_ms": 6.998338,
+        "p95_ms": 7.944313
+      },
+      "random_bits": "3faeb44562ae08c0",
+      "speedup": 8.998797732278767,
+      "workers": 1
+    },
+    {
+      "checksum": 223918974,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.2594850000000002,
+        "median_ms": 2.006295,
+        "p95_ms": 2.982204
+      },
+      "kind": "uniform_int64_max",
+      "normal_bits": "3fd0a54beb7c1918",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.8019830000000008,
+        "median_ms": 7.782507,
+        "p95_ms": 9.906279
+      },
+      "random_bits": "3fe0ba49e174c912",
+      "speedup": 3.879044208354205,
+      "workers": 1
+    },
+    {
+      "checksum": 2202766360,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.20460299999999987,
+        "median_ms": 2.082712,
+        "p95_ms": 3.076837
+      },
+      "kind": "exponential_float",
+      "normal_bits": "3fd0a54beb7c1918",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.3179420000000004,
+        "median_ms": 9.155122,
+        "p95_ms": 21.640241
+      },
+      "random_bits": "3fe0ba49e174c912",
+      "speedup": 4.395769554311879,
+      "workers": 1
+    },
+    {
+      "checksum": 868457028,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.5144040000000007,
+        "median_ms": 10.701525,
+        "p95_ms": 12.686423
+      },
+      "kind": "poisson_int",
+      "normal_bits": "bfe38c7ef3aa83c1",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.37852399999999875,
+        "median_ms": 20.3451,
+        "p95_ms": 23.372763
+      },
+      "random_bits": "3fe0ff474604c77c",
+      "speedup": 1.9011402580473342,
+      "workers": 1
+    },
+    {
+      "checksum": 2359635024,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.3633369999999996,
+        "median_ms": 5.21248,
+        "p95_ms": 7.90778
+      },
+      "kind": "normal_int",
+      "normal_bits": "3fe272f31911677b",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.548255000000001,
+        "median_ms": 10.09787,
+        "p95_ms": 14.73413
+      },
+      "random_bits": "3fee650e696754b9",
+      "speedup": 1.9372486800908588,
+      "workers": 1
+    },
+    {
+      "checksum": 2359635024,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.43241499999999977,
+        "median_ms": 5.269346,
+        "p95_ms": 10.389395
+      },
+      "kind": "normal_int",
+      "normal_bits": "3fe272f31911677b",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.7081739999999996,
+        "median_ms": 10.668629,
+        "p95_ms": 21.152277
+      },
+      "random_bits": "3fee650e696754b9",
+      "speedup": 2.024659037383387,
+      "workers": 0
+    },
+    {
+      "checksum": 2359635024,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.3907210000000001,
+        "median_ms": 5.727895,
+        "p95_ms": 8.041436
+      },
+      "kind": "normal_int",
+      "normal_bits": "3fe272f31911677b",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.6907560000000004,
+        "median_ms": 10.595701,
+        "p95_ms": 17.528851
+      },
+      "random_bits": "3fee650e696754b9",
+      "speedup": 1.8498420449397204,
+      "workers": 2
+    },
+    {
+      "checksum": 2359635024,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.354406,
+        "median_ms": 5.6516,
+        "p95_ms": 8.302811
+      },
+      "kind": "normal_int",
+      "normal_bits": "3fe272f31911677b",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.688187000000001,
+        "median_ms": 10.323441,
+        "p95_ms": 22.373379
+      },
+      "random_bits": "3fee650e696754b9",
+      "speedup": 1.8266404204119189,
+      "workers": 3
+    },
+    {
+      "checksum": 2359635024,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.25870499999999996,
+        "median_ms": 5.505389,
+        "p95_ms": 8.444649
+      },
+      "kind": "normal_int",
+      "normal_bits": "3fe272f31911677b",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.8441499999999991,
+        "median_ms": 10.258213,
+        "p95_ms": 17.029469
+      },
+      "random_bits": "3fee650e696754b9",
+      "speedup": 1.8633039372876283,
+      "workers": 4
+    },
+    {
+      "checksum": 2359635024,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.5086269999999997,
+        "median_ms": 5.719625,
+        "p95_ms": 11.945211
+      },
+      "kind": "normal_int",
+      "normal_bits": "3fe272f31911677b",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.5793949999999999,
+        "median_ms": 10.56838,
+        "p95_ms": 18.323282
+      },
+      "random_bits": "3fee650e696754b9",
+      "speedup": 1.8477400179207553,
+      "workers": 5
+    },
+    {
+      "checksum": 2359635024,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.2696949999999996,
+        "median_ms": 5.511978,
+        "p95_ms": 8.650368
+      },
+      "kind": "normal_int",
+      "normal_bits": "3fe272f31911677b",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.4940440000000006,
+        "median_ms": 10.314722,
+        "p95_ms": 18.351731
+      },
+      "random_bits": "3fee650e696754b9",
+      "speedup": 1.87132858657999,
+      "workers": 6
+    },
+    {
+      "checksum": 2359635024,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.32187499999999947,
+        "median_ms": 5.686367,
+        "p95_ms": 11.843728
+      },
+      "kind": "normal_int",
+      "normal_bits": "3fe272f31911677b",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.4139879999999998,
+        "median_ms": 10.131185,
+        "p95_ms": 14.621497
+      },
+      "random_bits": "3fee650e696754b9",
+      "speedup": 1.7816621755155797,
+      "workers": 7
+    },
+    {
+      "checksum": 2359635024,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.3951140000000004,
+        "median_ms": 5.628573,
+        "p95_ms": 8.765378
+      },
+      "kind": "normal_int",
+      "normal_bits": "3fe272f31911677b",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.31170900000000046,
+        "median_ms": 9.936219,
+        "p95_ms": 12.128127
+      },
+      "random_bits": "3fee650e696754b9",
+      "speedup": 1.765317603591532,
+      "workers": 8
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.20889799999999958,
+        "median_ms": 4.422699,
+        "p95_ms": 5.185521
+      },
+      "kind": "normal_bool",
+      "normal_bits": "3fe272f31911677b",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 0.41051399999999916,
+        "median_ms": 8.512001,
+        "p95_ms": 11.908151
+      },
+      "random_bits": "3fee650e696754b9",
+      "speedup": 1.924616845957638,
+      "workers": 1
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.30980399999999975,
+        "median_ms": 4.378997,
+        "p95_ms": 5.398824
+      },
+      "kind": "normal_bool",
+      "normal_bits": "3fe272f31911677b",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 0.5091409999999996,
+        "median_ms": 8.371552,
+        "p95_ms": 10.565361
+      },
+      "random_bits": "3fee650e696754b9",
+      "speedup": 1.9117510242642322,
+      "workers": 0
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.38429599999999997,
+        "median_ms": 4.780767,
+        "p95_ms": 5.604888
+      },
+      "kind": "normal_bool",
+      "normal_bits": "3fe272f31911677b",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 0.4703129999999991,
+        "median_ms": 8.770242,
+        "p95_ms": 21.339293
+      },
+      "random_bits": "3fee650e696754b9",
+      "speedup": 1.8344842992766641,
+      "workers": 2
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.2410319999999997,
+        "median_ms": 4.687454,
+        "p95_ms": 6.985057
+      },
+      "kind": "normal_bool",
+      "normal_bits": "3fe272f31911677b",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 0.39079200000000114,
+        "median_ms": 8.518292,
+        "p95_ms": 10.947744
+      },
+      "random_bits": "3fee650e696754b9",
+      "speedup": 1.817253459980621,
+      "workers": 3
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.26229000000000013,
+        "median_ms": 4.755332,
+        "p95_ms": 6.314236
+      },
+      "kind": "normal_bool",
+      "normal_bits": "3fe272f31911677b",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 0.5943100000000001,
+        "median_ms": 8.543973,
+        "p95_ms": 10.819406
+      },
+      "random_bits": "3fee650e696754b9",
+      "speedup": 1.7967142988123646,
+      "workers": 4
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.29839899999999986,
+        "median_ms": 4.783764,
+        "p95_ms": 6.123935
+      },
+      "kind": "normal_bool",
+      "normal_bits": "3fe272f31911677b",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 0.23488899999999902,
+        "median_ms": 8.390262,
+        "p95_ms": 11.317093
+      },
+      "random_bits": "3fee650e696754b9",
+      "speedup": 1.7539038297039737,
+      "workers": 5
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.26660799999999973,
+        "median_ms": 4.801975,
+        "p95_ms": 5.676485
+      },
+      "kind": "normal_bool",
+      "normal_bits": "3fe272f31911677b",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 0.316732,
+        "median_ms": 8.427321,
+        "p95_ms": 10.88701
+      },
+      "random_bits": "3fee650e696754b9",
+      "speedup": 1.754969778060069,
+      "workers": 6
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.36206799999999983,
+        "median_ms": 4.80358,
+        "p95_ms": 5.79481
+      },
+      "kind": "normal_bool",
+      "normal_bits": "3fe272f31911677b",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 0.295636,
+        "median_ms": 8.178436,
+        "p95_ms": 10.075609
+      },
+      "random_bits": "3fee650e696754b9",
+      "speedup": 1.7025709991298155,
+      "workers": 7
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.23907200000000017,
+        "median_ms": 4.935233,
+        "p95_ms": 5.448007
+      },
+      "kind": "normal_bool",
+      "normal_bits": "3fe272f31911677b",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 0.42538000000000054,
+        "median_ms": 8.541246,
+        "p95_ms": 10.107024
+      },
+      "random_bits": "3fee650e696754b9",
+      "speedup": 1.7306672248301143,
+      "workers": 8
+    },
+    {
+      "checksum": 2260842165,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.32176300000000024,
+        "median_ms": 3.952232,
+        "p95_ms": 6.291038
+      },
+      "kind": "exponential_int",
+      "normal_bits": "3fd0a54beb7c1918",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.4805639999999993,
+        "median_ms": 8.191844,
+        "p95_ms": 10.953935
+      },
+      "random_bits": "3fe0ba49e174c912",
+      "speedup": 2.072713342738989,
+      "workers": 1
+    },
+    {
+      "checksum": 2260842165,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.3011759999999999,
+        "median_ms": 3.00795,
+        "p95_ms": 3.946175
+      },
+      "kind": "exponential_int",
+      "normal_bits": "3fd0a54beb7c1918",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.4654380000000007,
+        "median_ms": 8.550389,
+        "p95_ms": 12.474213
+      },
+      "random_bits": "3fe0ba49e174c912",
+      "speedup": 2.8425967851859237,
+      "workers": 0
+    },
+    {
+      "checksum": 2260842165,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.22652599999999978,
+        "median_ms": 3.480006,
+        "p95_ms": 4.499153
+      },
+      "kind": "exponential_int",
+      "normal_bits": "3fd0a54beb7c1918",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.551673000000001,
+        "median_ms": 8.071635,
+        "p95_ms": 11.241596
+      },
+      "random_bits": "3fe0ba49e174c912",
+      "speedup": 2.3194313458080247,
+      "workers": 2
+    },
+    {
+      "checksum": 2260842165,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.32055299999999987,
+        "median_ms": 3.032559,
+        "p95_ms": 4.046039
+      },
+      "kind": "exponential_int",
+      "normal_bits": "3fd0a54beb7c1918",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.552956,
+        "median_ms": 8.31662,
+        "p95_ms": 10.751199
+      },
+      "random_bits": "3fe0ba49e174c912",
+      "speedup": 2.7424429335092904,
+      "workers": 3
+    },
+    {
+      "checksum": 2260842165,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.20343599999999995,
+        "median_ms": 3.032946,
+        "p95_ms": 4.216948
+      },
+      "kind": "exponential_int",
+      "normal_bits": "3fd0a54beb7c1918",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.5736399999999993,
+        "median_ms": 8.197541,
+        "p95_ms": 10.550421
+      },
+      "random_bits": "3fe0ba49e174c912",
+      "speedup": 2.7028311747060445,
+      "workers": 4
+    },
+    {
+      "checksum": 2260842165,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.2189429999999999,
+        "median_ms": 2.996658,
+        "p95_ms": 3.427122
+      },
+      "kind": "exponential_int",
+      "normal_bits": "3fd0a54beb7c1918",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.3869290000000003,
+        "median_ms": 8.39504,
+        "p95_ms": 10.16953
+      },
+      "random_bits": "3fe0ba49e174c912",
+      "speedup": 2.801467501463297,
+      "workers": 5
+    },
+    {
+      "checksum": 2260842165,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.21261299999999972,
+        "median_ms": 2.848581,
+        "p95_ms": 4.372041
+      },
+      "kind": "exponential_int",
+      "normal_bits": "3fd0a54beb7c1918",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.7492400000000004,
+        "median_ms": 8.420184,
+        "p95_ms": 16.825967
+      },
+      "random_bits": "3fe0ba49e174c912",
+      "speedup": 2.955922264453776,
+      "workers": 6
+    },
+    {
+      "checksum": 2260842165,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.17458399999999985,
+        "median_ms": 2.81651,
+        "p95_ms": 9.938872
+      },
+      "kind": "exponential_int",
+      "normal_bits": "3fd0a54beb7c1918",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.3615490000000001,
+        "median_ms": 8.232658,
+        "p95_ms": 14.353195
+      },
+      "random_bits": "3fe0ba49e174c912",
+      "speedup": 2.922999740813986,
+      "workers": 7
+    },
+    {
+      "checksum": 2260842165,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.3238839999999996,
+        "median_ms": 3.074333,
+        "p95_ms": 4.21306
+      },
+      "kind": "exponential_int",
+      "normal_bits": "3fd0a54beb7c1918",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.4210700000000003,
+        "median_ms": 8.332665,
+        "p95_ms": 12.176149
+      },
+      "random_bits": "3fe0ba49e174c912",
+      "speedup": 2.710397669998663,
+      "workers": 8
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.2801469999999999,
+        "median_ms": 3.060508,
+        "p95_ms": 4.536916
+      },
+      "kind": "exponential_bool",
+      "normal_bits": "3fd0a54beb7c1918",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 0.5266229999999998,
+        "median_ms": 7.271494,
+        "p95_ms": 9.015412
+      },
+      "random_bits": "3fe0ba49e174c912",
+      "speedup": 2.375910796508292,
+      "workers": 1
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.2040059999999999,
+        "median_ms": 2.147528,
+        "p95_ms": 3.228685
+      },
+      "kind": "exponential_bool",
+      "normal_bits": "3fd0a54beb7c1918",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 0.4392560000000003,
+        "median_ms": 7.075937,
+        "p95_ms": 9.545656
+      },
+      "random_bits": "3fe0ba49e174c912",
+      "speedup": 3.2949218822758075,
+      "workers": 0
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.2542209999999998,
+        "median_ms": 2.643534,
+        "p95_ms": 4.803577
+      },
+      "kind": "exponential_bool",
+      "normal_bits": "3fd0a54beb7c1918",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 0.5352079999999999,
+        "median_ms": 7.285343,
+        "p95_ms": 14.750178
+      },
+      "random_bits": "3fe0ba49e174c912",
+      "speedup": 2.755910459256435,
+      "workers": 2
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.28382099999999966,
+        "median_ms": 2.371036,
+        "p95_ms": 3.984902
+      },
+      "kind": "exponential_bool",
+      "normal_bits": "3fd0a54beb7c1918",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 0.360703,
+        "median_ms": 7.204036,
+        "p95_ms": 8.569553
+      },
+      "random_bits": "3fe0ba49e174c912",
+      "speedup": 3.0383494809863705,
+      "workers": 3
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.22726599999999975,
+        "median_ms": 2.374109,
+        "p95_ms": 3.888831
+      },
+      "kind": "exponential_bool",
+      "normal_bits": "3fd0a54beb7c1918",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 0.42170800000000064,
+        "median_ms": 7.102292,
+        "p95_ms": 9.125555
+      },
+      "random_bits": "3fe0ba49e174c912",
+      "speedup": 2.991561044585569,
+      "workers": 4
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.21595699999999995,
+        "median_ms": 2.272895,
+        "p95_ms": 2.938094
+      },
+      "kind": "exponential_bool",
+      "normal_bits": "3fd0a54beb7c1918",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 0.39521499999999943,
+        "median_ms": 7.286367,
+        "p95_ms": 9.427023
+      },
+      "random_bits": "3fe0ba49e174c912",
+      "speedup": 3.205764894550782,
+      "workers": 5
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.43256300000000003,
+        "median_ms": 2.427136,
+        "p95_ms": 3.817922
+      },
+      "kind": "exponential_bool",
+      "normal_bits": "3fd0a54beb7c1918",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 0.31355999999999984,
+        "median_ms": 7.037318,
+        "p95_ms": 11.935709
+      },
+      "random_bits": "3fe0ba49e174c912",
+      "speedup": 2.899432911876384,
+      "workers": 6
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.36641899999999983,
+        "median_ms": 2.359126,
+        "p95_ms": 3.641075
+      },
+      "kind": "exponential_bool",
+      "normal_bits": "3fd0a54beb7c1918",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 0.5303129999999996,
+        "median_ms": 7.189302,
+        "p95_ms": 10.247326
+      },
+      "random_bits": "3fe0ba49e174c912",
+      "speedup": 3.0474429937188603,
+      "workers": 7
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.2876249999999998,
+        "median_ms": 2.310012,
+        "p95_ms": 3.193493
+      },
+      "kind": "exponential_bool",
+      "normal_bits": "3fd0a54beb7c1918",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 0.27717599999999987,
+        "median_ms": 7.052885,
+        "p95_ms": 8.204063
+      },
+      "random_bits": "3fe0ba49e174c912",
+      "speedup": 3.053181109015884,
+      "workers": 8
+    },
+    {
+      "checksum": 576778471,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.570919,
+        "median_ms": 12.723438,
+        "p95_ms": 15.957091
+      },
+      "kind": "poisson_float",
+      "normal_bits": "bfe38c7ef3aa83c1",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 1.0090439999999994,
+        "median_ms": 23.156785,
+        "p95_ms": 26.860356
+      },
+      "random_bits": "3fe0ff474604c77c",
+      "speedup": 1.82001004759877,
+      "workers": 1
+    },
+    {
+      "checksum": 576778471,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.6652550000000002,
+        "median_ms": 12.820125,
+        "p95_ms": 17.009086
+      },
+      "kind": "poisson_float",
+      "normal_bits": "bfe38c7ef3aa83c1",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 1.1196009999999994,
+        "median_ms": 23.77789,
+        "p95_ms": 31.605758
+      },
+      "random_bits": "3fe0ff474604c77c",
+      "speedup": 1.85473152562865,
+      "workers": 0
+    },
+    {
+      "checksum": 576778471,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.6737570000000002,
+        "median_ms": 13.146637,
+        "p95_ms": 17.984818
+      },
+      "kind": "poisson_float",
+      "normal_bits": "bfe38c7ef3aa83c1",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 1.1310809999999982,
+        "median_ms": 23.633794,
+        "p95_ms": 25.612667
+      },
+      "random_bits": "3fe0ff474604c77c",
+      "speedup": 1.7977064400576361,
+      "workers": 2
+    },
+    {
+      "checksum": 576778471,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.38486200000000004,
+        "median_ms": 12.708962,
+        "p95_ms": 14.707727
+      },
+      "kind": "poisson_float",
+      "normal_bits": "bfe38c7ef3aa83c1",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.8539569999999976,
+        "median_ms": 23.150943,
+        "p95_ms": 28.329438
+      },
+      "random_bits": "3fe0ff474604c77c",
+      "speedup": 1.8216234339200954,
+      "workers": 3
+    },
+    {
+      "checksum": 576778471,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.3989510000000003,
+        "median_ms": 12.972856,
+        "p95_ms": 14.64847
+      },
+      "kind": "poisson_float",
+      "normal_bits": "bfe38c7ef3aa83c1",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.9096459999999986,
+        "median_ms": 22.829926,
+        "p95_ms": 38.316279
+      },
+      "random_bits": "3fe0ff474604c77c",
+      "speedup": 1.7598226635676832,
+      "workers": 4
+    },
+    {
+      "checksum": 576778471,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.4527579999999993,
+        "median_ms": 12.931562,
+        "p95_ms": 16.286858
+      },
+      "kind": "poisson_float",
+      "normal_bits": "bfe38c7ef3aa83c1",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.7825209999999991,
+        "median_ms": 23.455164,
+        "p95_ms": 30.977347
+      },
+      "random_bits": "3fe0ff474604c77c",
+      "speedup": 1.8137920229590208,
+      "workers": 5
+    },
+    {
+      "checksum": 576778471,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.3079740000000015,
+        "median_ms": 13.09021,
+        "p95_ms": 16.925477
+      },
+      "kind": "poisson_float",
+      "normal_bits": "bfe38c7ef3aa83c1",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 1.3517289999999988,
+        "median_ms": 23.309623,
+        "p95_ms": 31.431468
+      },
+      "random_bits": "3fe0ff474604c77c",
+      "speedup": 1.7806912952504197,
+      "workers": 6
+    },
+    {
+      "checksum": 576778471,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.43714900000000156,
+        "median_ms": 13.326823,
+        "p95_ms": 17.217303
+      },
+      "kind": "poisson_float",
+      "normal_bits": "bfe38c7ef3aa83c1",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.6716949999999997,
+        "median_ms": 22.716768,
+        "p95_ms": 29.761975
+      },
+      "random_bits": "3fe0ff474604c77c",
+      "speedup": 1.70458990863764,
+      "workers": 7
+    },
+    {
+      "checksum": 576778471,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.4772059999999989,
+        "median_ms": 13.516986,
+        "p95_ms": 16.464595
+      },
+      "kind": "poisson_float",
+      "normal_bits": "bfe38c7ef3aa83c1",
+      "output_bytes": 2400000,
+      "python": {
+        "mad_ms": 0.6205069999999999,
+        "median_ms": 23.095136,
+        "p95_ms": 29.766879
+      },
+      "random_bits": "3fe0ff474604c77c",
+      "speedup": 1.7086010150487692,
+      "workers": 8
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.43446299999999916,
+        "median_ms": 11.960306,
+        "p95_ms": 14.596895
+      },
+      "kind": "poisson_bool",
+      "normal_bits": "bfe38c7ef3aa83c1",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 0.8792930000000005,
+        "median_ms": 20.349437,
+        "p95_ms": 25.727784
+      },
+      "random_bits": "3fe0ff474604c77c",
+      "speedup": 1.701414411972403,
+      "workers": 1
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.45483400000000174,
+        "median_ms": 11.923654,
+        "p95_ms": 16.253226
+      },
+      "kind": "poisson_bool",
+      "normal_bits": "bfe38c7ef3aa83c1",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 1.0528290000000027,
+        "median_ms": 21.039671,
+        "p95_ms": 25.084623
+      },
+      "random_bits": "3fe0ff474604c77c",
+      "speedup": 1.764532164385179,
+      "workers": 0
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.4251199999999997,
+        "median_ms": 12.194146,
+        "p95_ms": 17.540038
+      },
+      "kind": "poisson_bool",
+      "normal_bits": "bfe38c7ef3aa83c1",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 0.6132200000000019,
+        "median_ms": 20.435261,
+        "p95_ms": 25.514798
+      },
+      "random_bits": "3fe0ff474604c77c",
+      "speedup": 1.6758255149643115,
+      "workers": 2
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.26175500000000085,
+        "median_ms": 11.955921,
+        "p95_ms": 14.444343
+      },
+      "kind": "poisson_bool",
+      "normal_bits": "bfe38c7ef3aa83c1",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 0.5451319999999988,
+        "median_ms": 20.606307,
+        "p95_ms": 34.846348
+      },
+      "random_bits": "3fe0ff474604c77c",
+      "speedup": 1.7235231815265424,
+      "workers": 3
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.37709800000000016,
+        "median_ms": 12.162425,
+        "p95_ms": 15.016242
+      },
+      "kind": "poisson_bool",
+      "normal_bits": "bfe38c7ef3aa83c1",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 0.48469599999999957,
+        "median_ms": 20.596372,
+        "p95_ms": 28.020566
+      },
+      "random_bits": "3fe0ff474604c77c",
+      "speedup": 1.6934428783733506,
+      "workers": 4
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.3734870000000008,
+        "median_ms": 12.16021,
+        "p95_ms": 13.582541
+      },
+      "kind": "poisson_bool",
+      "normal_bits": "bfe38c7ef3aa83c1",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 0.5174519999999987,
+        "median_ms": 20.401123,
+        "p95_ms": 24.649247
+      },
+      "random_bits": "3fe0ff474604c77c",
+      "speedup": 1.677694957570634,
+      "workers": 5
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.4681570000000015,
+        "median_ms": 12.406042,
+        "p95_ms": 14.052203
+      },
+      "kind": "poisson_bool",
+      "normal_bits": "bfe38c7ef3aa83c1",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 0.8830999999999989,
+        "median_ms": 20.992756,
+        "p95_ms": 23.448194
+      },
+      "random_bits": "3fe0ff474604c77c",
+      "speedup": 1.6921396848406607,
+      "workers": 6
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.5707799999999992,
+        "median_ms": 12.447281,
+        "p95_ms": 16.01401
+      },
+      "kind": "poisson_bool",
+      "normal_bits": "bfe38c7ef3aa83c1",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 0.948833999999998,
+        "median_ms": 20.9946,
+        "p95_ms": 26.104241
+      },
+      "random_bits": "3fe0ff474604c77c",
+      "speedup": 1.6866816134383082,
+      "workers": 7
+    },
+    {
+      "checksum": 2458358813,
+      "count": 300000,
+      "cpp": {
+        "mad_ms": 0.40930099999999925,
+        "median_ms": 12.581423,
+        "p95_ms": 13.608484
+      },
+      "kind": "poisson_bool",
+      "normal_bits": "bfe38c7ef3aa83c1",
+      "output_bytes": 300000,
+      "python": {
+        "mad_ms": 0.5765299999999982,
+        "median_ms": 20.701673,
+        "p95_ms": 24.43542
+      },
+      "random_bits": "3fe0ff474604c77c",
+      "speedup": 1.6454158643263168,
+      "workers": 8
+    }
+  ],
+  "runtime": {
+    "cpu_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "cpus_visible": 8,
+    "implementation": "CPython",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+    "python": "3.10.20"
+  },
+  "source_sha256": "269650ebcc373d7bdf79fa17346bd6f847973f17e60c1ac9bcae7cfd97bf936f"
+}

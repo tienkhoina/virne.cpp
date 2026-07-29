@@ -1,0 +1,1336 @@
+{
+  "affinity_cpus": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "documents": [
+    2,
+    4,
+    8,
+    16,
+    32,
+    64
+  ],
+  "harness_sha256": "2d8608b6ab07e9a4147a0974a9247170f5b94a84bc1d1b3c3b6ac3ac75ecc766",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+  "policy_gate": true,
+  "python": "3.10.20",
+  "repetitions": 31,
+  "results": [
+    {
+      "checksum": 3235236201642710273,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.1729099999999999,
+        "median_ms": 2.494858,
+        "p95_ms": 4.360126
+      },
+      "documents": 2,
+      "output_bytes": 73929,
+      "workers": 1
+    },
+    {
+      "checksum": 3235236201642710273,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.29423,
+        "median_ms": 2.059481,
+        "p95_ms": 2.885337
+      },
+      "documents": 2,
+      "output_bytes": 73929,
+      "workers": 0
+    },
+    {
+      "checksum": 3235236201642710273,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.2179660000000001,
+        "median_ms": 1.999603,
+        "p95_ms": 2.663731
+      },
+      "documents": 2,
+      "output_bytes": 73929,
+      "workers": 2
+    },
+    {
+      "checksum": 3235236201642710273,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.3167740000000001,
+        "median_ms": 2.011961,
+        "p95_ms": 3.105277
+      },
+      "documents": 2,
+      "output_bytes": 73929,
+      "workers": 3
+    },
+    {
+      "checksum": 3235236201642710273,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.2487219999999999,
+        "median_ms": 1.955603,
+        "p95_ms": 2.959787
+      },
+      "documents": 2,
+      "output_bytes": 73929,
+      "workers": 4
+    },
+    {
+      "checksum": 3235236201642710273,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.18271100000000007,
+        "median_ms": 1.877746,
+        "p95_ms": 2.656904
+      },
+      "documents": 2,
+      "output_bytes": 73929,
+      "workers": 5
+    },
+    {
+      "checksum": 3235236201642710273,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.354282,
+        "median_ms": 2.00576,
+        "p95_ms": 3.838566
+      },
+      "documents": 2,
+      "output_bytes": 73929,
+      "workers": 6
+    },
+    {
+      "checksum": 3235236201642710273,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.2345949999999999,
+        "median_ms": 1.896299,
+        "p95_ms": 3.208762
+      },
+      "documents": 2,
+      "output_bytes": 73929,
+      "workers": 7
+    },
+    {
+      "checksum": 3235236201642710273,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.29122400000000015,
+        "median_ms": 2.03574,
+        "p95_ms": 2.835009
+      },
+      "documents": 2,
+      "output_bytes": 73929,
+      "workers": 8
+    },
+    {
+      "checksum": 18348862858073365639,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.25556800000000024,
+        "median_ms": 4.529567,
+        "p95_ms": 8.001472
+      },
+      "documents": 4,
+      "output_bytes": 147841,
+      "workers": 1
+    },
+    {
+      "checksum": 18348862858073365639,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.2953230000000002,
+        "median_ms": 3.231338,
+        "p95_ms": 4.642891
+      },
+      "documents": 4,
+      "output_bytes": 147841,
+      "workers": 0
+    },
+    {
+      "checksum": 18348862858073365639,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.14276599999999995,
+        "median_ms": 3.069227,
+        "p95_ms": 3.929088
+      },
+      "documents": 4,
+      "output_bytes": 147841,
+      "workers": 2
+    },
+    {
+      "checksum": 18348862858073365639,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.27012899999999984,
+        "median_ms": 3.261243,
+        "p95_ms": 5.469468
+      },
+      "documents": 4,
+      "output_bytes": 147841,
+      "workers": 3
+    },
+    {
+      "checksum": 18348862858073365639,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.3333059999999999,
+        "median_ms": 3.032231,
+        "p95_ms": 3.602636
+      },
+      "documents": 4,
+      "output_bytes": 147841,
+      "workers": 4
+    },
+    {
+      "checksum": 18348862858073365639,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.355251,
+        "median_ms": 2.878883,
+        "p95_ms": 3.829769
+      },
+      "documents": 4,
+      "output_bytes": 147841,
+      "workers": 5
+    },
+    {
+      "checksum": 18348862858073365639,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.37598100000000034,
+        "median_ms": 2.760887,
+        "p95_ms": 3.561107
+      },
+      "documents": 4,
+      "output_bytes": 147841,
+      "workers": 6
+    },
+    {
+      "checksum": 18348862858073365639,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.448782,
+        "median_ms": 2.829241,
+        "p95_ms": 3.800249
+      },
+      "documents": 4,
+      "output_bytes": 147841,
+      "workers": 7
+    },
+    {
+      "checksum": 18348862858073365639,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.4922979999999999,
+        "median_ms": 3.037211,
+        "p95_ms": 4.602409
+      },
+      "documents": 4,
+      "output_bytes": 147841,
+      "workers": 8
+    },
+    {
+      "checksum": 4721027683482230939,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.5593970000000006,
+        "median_ms": 8.660844,
+        "p95_ms": 12.077622
+      },
+      "documents": 8,
+      "output_bytes": 295665,
+      "workers": 1
+    },
+    {
+      "checksum": 4721027683482230939,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.6002749999999999,
+        "median_ms": 4.823675,
+        "p95_ms": 6.748646
+      },
+      "documents": 8,
+      "output_bytes": 295665,
+      "workers": 0
+    },
+    {
+      "checksum": 4721027683482230939,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.3686090000000002,
+        "median_ms": 5.132306,
+        "p95_ms": 8.528699
+      },
+      "documents": 8,
+      "output_bytes": 295665,
+      "workers": 2
+    },
+    {
+      "checksum": 4721027683482230939,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.6676170000000008,
+        "median_ms": 4.785987,
+        "p95_ms": 6.823366
+      },
+      "documents": 8,
+      "output_bytes": 295665,
+      "workers": 3
+    },
+    {
+      "checksum": 4721027683482230939,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.8090010000000003,
+        "median_ms": 4.873425,
+        "p95_ms": 6.014379
+      },
+      "documents": 8,
+      "output_bytes": 295665,
+      "workers": 4
+    },
+    {
+      "checksum": 4721027683482230939,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.35516400000000026,
+        "median_ms": 4.875852,
+        "p95_ms": 7.425678
+      },
+      "documents": 8,
+      "output_bytes": 295665,
+      "workers": 5
+    },
+    {
+      "checksum": 4721027683482230939,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.28728599999999993,
+        "median_ms": 5.093366,
+        "p95_ms": 6.843394
+      },
+      "documents": 8,
+      "output_bytes": 295665,
+      "workers": 6
+    },
+    {
+      "checksum": 4721027683482230939,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.4221370000000002,
+        "median_ms": 5.322598,
+        "p95_ms": 7.283879
+      },
+      "documents": 8,
+      "output_bytes": 295665,
+      "workers": 7
+    },
+    {
+      "checksum": 4721027683482230939,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.34194000000000013,
+        "median_ms": 4.837329,
+        "p95_ms": 6.751994
+      },
+      "documents": 8,
+      "output_bytes": 295665,
+      "workers": 8
+    },
+    {
+      "checksum": 12260851613415961376,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.8070629999999994,
+        "median_ms": 17.246456,
+        "p95_ms": 24.557022
+      },
+      "documents": 16,
+      "output_bytes": 591314,
+      "workers": 1
+    },
+    {
+      "checksum": 12260851613415961376,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 1.4433619999999996,
+        "median_ms": 8.141974,
+        "p95_ms": 10.780187
+      },
+      "documents": 16,
+      "output_bytes": 591314,
+      "workers": 0
+    },
+    {
+      "checksum": 12260851613415961376,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 1.0331890000000001,
+        "median_ms": 10.234716,
+        "p95_ms": 17.085404
+      },
+      "documents": 16,
+      "output_bytes": 591314,
+      "workers": 2
+    },
+    {
+      "checksum": 12260851613415961376,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 1.2545099999999998,
+        "median_ms": 8.384247,
+        "p95_ms": 15.893706
+      },
+      "documents": 16,
+      "output_bytes": 591314,
+      "workers": 3
+    },
+    {
+      "checksum": 12260851613415961376,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 1.1053009999999999,
+        "median_ms": 6.669392,
+        "p95_ms": 14.945091
+      },
+      "documents": 16,
+      "output_bytes": 591314,
+      "workers": 4
+    },
+    {
+      "checksum": 12260851613415961376,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.8002429999999991,
+        "median_ms": 8.105044,
+        "p95_ms": 13.708381
+      },
+      "documents": 16,
+      "output_bytes": 591314,
+      "workers": 5
+    },
+    {
+      "checksum": 12260851613415961376,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.38336599999999965,
+        "median_ms": 7.684088,
+        "p95_ms": 10.51804
+      },
+      "documents": 16,
+      "output_bytes": 591314,
+      "workers": 6
+    },
+    {
+      "checksum": 12260851613415961376,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.6338049999999997,
+        "median_ms": 7.759885,
+        "p95_ms": 9.967494
+      },
+      "documents": 16,
+      "output_bytes": 591314,
+      "workers": 7
+    },
+    {
+      "checksum": 12260851613415961376,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.7241870000000006,
+        "median_ms": 7.191181,
+        "p95_ms": 9.416194
+      },
+      "documents": 16,
+      "output_bytes": 591314,
+      "workers": 8
+    },
+    {
+      "checksum": 596097361885003626,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 1.826910999999999,
+        "median_ms": 33.128698,
+        "p95_ms": 48.556089
+      },
+      "documents": 32,
+      "output_bytes": 1182610,
+      "workers": 1
+    },
+    {
+      "checksum": 596097361885003626,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 1.2024389999999983,
+        "median_ms": 12.888706,
+        "p95_ms": 20.899522
+      },
+      "documents": 32,
+      "output_bytes": 1182610,
+      "workers": 0
+    },
+    {
+      "checksum": 596097361885003626,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 1.6392699999999998,
+        "median_ms": 19.018715,
+        "p95_ms": 32.914859
+      },
+      "documents": 32,
+      "output_bytes": 1182610,
+      "workers": 2
+    },
+    {
+      "checksum": 596097361885003626,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 2.5263089999999977,
+        "median_ms": 15.703264,
+        "p95_ms": 20.792243
+      },
+      "documents": 32,
+      "output_bytes": 1182610,
+      "workers": 3
+    },
+    {
+      "checksum": 596097361885003626,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 1.862819,
+        "median_ms": 13.505154,
+        "p95_ms": 19.048534
+      },
+      "documents": 32,
+      "output_bytes": 1182610,
+      "workers": 4
+    },
+    {
+      "checksum": 596097361885003626,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 1.3074739999999991,
+        "median_ms": 13.224639,
+        "p95_ms": 19.478529
+      },
+      "documents": 32,
+      "output_bytes": 1182610,
+      "workers": 5
+    },
+    {
+      "checksum": 596097361885003626,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.9711180000000006,
+        "median_ms": 12.743686,
+        "p95_ms": 17.38683
+      },
+      "documents": 32,
+      "output_bytes": 1182610,
+      "workers": 6
+    },
+    {
+      "checksum": 596097361885003626,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 0.7189239999999995,
+        "median_ms": 11.940871,
+        "p95_ms": 14.427188
+      },
+      "documents": 32,
+      "output_bytes": 1182610,
+      "workers": 7
+    },
+    {
+      "checksum": 596097361885003626,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 1.371910999999999,
+        "median_ms": 11.722548,
+        "p95_ms": 15.810497
+      },
+      "documents": 32,
+      "output_bytes": 1182610,
+      "workers": 8
+    },
+    {
+      "checksum": 4930543453199458931,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 4.818994999999994,
+        "median_ms": 68.37414,
+        "p95_ms": 98.704113
+      },
+      "documents": 64,
+      "output_bytes": 2365202,
+      "workers": 1
+    },
+    {
+      "checksum": 4930543453199458931,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 1.6550909999999988,
+        "median_ms": 23.680844,
+        "p95_ms": 27.23081
+      },
+      "documents": 64,
+      "output_bytes": 2365202,
+      "workers": 0
+    },
+    {
+      "checksum": 4930543453199458931,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 3.4237950000000055,
+        "median_ms": 36.821471,
+        "p95_ms": 53.912189
+      },
+      "documents": 64,
+      "output_bytes": 2365202,
+      "workers": 2
+    },
+    {
+      "checksum": 4930543453199458931,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 4.297136999999999,
+        "median_ms": 28.266024,
+        "p95_ms": 38.02701
+      },
+      "documents": 64,
+      "output_bytes": 2365202,
+      "workers": 3
+    },
+    {
+      "checksum": 4930543453199458931,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 3.09028,
+        "median_ms": 24.937723,
+        "p95_ms": 30.858314
+      },
+      "documents": 64,
+      "output_bytes": 2365202,
+      "workers": 4
+    },
+    {
+      "checksum": 4930543453199458931,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 1.8741099999999982,
+        "median_ms": 23.697732,
+        "p95_ms": 51.919938
+      },
+      "documents": 64,
+      "output_bytes": 2365202,
+      "workers": 5
+    },
+    {
+      "checksum": 4930543453199458931,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 1.484292,
+        "median_ms": 22.656243,
+        "p95_ms": 30.859377
+      },
+      "documents": 64,
+      "output_bytes": 2365202,
+      "workers": 6
+    },
+    {
+      "checksum": 4930543453199458931,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 2.107666000000002,
+        "median_ms": 21.955739,
+        "p95_ms": 30.114392
+      },
+      "documents": 64,
+      "output_bytes": 2365202,
+      "workers": 7
+    },
+    {
+      "checksum": 4930543453199458931,
+      "corpus": "brain",
+      "cpp": {
+        "mad_ms": 2.74465,
+        "median_ms": 21.671649,
+        "p95_ms": 32.245394
+      },
+      "documents": 64,
+      "output_bytes": 2365202,
+      "workers": 8
+    },
+    {
+      "checksum": 16442757716254514525,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 0.35516799999999993,
+        "median_ms": 5.284167,
+        "p95_ms": 7.779919
+      },
+      "documents": 2,
+      "output_bytes": 275801,
+      "workers": 1
+    },
+    {
+      "checksum": 16442757716254514525,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 0.25801399999999974,
+        "median_ms": 3.552579,
+        "p95_ms": 4.429612
+      },
+      "documents": 2,
+      "output_bytes": 275801,
+      "workers": 0
+    },
+    {
+      "checksum": 16442757716254514525,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 0.22631900000000016,
+        "median_ms": 3.58286,
+        "p95_ms": 6.030738
+      },
+      "documents": 2,
+      "output_bytes": 275801,
+      "workers": 2
+    },
+    {
+      "checksum": 16442757716254514525,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 0.24275199999999986,
+        "median_ms": 3.588405,
+        "p95_ms": 4.816793
+      },
+      "documents": 2,
+      "output_bytes": 275801,
+      "workers": 3
+    },
+    {
+      "checksum": 16442757716254514525,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 0.30319200000000013,
+        "median_ms": 3.756793,
+        "p95_ms": 4.855538
+      },
+      "documents": 2,
+      "output_bytes": 275801,
+      "workers": 4
+    },
+    {
+      "checksum": 16442757716254514525,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 0.32842400000000005,
+        "median_ms": 3.598464,
+        "p95_ms": 5.784049
+      },
+      "documents": 2,
+      "output_bytes": 275801,
+      "workers": 5
+    },
+    {
+      "checksum": 16442757716254514525,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 0.320843,
+        "median_ms": 3.59286,
+        "p95_ms": 5.564216
+      },
+      "documents": 2,
+      "output_bytes": 275801,
+      "workers": 6
+    },
+    {
+      "checksum": 16442757716254514525,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 0.3295809999999997,
+        "median_ms": 3.619613,
+        "p95_ms": 5.314809
+      },
+      "documents": 2,
+      "output_bytes": 275801,
+      "workers": 7
+    },
+    {
+      "checksum": 16442757716254514525,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 0.2576149999999999,
+        "median_ms": 3.544905,
+        "p95_ms": 5.399519
+      },
+      "documents": 2,
+      "output_bytes": 275801,
+      "workers": 8
+    },
+    {
+      "checksum": 8668715872391639743,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 0.5870350000000002,
+        "median_ms": 9.801331,
+        "p95_ms": 12.704902
+      },
+      "documents": 4,
+      "output_bytes": 551585,
+      "workers": 1
+    },
+    {
+      "checksum": 8668715872391639743,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 0.7426570000000003,
+        "median_ms": 5.386115,
+        "p95_ms": 7.488405
+      },
+      "documents": 4,
+      "output_bytes": 551585,
+      "workers": 0
+    },
+    {
+      "checksum": 8668715872391639743,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 0.6281309999999998,
+        "median_ms": 6.583417,
+        "p95_ms": 9.10199
+      },
+      "documents": 4,
+      "output_bytes": 551585,
+      "workers": 2
+    },
+    {
+      "checksum": 8668715872391639743,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 0.8020969999999998,
+        "median_ms": 6.816377,
+        "p95_ms": 10.261548
+      },
+      "documents": 4,
+      "output_bytes": 551585,
+      "workers": 3
+    },
+    {
+      "checksum": 8668715872391639743,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 0.8323030000000005,
+        "median_ms": 5.557203,
+        "p95_ms": 14.201237
+      },
+      "documents": 4,
+      "output_bytes": 551585,
+      "workers": 4
+    },
+    {
+      "checksum": 8668715872391639743,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 0.4889329999999994,
+        "median_ms": 5.079152,
+        "p95_ms": 14.637354
+      },
+      "documents": 4,
+      "output_bytes": 551585,
+      "workers": 5
+    },
+    {
+      "checksum": 8668715872391639743,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 0.8914339999999994,
+        "median_ms": 5.700169,
+        "p95_ms": 11.545964
+      },
+      "documents": 4,
+      "output_bytes": 551585,
+      "workers": 6
+    },
+    {
+      "checksum": 8668715872391639743,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 0.6290260000000005,
+        "median_ms": 5.067051,
+        "p95_ms": 7.780573
+      },
+      "documents": 4,
+      "output_bytes": 551585,
+      "workers": 7
+    },
+    {
+      "checksum": 8668715872391639743,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 0.7102010000000005,
+        "median_ms": 5.208916,
+        "p95_ms": 7.159913
+      },
+      "documents": 4,
+      "output_bytes": 551585,
+      "workers": 8
+    },
+    {
+      "checksum": 12609557316536797163,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 1.3796599999999977,
+        "median_ms": 18.871069,
+        "p95_ms": 25.422705
+      },
+      "documents": 8,
+      "output_bytes": 1103153,
+      "workers": 1
+    },
+    {
+      "checksum": 12609557316536797163,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 1.0071220000000007,
+        "median_ms": 8.360919,
+        "p95_ms": 12.546091
+      },
+      "documents": 8,
+      "output_bytes": 1103153,
+      "workers": 0
+    },
+    {
+      "checksum": 12609557316536797163,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 0.591564,
+        "median_ms": 10.813239,
+        "p95_ms": 14.682249
+      },
+      "documents": 8,
+      "output_bytes": 1103153,
+      "workers": 2
+    },
+    {
+      "checksum": 12609557316536797163,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 0.8136860000000006,
+        "median_ms": 9.462699,
+        "p95_ms": 15.73643
+      },
+      "documents": 8,
+      "output_bytes": 1103153,
+      "workers": 3
+    },
+    {
+      "checksum": 12609557316536797163,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 0.6682330000000007,
+        "median_ms": 8.281484,
+        "p95_ms": 13.649999
+      },
+      "documents": 8,
+      "output_bytes": 1103153,
+      "workers": 4
+    },
+    {
+      "checksum": 12609557316536797163,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 0.8109289999999998,
+        "median_ms": 9.369035,
+        "p95_ms": 13.015811
+      },
+      "documents": 8,
+      "output_bytes": 1103153,
+      "workers": 5
+    },
+    {
+      "checksum": 12609557316536797163,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 0.7032150000000001,
+        "median_ms": 9.804539,
+        "p95_ms": 14.611812
+      },
+      "documents": 8,
+      "output_bytes": 1103153,
+      "workers": 6
+    },
+    {
+      "checksum": 12609557316536797163,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 0.6305060000000005,
+        "median_ms": 9.98921,
+        "p95_ms": 13.174549
+      },
+      "documents": 8,
+      "output_bytes": 1103153,
+      "workers": 7
+    },
+    {
+      "checksum": 12609557316536797163,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 0.4030389999999997,
+        "median_ms": 7.958698,
+        "p95_ms": 12.467707
+      },
+      "documents": 8,
+      "output_bytes": 1103153,
+      "workers": 8
+    },
+    {
+      "checksum": 7124838808799260864,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 3.469819000000001,
+        "median_ms": 39.248414,
+        "p95_ms": 48.524039
+      },
+      "documents": 16,
+      "output_bytes": 2206290,
+      "workers": 1
+    },
+    {
+      "checksum": 7124838808799260864,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 1.3930190000000007,
+        "median_ms": 14.570607,
+        "p95_ms": 19.10816
+      },
+      "documents": 16,
+      "output_bytes": 2206290,
+      "workers": 0
+    },
+    {
+      "checksum": 7124838808799260864,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 3.11881,
+        "median_ms": 23.526754,
+        "p95_ms": 34.883166
+      },
+      "documents": 16,
+      "output_bytes": 2206290,
+      "workers": 2
+    },
+    {
+      "checksum": 7124838808799260864,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 1.2925320000000013,
+        "median_ms": 17.437403,
+        "p95_ms": 28.693854
+      },
+      "documents": 16,
+      "output_bytes": 2206290,
+      "workers": 3
+    },
+    {
+      "checksum": 7124838808799260864,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 2.1827219999999983,
+        "median_ms": 16.409226,
+        "p95_ms": 21.891707
+      },
+      "documents": 16,
+      "output_bytes": 2206290,
+      "workers": 4
+    },
+    {
+      "checksum": 7124838808799260864,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 1.937296,
+        "median_ms": 15.854779,
+        "p95_ms": 28.10185
+      },
+      "documents": 16,
+      "output_bytes": 2206290,
+      "workers": 5
+    },
+    {
+      "checksum": 7124838808799260864,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 1.561853000000001,
+        "median_ms": 15.726698,
+        "p95_ms": 23.974747
+      },
+      "documents": 16,
+      "output_bytes": 2206290,
+      "workers": 6
+    },
+    {
+      "checksum": 7124838808799260864,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 1.0813170000000003,
+        "median_ms": 15.606404,
+        "p95_ms": 24.100294
+      },
+      "documents": 16,
+      "output_bytes": 2206290,
+      "workers": 7
+    },
+    {
+      "checksum": 7124838808799260864,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 1.2680070000000008,
+        "median_ms": 14.670132,
+        "p95_ms": 25.944455
+      },
+      "documents": 16,
+      "output_bytes": 2206290,
+      "workers": 8
+    },
+    {
+      "checksum": 7585561952642654122,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 5.171576000000002,
+        "median_ms": 69.016528,
+        "p95_ms": 83.901199
+      },
+      "documents": 32,
+      "output_bytes": 4412562,
+      "workers": 1
+    },
+    {
+      "checksum": 7585561952642654122,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 2.844847999999999,
+        "median_ms": 26.553422,
+        "p95_ms": 37.689179
+      },
+      "documents": 32,
+      "output_bytes": 4412562,
+      "workers": 0
+    },
+    {
+      "checksum": 7585561952642654122,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 6.361677,
+        "median_ms": 43.170712,
+        "p95_ms": 85.664999
+      },
+      "documents": 32,
+      "output_bytes": 4412562,
+      "workers": 2
+    },
+    {
+      "checksum": 7585561952642654122,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 3.711324999999995,
+        "median_ms": 33.304729,
+        "p95_ms": 40.438855
+      },
+      "documents": 32,
+      "output_bytes": 4412562,
+      "workers": 3
+    },
+    {
+      "checksum": 7585561952642654122,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 3.095811000000001,
+        "median_ms": 30.473102,
+        "p95_ms": 44.697051
+      },
+      "documents": 32,
+      "output_bytes": 4412562,
+      "workers": 4
+    },
+    {
+      "checksum": 7585561952642654122,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 2.391503,
+        "median_ms": 27.836362,
+        "p95_ms": 41.461777
+      },
+      "documents": 32,
+      "output_bytes": 4412562,
+      "workers": 5
+    },
+    {
+      "checksum": 7585561952642654122,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 2.465045,
+        "median_ms": 26.968612,
+        "p95_ms": 35.652947
+      },
+      "documents": 32,
+      "output_bytes": 4412562,
+      "workers": 6
+    },
+    {
+      "checksum": 7585561952642654122,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 1.638888999999999,
+        "median_ms": 26.527768,
+        "p95_ms": 59.861492
+      },
+      "documents": 32,
+      "output_bytes": 4412562,
+      "workers": 7
+    },
+    {
+      "checksum": 7585561952642654122,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 1.3630689999999994,
+        "median_ms": 25.322138,
+        "p95_ms": 34.914656
+      },
+      "documents": 32,
+      "output_bytes": 4412562,
+      "workers": 8
+    },
+    {
+      "checksum": 17533068944302945523,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 7.905858999999992,
+        "median_ms": 131.921673,
+        "p95_ms": 177.757558
+      },
+      "documents": 64,
+      "output_bytes": 8825106,
+      "workers": 1
+    },
+    {
+      "checksum": 17533068944302945523,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 4.073305999999995,
+        "median_ms": 54.428822,
+        "p95_ms": 74.073721
+      },
+      "documents": 64,
+      "output_bytes": 8825106,
+      "workers": 0
+    },
+    {
+      "checksum": 17533068944302945523,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 11.016836999999995,
+        "median_ms": 83.172445,
+        "p95_ms": 129.433303
+      },
+      "documents": 64,
+      "output_bytes": 8825106,
+      "workers": 2
+    },
+    {
+      "checksum": 17533068944302945523,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 7.1322410000000005,
+        "median_ms": 64.958843,
+        "p95_ms": 87.527024
+      },
+      "documents": 64,
+      "output_bytes": 8825106,
+      "workers": 3
+    },
+    {
+      "checksum": 17533068944302945523,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 4.392747,
+        "median_ms": 56.140335,
+        "p95_ms": 72.650327
+      },
+      "documents": 64,
+      "output_bytes": 8825106,
+      "workers": 4
+    },
+    {
+      "checksum": 17533068944302945523,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 5.464019,
+        "median_ms": 52.157378,
+        "p95_ms": 114.278172
+      },
+      "documents": 64,
+      "output_bytes": 8825106,
+      "workers": 5
+    },
+    {
+      "checksum": 17533068944302945523,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 3.463378999999996,
+        "median_ms": 50.206059,
+        "p95_ms": 73.034949
+      },
+      "documents": 64,
+      "output_bytes": 8825106,
+      "workers": 6
+    },
+    {
+      "checksum": 17533068944302945523,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 1.552605000000007,
+        "median_ms": 47.071054,
+        "p95_ms": 59.299133
+      },
+      "documents": 64,
+      "output_bytes": 8825106,
+      "workers": 7
+    },
+    {
+      "checksum": 17533068944302945523,
+      "corpus": "synthetic",
+      "cpp": {
+        "mad_ms": 3.2054709999999957,
+        "median_ms": 47.941446,
+        "p95_ms": 68.199878
+      },
+      "documents": 64,
+      "output_bytes": 8825106,
+      "workers": 8
+    }
+  ],
+  "status": "PASS",
+  "warmups": 5,
+  "workers": [
+    1,
+    0,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ]
+}

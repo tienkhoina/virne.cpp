@@ -1,0 +1,16 @@
+{
+  "boundaries": {
+    "deferred": "MCF, BFS solver deployment, candidate search, unsafe whole-link mapping, solver/system/RL/ML remain outside this differential.",
+    "native_workers": "Python lifecycle mutation is sequential; native workers 1/2/8 must retain its output and partial-error order.",
+    "oracle_collaborators": "The exact Controller class AST runs with narrow deterministic NodeMapper/LinkMapper/ResourceUpdator/network collaborators matching this fixture; native always runs the real prepared production stack."
+  },
+  "component": "core.controller.Controller",
+  "shared_case_count": 10,
+  "source_sha256": "352552B0312D18B42EB6904629ED43C76DF2D9C844DF59FE51AB8653FFAC02A5",
+  "status": "PASS",
+  "workers": [
+    1,
+    2,
+    8
+  ]
+}

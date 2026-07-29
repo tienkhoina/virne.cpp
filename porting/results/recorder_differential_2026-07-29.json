@@ -1,0 +1,13 @@
+{
+  "component": "core.Recorder.non_ml",
+  "native_worker_counts": [1, 2, 8],
+  "python_only_boundaries": {
+    "csv_and_pandas": "Pandas-backed arbitrary dynamic record schemas are a cold boundary; native fixed-schema CSV has its own unit gate.",
+    "native_workers": "Python Recorder is scalar. Native workers 1/2/8 are required here to produce identical full state/history payloads.",
+    "reward": "v_net_reward is covered only as an unchanged scalar carried by Solution/Recorder; no reward calculation or learning behavior is run.",
+    "rl_and_training": "save_summary RL/feature/training naming and solver integration are intentionally outside this non-ML differential; the native core only exposes a cold typed summary extension seam."
+  },
+  "shared_case_count": 6,
+  "source_sha256": "41E66702F29644E6F8A374EF909A1C41F87982558863BE17B6FDF72CEB971F4A",
+  "status": "PASS"
+}

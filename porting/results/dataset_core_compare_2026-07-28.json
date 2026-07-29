@@ -1,0 +1,640 @@
+{
+  "harness_sha256": "622a778a47a0f300bc99a80fe74a8993dc20a5b49acef8556b76d34dde9e9b28",
+  "protocol": {
+    "fixture_setup_and_verification_excluded": true,
+    "paired_alternating_order": true,
+    "process_startup_excluded": true,
+    "repetitions": 31,
+    "scale": 1.0,
+    "thread_creation_included_for_batch_api": true,
+    "warmups": 5,
+    "workers": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      0
+    ]
+  },
+  "rows": [
+    {
+      "batch_size": 4,
+      "checksum": 1392107064988423445,
+      "cpp": {
+        "mad_ms": 0.16822600000000065,
+        "median_ms": 4.853469,
+        "p95_ms": 6.581262
+      },
+      "kind": "parameters",
+      "operations": 100000,
+      "output_bytes": 450000,
+      "python": {
+        "mad_ms": 1.1975629999999953,
+        "median_ms": 55.873823,
+        "p95_ms": 64.622433
+      },
+      "speedup": 11.512141727906371,
+      "workers": 1
+    },
+    {
+      "batch_size": 1024,
+      "checksum": 18379643825291057673,
+      "cpp": {
+        "mad_ms": 0.2057570000000002,
+        "median_ms": 3.631546,
+        "p95_ms": 6.30662
+      },
+      "kind": "filename",
+      "operations": 30000,
+      "output_bytes": 1599792,
+      "python": {
+        "mad_ms": 1.2281759999999977,
+        "median_ms": 52.307604,
+        "p95_ms": 63.912988
+      },
+      "speedup": 14.403673807243525,
+      "workers": 1
+    },
+    {
+      "batch_size": 17,
+      "checksum": 11642140096485408797,
+      "cpp": {
+        "mad_ms": 0.5759839999999983,
+        "median_ms": 17.657638,
+        "p95_ms": 24.084006
+      },
+      "kind": "physical",
+      "operations": 20000,
+      "output_bytes": 2448232,
+      "python": {
+        "mad_ms": 3.4748359999999963,
+        "median_ms": 109.379132,
+        "p95_ms": 136.799314
+      },
+      "speedup": 6.194437330746049,
+      "workers": 1
+    },
+    {
+      "batch_size": 17,
+      "checksum": 7025605885983445345,
+      "cpp": {
+        "mad_ms": 1.1346890000000016,
+        "median_ms": 16.78046,
+        "p95_ms": 27.679053
+      },
+      "kind": "physical_existing",
+      "operations": 10000,
+      "output_bytes": 1064116,
+      "python": {
+        "mad_ms": 5.29824099999999,
+        "median_ms": 75.396894,
+        "p95_ms": 114.630133
+      },
+      "speedup": 4.493136302580501,
+      "workers": 1
+    },
+    {
+      "batch_size": 17,
+      "checksum": 15651046713197998389,
+      "cpp": {
+        "mad_ms": 0.7816880000000008,
+        "median_ms": 14.850263,
+        "p95_ms": 18.151935
+      },
+      "kind": "virtual",
+      "operations": 20000,
+      "output_bytes": 2008232,
+      "python": {
+        "mad_ms": 4.710279999999997,
+        "median_ms": 92.562303,
+        "p95_ms": 110.023295
+      },
+      "speedup": 6.233041327281544,
+      "workers": 1
+    },
+    {
+      "batch_size": 8192,
+      "checksum": 15786229347802482891,
+      "cpp": {
+        "mad_ms": 0.31618999999999975,
+        "median_ms": 4.215528,
+        "p95_ms": 5.203149
+      },
+      "kind": "filename_batch",
+      "operations": 4,
+      "output_bytes": 452436,
+      "python": {
+        "mad_ms": 1.9641219999999961,
+        "median_ms": 53.234054,
+        "p95_ms": 64.700164
+      },
+      "speedup": 12.628086920547082,
+      "workers": 1
+    },
+    {
+      "batch_size": 8192,
+      "checksum": 15786229347802482891,
+      "cpp": {
+        "mad_ms": 0.34390499999999946,
+        "median_ms": 4.848263,
+        "p95_ms": 5.630575
+      },
+      "kind": "filename_batch",
+      "operations": 4,
+      "output_bytes": 452436,
+      "python": {
+        "mad_ms": 1.891136000000003,
+        "median_ms": 51.736237,
+        "p95_ms": 82.183149
+      },
+      "speedup": 10.671087150181416,
+      "workers": 2
+    },
+    {
+      "batch_size": 8192,
+      "checksum": 15786229347802482891,
+      "cpp": {
+        "mad_ms": 0.2975019999999997,
+        "median_ms": 4.642806,
+        "p95_ms": 5.398005
+      },
+      "kind": "filename_batch",
+      "operations": 4,
+      "output_bytes": 452436,
+      "python": {
+        "mad_ms": 1.4279960000000003,
+        "median_ms": 51.73698,
+        "p95_ms": 64.106
+      },
+      "speedup": 11.143472288094742,
+      "workers": 3
+    },
+    {
+      "batch_size": 8192,
+      "checksum": 15786229347802482891,
+      "cpp": {
+        "mad_ms": 0.2370979999999996,
+        "median_ms": 4.559417,
+        "p95_ms": 6.236652
+      },
+      "kind": "filename_batch",
+      "operations": 4,
+      "output_bytes": 452436,
+      "python": {
+        "mad_ms": 1.8181249999999949,
+        "median_ms": 51.394774,
+        "p95_ms": 64.879988
+      },
+      "speedup": 11.27222493577578,
+      "workers": 4
+    },
+    {
+      "batch_size": 8192,
+      "checksum": 15786229347802482891,
+      "cpp": {
+        "mad_ms": 0.28032399999999935,
+        "median_ms": 5.102622,
+        "p95_ms": 5.643673
+      },
+      "kind": "filename_batch",
+      "operations": 4,
+      "output_bytes": 452436,
+      "python": {
+        "mad_ms": 1.9122050000000002,
+        "median_ms": 52.857875,
+        "p95_ms": 58.261494
+      },
+      "speedup": 10.358963489750955,
+      "workers": 5
+    },
+    {
+      "batch_size": 8192,
+      "checksum": 15786229347802482891,
+      "cpp": {
+        "mad_ms": 0.3055659999999998,
+        "median_ms": 5.20381,
+        "p95_ms": 6.018456
+      },
+      "kind": "filename_batch",
+      "operations": 4,
+      "output_bytes": 452436,
+      "python": {
+        "mad_ms": 2.0997410000000016,
+        "median_ms": 52.425692,
+        "p95_ms": 67.718698
+      },
+      "speedup": 10.074482350431703,
+      "workers": 6
+    },
+    {
+      "batch_size": 8192,
+      "checksum": 15786229347802482891,
+      "cpp": {
+        "mad_ms": 0.5726959999999996,
+        "median_ms": 6.106462,
+        "p95_ms": 7.321783
+      },
+      "kind": "filename_batch",
+      "operations": 4,
+      "output_bytes": 452436,
+      "python": {
+        "mad_ms": 1.6766529999999946,
+        "median_ms": 51.435776,
+        "p95_ms": 60.877097
+      },
+      "speedup": 8.423171387949356,
+      "workers": 7
+    },
+    {
+      "batch_size": 8192,
+      "checksum": 15786229347802482891,
+      "cpp": {
+        "mad_ms": 0.45074599999999965,
+        "median_ms": 6.173734,
+        "p95_ms": 7.286791
+      },
+      "kind": "filename_batch",
+      "operations": 4,
+      "output_bytes": 452436,
+      "python": {
+        "mad_ms": 1.2096499999999963,
+        "median_ms": 51.356356,
+        "p95_ms": 59.555803
+      },
+      "speedup": 8.318524251287794,
+      "workers": 8
+    },
+    {
+      "batch_size": 8192,
+      "checksum": 15786229347802482891,
+      "cpp": {
+        "mad_ms": 0.37122600000000006,
+        "median_ms": 4.401567,
+        "p95_ms": 5.446957
+      },
+      "kind": "filename_batch",
+      "operations": 4,
+      "output_bytes": 452436,
+      "python": {
+        "mad_ms": 2.1755759999999995,
+        "median_ms": 52.492288,
+        "p95_ms": 66.224239
+      },
+      "speedup": 11.92581823700514,
+      "workers": 0
+    },
+    {
+      "batch_size": 4096,
+      "checksum": 7757782050140820735,
+      "cpp": {
+        "mad_ms": 0.6751110000000011,
+        "median_ms": 14.532111,
+        "p95_ms": 18.644591
+      },
+      "kind": "physical_batch",
+      "operations": 3,
+      "output_bytes": 501398,
+      "python": {
+        "mad_ms": 2.6301519999999954,
+        "median_ms": 68.43964,
+        "p95_ms": 82.334333
+      },
+      "speedup": 4.709545639996832,
+      "workers": 1
+    },
+    {
+      "batch_size": 4096,
+      "checksum": 7757782050140820735,
+      "cpp": {
+        "mad_ms": 0.9134270000000004,
+        "median_ms": 10.729517,
+        "p95_ms": 14.836639
+      },
+      "kind": "physical_batch",
+      "operations": 3,
+      "output_bytes": 501398,
+      "python": {
+        "mad_ms": 4.533577000000008,
+        "median_ms": 70.710939,
+        "p95_ms": 84.36634
+      },
+      "speedup": 6.5903189304793495,
+      "workers": 2
+    },
+    {
+      "batch_size": 4096,
+      "checksum": 7757782050140820735,
+      "cpp": {
+        "mad_ms": 1.1171799999999994,
+        "median_ms": 9.320189,
+        "p95_ms": 12.594335
+      },
+      "kind": "physical_batch",
+      "operations": 3,
+      "output_bytes": 501398,
+      "python": {
+        "mad_ms": 3.011291,
+        "median_ms": 69.321684,
+        "p95_ms": 96.99676
+      },
+      "speedup": 7.437798096154489,
+      "workers": 3
+    },
+    {
+      "batch_size": 4096,
+      "checksum": 7757782050140820735,
+      "cpp": {
+        "mad_ms": 0.4936100000000003,
+        "median_ms": 8.212192,
+        "p95_ms": 9.825422
+      },
+      "kind": "physical_batch",
+      "operations": 3,
+      "output_bytes": 501398,
+      "python": {
+        "mad_ms": 3.107800999999995,
+        "median_ms": 68.121117,
+        "p95_ms": 78.109096
+      },
+      "speedup": 8.295119865682633,
+      "workers": 4
+    },
+    {
+      "batch_size": 4096,
+      "checksum": 7757782050140820735,
+      "cpp": {
+        "mad_ms": 0.27245400000000064,
+        "median_ms": 7.900216,
+        "p95_ms": 8.712389
+      },
+      "kind": "physical_batch",
+      "operations": 3,
+      "output_bytes": 501398,
+      "python": {
+        "mad_ms": 2.163000999999994,
+        "median_ms": 68.484411,
+        "p95_ms": 86.194458
+      },
+      "speedup": 8.668675767852422,
+      "workers": 5
+    },
+    {
+      "batch_size": 4096,
+      "checksum": 7757782050140820735,
+      "cpp": {
+        "mad_ms": 0.4570040000000004,
+        "median_ms": 7.86164,
+        "p95_ms": 8.818026
+      },
+      "kind": "physical_batch",
+      "operations": 3,
+      "output_bytes": 501398,
+      "python": {
+        "mad_ms": 1.7842969999999951,
+        "median_ms": 68.280751,
+        "p95_ms": 78.889554
+      },
+      "speedup": 8.6853062465338,
+      "workers": 6
+    },
+    {
+      "batch_size": 4096,
+      "checksum": 7757782050140820735,
+      "cpp": {
+        "mad_ms": 0.5608499999999994,
+        "median_ms": 8.009469,
+        "p95_ms": 9.744097
+      },
+      "kind": "physical_batch",
+      "operations": 3,
+      "output_bytes": 501398,
+      "python": {
+        "mad_ms": 2.6903159999999957,
+        "median_ms": 69.541997,
+        "p95_ms": 87.621095
+      },
+      "speedup": 8.68247283309293,
+      "workers": 7
+    },
+    {
+      "batch_size": 4096,
+      "checksum": 7757782050140820735,
+      "cpp": {
+        "mad_ms": 0.5627490000000002,
+        "median_ms": 9.393767,
+        "p95_ms": 12.74753
+      },
+      "kind": "physical_batch",
+      "operations": 3,
+      "output_bytes": 501398,
+      "python": {
+        "mad_ms": 2.7448789999999974,
+        "median_ms": 70.046556,
+        "p95_ms": 85.2847
+      },
+      "speedup": 7.456705707092798,
+      "workers": 8
+    },
+    {
+      "batch_size": 4096,
+      "checksum": 7757782050140820735,
+      "cpp": {
+        "mad_ms": 0.2936230000000002,
+        "median_ms": 7.887645,
+        "p95_ms": 9.395442
+      },
+      "kind": "physical_batch",
+      "operations": 3,
+      "output_bytes": 501398,
+      "python": {
+        "mad_ms": 2.7238459999999947,
+        "median_ms": 69.771992,
+        "p95_ms": 89.478139
+      },
+      "speedup": 8.845731774186085,
+      "workers": 0
+    },
+    {
+      "batch_size": 4096,
+      "checksum": 11657498433134710547,
+      "cpp": {
+        "mad_ms": 0.6546639999999986,
+        "median_ms": 12.880301,
+        "p95_ms": 15.238927
+      },
+      "kind": "virtual_batch",
+      "operations": 3,
+      "output_bytes": 411286,
+      "python": {
+        "mad_ms": 3.0223469999999963,
+        "median_ms": 58.881776,
+        "p95_ms": 89.114693
+      },
+      "speedup": 4.571459626603447,
+      "workers": 1
+    },
+    {
+      "batch_size": 4096,
+      "checksum": 11657498433134710547,
+      "cpp": {
+        "mad_ms": 0.5817379999999996,
+        "median_ms": 9.426343,
+        "p95_ms": 35.833017
+      },
+      "kind": "virtual_batch",
+      "operations": 3,
+      "output_bytes": 411286,
+      "python": {
+        "mad_ms": 3.641556999999999,
+        "median_ms": 61.919723,
+        "p95_ms": 70.206841
+      },
+      "speedup": 6.568795873436814,
+      "workers": 2
+    },
+    {
+      "batch_size": 4096,
+      "checksum": 11657498433134710547,
+      "cpp": {
+        "mad_ms": 0.7549789999999996,
+        "median_ms": 8.522122,
+        "p95_ms": 11.089528
+      },
+      "kind": "virtual_batch",
+      "operations": 3,
+      "output_bytes": 411286,
+      "python": {
+        "mad_ms": 5.693847000000005,
+        "median_ms": 62.714511,
+        "p95_ms": 105.82403
+      },
+      "speedup": 7.359025252161375,
+      "workers": 3
+    },
+    {
+      "batch_size": 4096,
+      "checksum": 11657498433134710547,
+      "cpp": {
+        "mad_ms": 0.43179999999999996,
+        "median_ms": 7.522302,
+        "p95_ms": 8.203399
+      },
+      "kind": "virtual_batch",
+      "operations": 3,
+      "output_bytes": 411286,
+      "python": {
+        "mad_ms": 1.983908999999997,
+        "median_ms": 59.525216,
+        "p95_ms": 78.225678
+      },
+      "speedup": 7.913164879580745,
+      "workers": 4
+    },
+    {
+      "batch_size": 4096,
+      "checksum": 11657498433134710547,
+      "cpp": {
+        "mad_ms": 0.3310599999999999,
+        "median_ms": 7.280607,
+        "p95_ms": 11.367315
+      },
+      "kind": "virtual_batch",
+      "operations": 3,
+      "output_bytes": 411286,
+      "python": {
+        "mad_ms": 3.862836999999999,
+        "median_ms": 60.374351,
+        "p95_ms": 71.362976
+      },
+      "speedup": 8.292488662003045,
+      "workers": 5
+    },
+    {
+      "batch_size": 4096,
+      "checksum": 11657498433134710547,
+      "cpp": {
+        "mad_ms": 0.4817599999999995,
+        "median_ms": 7.208163,
+        "p95_ms": 12.120402
+      },
+      "kind": "virtual_batch",
+      "operations": 3,
+      "output_bytes": 411286,
+      "python": {
+        "mad_ms": 3.3311139999999995,
+        "median_ms": 57.721904,
+        "p95_ms": 68.133753
+      },
+      "speedup": 8.007852208669533,
+      "workers": 6
+    },
+    {
+      "batch_size": 4096,
+      "checksum": 11657498433134710547,
+      "cpp": {
+        "mad_ms": 0.5274190000000001,
+        "median_ms": 7.484669,
+        "p95_ms": 10.401626
+      },
+      "kind": "virtual_batch",
+      "operations": 3,
+      "output_bytes": 411286,
+      "python": {
+        "mad_ms": 2.344749,
+        "median_ms": 55.922736,
+        "p95_ms": 64.551415
+      },
+      "speedup": 7.47163782393049,
+      "workers": 7
+    },
+    {
+      "batch_size": 4096,
+      "checksum": 11657498433134710547,
+      "cpp": {
+        "mad_ms": 0.7650420000000002,
+        "median_ms": 8.432081,
+        "p95_ms": 16.939075
+      },
+      "kind": "virtual_batch",
+      "operations": 3,
+      "output_bytes": 411286,
+      "python": {
+        "mad_ms": 1.4421509999999955,
+        "median_ms": 55.783255,
+        "p95_ms": 73.07417
+      },
+      "speedup": 6.615597620563654,
+      "workers": 8
+    },
+    {
+      "batch_size": 4096,
+      "checksum": 11657498433134710547,
+      "cpp": {
+        "mad_ms": 0.45462699999999945,
+        "median_ms": 7.330752,
+        "p95_ms": 8.778973
+      },
+      "kind": "virtual_batch",
+      "operations": 3,
+      "output_bytes": 411286,
+      "python": {
+        "mad_ms": 3.0365329999999986,
+        "median_ms": 57.03879,
+        "p95_ms": 65.287545
+      },
+      "speedup": 7.780755644168565,
+      "workers": 0
+    }
+  ],
+  "runtime": {
+    "cpus_visible": 8,
+    "implementation": "CPython",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+    "python": "3.10.20"
+  },
+  "source_sha256": "269650ebcc373d7bdf79fa17346bd6f847973f17e60c1ac9bcae7cfd97bf936f"
+}

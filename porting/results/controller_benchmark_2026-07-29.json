@@ -1,0 +1,48 @@
+{
+  "checksum": 8486823302284311477,
+  "component": "core.controller.Controller",
+  "deployed_checksum": 17514356897791579542,
+  "items": 8192,
+  "native": [
+    {
+      "checksum": 8486823302284311477,
+      "deployed_checksum": 17514356897791579542,
+      "items": 8192,
+      "median_ms": 3.892177,
+      "operations": 32768,
+      "output_bytes": 131072,
+      "speedup": 8.63897196864377,
+      "workers": 1
+    },
+    {
+      "checksum": 8486823302284311477,
+      "deployed_checksum": 17514356897791579542,
+      "items": 8192,
+      "median_ms": 6.484015,
+      "operations": 32768,
+      "output_bytes": 131072,
+      "speedup": 5.185738774509312,
+      "workers": 2
+    },
+    {
+      "checksum": 8486823302284311477,
+      "deployed_checksum": 17514356897791579542,
+      "items": 8192,
+      "median_ms": 11.785875,
+      "operations": 32768,
+      "output_bytes": 131072,
+      "speedup": 2.852941168984059,
+      "workers": 8
+    }
+  ],
+  "operations": 32768,
+  "oracle_boundary": "AST-isolated exact Controller.deploy/release and exact ResourceUpdator scalar lifecycle methods over the same one-node/one-link-resource schema; no routing, solver, system, RL or ML.",
+  "output_bytes": 131072,
+  "python_median_ms": 33.624408,
+  "resource_source_sha256": "9B7C14F8C6EAA5E8BC50A723B727FEC7EFF8F1C7D05F7BEF0DA0CC941C15AC85",
+  "samples": 3,
+  "source_sha256": "352552B0312D18B42EB6904629ED43C76DF2D9C844DF59FE51AB8653FFAC02A5",
+  "status": "PASS",
+  "warmup": 1,
+  "workload": "deploy_release"
+}

@@ -1,0 +1,160 @@
+{
+  "benchmark": {
+    "batch_operations": 2,
+    "batch_size": 64,
+    "repetitions": 31,
+    "rows": {
+      "json_batch_dump": {
+        "cpp": {
+          "mad_ms": 0.0007485312500000009,
+          "median_ms": 0.0078959296875,
+          "p95_ms": 0.0113263046875
+        },
+        "python": {
+          "mad_ms": 0.007288499999999996,
+          "median_ms": 0.0263060859375,
+          "p95_ms": 0.0440746015625
+        },
+        "speedup": 3.331600834686384
+      },
+      "json_batch_parse": {
+        "cpp": {
+          "mad_ms": 0.0014144531249999995,
+          "median_ms": 0.0131600859375,
+          "p95_ms": 0.0209213203125
+        },
+        "python": {
+          "mad_ms": 0.004095265625,
+          "median_ms": 0.02072846875,
+          "p95_ms": 0.0530049375
+        },
+        "speedup": 1.5751013214080694
+      },
+      "json_dump": {
+        "cpp": {
+          "mad_ms": 0.0016155234375000004,
+          "median_ms": 0.0099622578125,
+          "p95_ms": 0.0193210859375
+        },
+        "python": {
+          "mad_ms": 0.0045601523437499986,
+          "median_ms": 0.0231540078125,
+          "p95_ms": 0.06132828125
+        },
+        "speedup": 2.3241727174986218
+      },
+      "json_id_access": {
+        "cpp": {
+          "mad_ms": 2.770599999999996e-07,
+          "median_ms": 2.5099999999999997e-06,
+          "p95_ms": 4.491675e-06
+        },
+        "python": {
+          "mad_ms": 4.279284499999998e-05,
+          "median_ms": 0.000197551215,
+          "p95_ms": 0.00036030567000000003
+        },
+        "speedup": 78.70566334661356
+      },
+      "json_parse": {
+        "cpp": {
+          "mad_ms": 0.00212667578125,
+          "median_ms": 0.01089085546875,
+          "p95_ms": 0.02000798046875
+        },
+        "python": {
+          "mad_ms": 0.002147890624999999,
+          "median_ms": 0.01656341796875,
+          "p95_ms": 0.03411496875
+        },
+        "speedup": 1.5208555486092654
+      },
+      "yaml_batch_dump": {
+        "cpp": {
+          "mad_ms": 0.001943054687500001,
+          "median_ms": 0.0175968359375,
+          "p95_ms": 0.02383140625
+        },
+        "python": {
+          "mad_ms": 0.4553233828125003,
+          "median_ms": 3.1869872265625,
+          "p95_ms": 3.96317809375
+        },
+        "speedup": 181.111379220785
+      },
+      "yaml_batch_parse": {
+        "cpp": {
+          "mad_ms": 0.0382796953125,
+          "median_ms": 0.160282375,
+          "p95_ms": 0.22345959375
+        },
+        "python": {
+          "mad_ms": 0.32810860937499964,
+          "median_ms": 5.86231103125,
+          "p95_ms": 7.295273140625
+        },
+        "speedup": 36.57489497051687
+      },
+      "yaml_dump": {
+        "cpp": {
+          "mad_ms": 0.0032920585937499976,
+          "median_ms": 0.0294632421875,
+          "p95_ms": 0.0564877421875
+        },
+        "python": {
+          "mad_ms": 0.31780687109375005,
+          "median_ms": 3.33763437890625,
+          "p95_ms": 3.97624698046875
+        },
+        "speedup": 113.28130005740734
+      },
+      "yaml_id_access": {
+        "cpp": {
+          "mad_ms": 1.2875499999999975e-07,
+          "median_ms": 2.1963499999999997e-06,
+          "p95_ms": 3.92141e-06
+        },
+        "python": {
+          "mad_ms": 1.8768754999999972e-05,
+          "median_ms": 0.00013581160499999997,
+          "p95_ms": 0.0002318406
+        },
+        "speedup": 61.83513784232932
+      },
+      "yaml_parse": {
+        "cpp": {
+          "mad_ms": 0.07139492187500002,
+          "median_ms": 0.43135653515625,
+          "p95_ms": 0.57555157421875
+        },
+        "python": {
+          "mad_ms": 0.5346827968749999,
+          "median_ms": 6.07127452734375,
+          "p95_ms": 7.84230503515625
+        },
+        "speedup": 14.074840723450627
+      }
+    },
+    "scalar_operations": 256,
+    "warmups": 5,
+    "workers": 8
+  },
+  "component": "virne.utils.setting",
+  "differential": {
+    "fixture_transforms": 82,
+    "fixtures": 41,
+    "json_float_bit_cases": 17513,
+    "json_float_deterministic_decimal_cases": 1129,
+    "json_float_random_binary64_cases": 16384,
+    "python_file_contract_cases": 10,
+    "required_rejections": 12,
+    "synthetic_compatible": 20
+  },
+  "runtime": {
+    "cpus_visible": 8,
+    "python": "3.10.20",
+    "pyyaml": "6.0.1"
+  },
+  "source_sha256": "89FB0E0D6E40FB10703ADB30AD588731DACD0475F34E2E86F1EBFBB4E2031C8E",
+  "status": "pass"
+}

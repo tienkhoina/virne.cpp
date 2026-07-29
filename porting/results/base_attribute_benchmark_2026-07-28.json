@@ -1,0 +1,91 @@
+{
+  "harness_sha256": "3d57f657b0711e281be4d3f029d94e67ed87b2416c142decf326d0f9b6ae81c6",
+  "numpy_version": "2.2.6",
+  "protocol": {
+    "checksum_and_rng_continuation_excluded": true,
+    "count": 300000,
+    "process_startup_excluded": true,
+    "repetitions": 3,
+    "seed": 123,
+    "warmups": 1,
+    "workers": [
+      1,
+      2,
+      8
+    ]
+  },
+  "result": "PASS",
+  "rows": [
+    {
+      "checksum": 2593564740736600229,
+      "count": 300000,
+      "cpp_median_ms": 1.503554,
+      "kind": "customized",
+      "next_bits": "3fe0ba49e174c912",
+      "output_bytes": 2400000,
+      "python_median_ms": 3.871002,
+      "speedup": 2.574567990241787,
+      "workers": 1
+    },
+    {
+      "checksum": 2593564740736600229,
+      "count": 300000,
+      "cpp_median_ms": 2.403897,
+      "kind": "customized",
+      "next_bits": "3fe0ba49e174c912",
+      "output_bytes": 2400000,
+      "python_median_ms": 3.871002,
+      "speedup": 1.6103027708757902,
+      "workers": 2
+    },
+    {
+      "checksum": 2593564740736600229,
+      "count": 300000,
+      "cpp_median_ms": 2.685478,
+      "kind": "customized",
+      "next_bits": "3fe0ba49e174c912",
+      "output_bytes": 2400000,
+      "python_median_ms": 3.871002,
+      "speedup": 1.4414573494923437,
+      "workers": 8
+    },
+    {
+      "checksum": 4878929683856622407,
+      "count": 300000,
+      "cpp_median_ms": 5.91441,
+      "kind": "exponential_int",
+      "next_bits": "3fe0ba49e174c912",
+      "output_bytes": 2400000,
+      "python_median_ms": 8.303804,
+      "speedup": 1.4039953266682559,
+      "workers": 1
+    },
+    {
+      "checksum": 4878929683856622407,
+      "count": 300000,
+      "cpp_median_ms": 3.534242,
+      "kind": "exponential_int",
+      "next_bits": "3fe0ba49e174c912",
+      "output_bytes": 2400000,
+      "python_median_ms": 8.303804,
+      "speedup": 2.3495289796227876,
+      "workers": 2
+    },
+    {
+      "checksum": 4878929683856622407,
+      "count": 300000,
+      "cpp_median_ms": 3.326736,
+      "kind": "exponential_int",
+      "next_bits": "3fe0ba49e174c912",
+      "output_bytes": 2400000,
+      "python_median_ms": 8.303804,
+      "speedup": 2.496081444394746,
+      "workers": 8
+    }
+  ],
+  "runtime": {
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+    "python": "3.10.20"
+  },
+  "source_sha256": "103c5c16126ca76e782c2191ff0811b95ed88a0c3637f3a61e84c0b22df42e8e"
+}

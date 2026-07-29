@@ -1,0 +1,39 @@
+{
+  "batch_checksum": 12282527110206868916,
+  "case_count": 21,
+  "config_source_sha256": "ad1d32e6b2db842c958240301535d356919dbd822e403d6a767ce2ed2bbfe787",
+  "dataset_source_sha256": "269650ebcc373d7bdf79fa17346bd6f847973f17e60c1ac9bcae7cfd97bf936f",
+  "native_extension_cases": [
+    "batch_workers_0",
+    "batch_workers_1",
+    "batch_workers_2",
+    "batch_workers_8",
+    "fixed_attribute_kind_slots",
+    "typed_summary_return"
+  ],
+  "python_only_boundaries": {
+    "config_scalar_coercion": "Python os.path.join rejects non-path components; the native Config adapter requires callers to supply its documented typed string schema.",
+    "dynamic_mapping_protocols": "Python accepts DictConfig/dict subclasses and arbitrary key/value objects; native YAML is a cold compatibility boundary only.",
+    "generic_mutation": "Python mutates DictConfig fields incrementally and retains earlier writes on failure; native code returns fixed typed state for direct ownership.",
+    "plain_dict_identity": "Python returns the exact plain dict object; YAML::Node preserves shared node state but does not claim Python object identity.",
+    "unknown_attribute_types": "Python treats unknown type strings as non-status and may match custom membership containers; native decoding rejects values outside AttributeKind."
+  },
+  "result": "PASS",
+  "shared_cases": [
+    "generate_run_id",
+    "run_id_rng_continuation",
+    "simulation_variant_0",
+    "simulation_variant_1",
+    "simulation_variant_2",
+    "run_directory_direct",
+    "run_directory_config_adapter",
+    "resolve_dict_config",
+    "resolve_plain_dict_identity",
+    "resolve_invalid_type"
+  ],
+  "summary_checksums": [
+    9908951290258426500,
+    15902681437142816804,
+    4881879912879849376
+  ]
+}

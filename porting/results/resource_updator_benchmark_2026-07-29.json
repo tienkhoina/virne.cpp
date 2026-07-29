@@ -1,0 +1,31 @@
+{
+  "case": "disjoint_node_batch",
+  "component": "core.controller.ResourceUpdator",
+  "count": 32768,
+  "cpp": [
+    {
+      "cpp_median_ns": 2534859,
+      "speedup_vs_python": 33.11265439221669,
+      "workers": 1
+    },
+    {
+      "cpp_median_ns": 15145464,
+      "speedup_vs_python": 5.541983395160425,
+      "workers": 2
+    },
+    {
+      "cpp_median_ns": 15444391,
+      "speedup_vs_python": 5.434718015103347,
+      "workers": 8
+    }
+  ],
+  "fingerprint": {
+    "checksum": 17411705748429442498,
+    "entry_count": 32768,
+    "value_sum": 3407839
+  },
+  "python_median_ns": 83935910,
+  "repetitions": 3,
+  "status": "PASS",
+  "warmups": 1
+}

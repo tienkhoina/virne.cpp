@@ -1,0 +1,15 @@
+{
+  "batch_cases": 14,
+  "brain_gml_checked_raw_sha256": "b0651a388a904d6e45559388f56a7bffe2207d4928450552003c567907783cc3",
+  "brain_gml_generated_bytes": 45085,
+  "brain_gml_generated_sha256": "0f30d85c53ecc94461fe7dd00d627f1f91492428266f37528642f29ea2965a3f",
+  "brain_xml_bytes": 132090,
+  "brain_xml_sha256": "2cbb55bbd979ddae7696e57a3c70867be51abc82e20fe8e0bdbde32cdc966f4b",
+  "compatibility_cases": 24,
+  "error_cases": 18,
+  "harness_sha256": "2d8608b6ab07e9a4147a0974a9247170f5b94a84bc1d1b3c3b6ac3ac75ecc766",
+  "networkx": "3.4.2",
+  "python_source_sha256": "269650ebcc373d7bdf79fa17346bd6f847973f17e60c1ac9bcae7cfd97bf936f",
+  "status": "PASS",
+  "total_cases": 57
+}

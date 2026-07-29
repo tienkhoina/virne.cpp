@@ -1,0 +1,60 @@
+{
+  "accepted": 64,
+  "checksum": 17358322786803582063,
+  "component": "core.BaseEnvironment",
+  "events": 192,
+  "native": [
+    {
+      "accepted": 64,
+      "checksum": 17358322786803582063,
+      "events": 192,
+      "median_ms": 65.88251,
+      "output_bytes": 72481,
+      "physical_checksum": 5251282115348753471,
+      "records": 192,
+      "requests": 96,
+      "speedup": 146.85375223257282,
+      "workers": 1
+    },
+    {
+      "accepted": 64,
+      "checksum": 17358322786803582063,
+      "events": 192,
+      "median_ms": 254.199031,
+      "output_bytes": 72481,
+      "physical_checksum": 5251282115348753471,
+      "records": 192,
+      "requests": 96,
+      "speedup": 38.06109630685414,
+      "workers": 2
+    },
+    {
+      "accepted": 64,
+      "checksum": 17358322786803582063,
+      "events": 192,
+      "median_ms": 993.396108,
+      "output_bytes": 72481,
+      "physical_checksum": 5251282115348753471,
+      "records": 192,
+      "requests": 96,
+      "speedup": 9.739411823828084,
+      "workers": 8
+    }
+  ],
+  "oracle_boundary": "Exact SHA-locked AST-isolated Python Environment lifecycle over deterministic collaborators that perform node/link resource sums, deploy/release mutations, counter fields, record state and deep history snapshots. Logging, filesystem persistence, observation/reward, solver, system, RL and ML are excluded.",
+  "output_bytes": 72481,
+  "physical_checksum": 5251282115348753471,
+  "physical_links": 4095,
+  "physical_nodes": 4096,
+  "python_median_ms": 9675.0938,
+  "records": 192,
+  "requests": 96,
+  "samples": 3,
+  "source_sha256": "6004CFF2114E504E30C5490232763F71CB9E7799216C4F6CE8BADC27A0E42B34",
+  "status": "PASS",
+  "timing_boundary": "Environment arrival admission/count/deploy/record/transit and automatic leave release/record only; fixture construction, reset/preparation, input cloning, process startup and all checksum/output gates are outside the timer.",
+  "virtual_links_per_request": 7,
+  "virtual_nodes_per_request": 8,
+  "warmup": 1,
+  "workload": "mixed_accepted_rejected_overlapping_leave_lifecycle"
+}

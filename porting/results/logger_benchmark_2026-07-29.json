@@ -1,0 +1,68 @@
+{
+  "case": "dense_metric_batch_file_csv",
+  "component": "core.Logger",
+  "cpp": [
+    {
+      "cpp_median_ns": 5602463,
+      "speedup_vs_python": 14.877950644207734,
+      "workers": 1
+    },
+    {
+      "cpp_median_ns": 4917295,
+      "speedup_vs_python": 16.951020428914678,
+      "workers": 2
+    },
+    {
+      "cpp_median_ns": 6088893,
+      "speedup_vs_python": 13.689379662280155,
+      "workers": 8
+    }
+  ],
+  "fingerprint": {
+    "fnv64": 3834733185215270441,
+    "output_bytes": 216838,
+    "sha256": "B38737B10F562DC2912782DC6AB0EDB3971BD1744D7D1887D3AA906D73E874E7"
+  },
+  "native_executable_sha256": "D0314DF182A6944BD543A66634114E1022B55682AECDB7E444C5503C762FB333",
+  "oracle": {
+    "backend": "real stdlib logging FileHandler plus csv.writer",
+    "excluded": [
+      "wandb",
+      "tensorboard",
+      "torch",
+      "rl",
+      "solver",
+      "system"
+    ],
+    "fake_boundary": "colorlog.ColoredFormatter constructor only; empty messages and disabled progress output make it observationally cold",
+    "loader": "exact single-class AST isolation"
+  },
+  "protocol": {
+    "checksum_excluded": true,
+    "cleanup_excluded": true,
+    "construction_excluded": true,
+    "csv_rows": 4097,
+    "entry_count": 4096,
+    "file_read_excluded": true,
+    "fixture_construction_excluded": true,
+    "metric_count": 8,
+    "native_hot_loop_uses_dense_metric_ids": true,
+    "process_startup_excluded": true,
+    "repetitions": 3,
+    "result_gate": "exact CSV bytes plus rows/size/FNV64 and empty run.log",
+    "schema_registration_excluded": true,
+    "warmups": 1,
+    "workers": [
+      1,
+      2,
+      8
+    ]
+  },
+  "python_median_ns": 83353168,
+  "runtime": {
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+    "python": "3.10.20"
+  },
+  "source_sha256": "274189AF7211ABA134C4696B2DA8190F743B2F59D4287CF56843510F0B2C7083",
+  "status": "PASS"
+}

@@ -1,0 +1,13 @@
+{
+  "component": "core.controller.ConstraintChecker",
+  "native_unit_case_groups": 7,
+  "python_only_boundaries": {
+    "dynamic_names": "Python returns string-keyed offset dictionaries; native names resolve once during prepare and results use direct ID slots.",
+    "dynamic_protocols": "Python permits monkey-patched attributes and arbitrary mapping protocols; native preparation accepts frozen concrete typed attributes.",
+    "native_batches": "Configurable deterministic worker batches are a native throughput extension; Python exposes scalar checks only.",
+    "unbounded_labels": "Python node labels and integers are unbounded objects; native graph vertices and registry IDs use frozen bounded integer types."
+  },
+  "shared_case_count": 14,
+  "source_sha256": "EA41EE9226CEF3F38CFFF30D7ABB276A7A9AF58FEE67CE78C3763413BDB9619A",
+  "status": "PASS"
+}

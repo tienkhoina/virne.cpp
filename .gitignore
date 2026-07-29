@@ -1,4 +1,10 @@
 /build/
+/build-*/
+/build_*/
+# Container toolchain smoke test build output.
+/.docker-smoke/*
+!/.docker-smoke/CMakeLists.txt
+!/.docker-smoke/hello_toolchain.cpp
 # C++ dependency payloads are reconstructed only from DEPENDENCIES.md and
 # DEPENDENCIES.sha256; never resolve these paths from an OS/Conda install.
 /libs/

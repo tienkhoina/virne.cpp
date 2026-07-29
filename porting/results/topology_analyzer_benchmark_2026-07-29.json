@@ -1,0 +1,40 @@
+{
+  "case": "first_shortest_batch",
+  "component": "core.controller.TopologyAnalyzer",
+  "count": 4096,
+  "cpp": [
+    {
+      "checksum": 10025764477037659827,
+      "cpp_median_ns": 16830783,
+      "path_count": 4096,
+      "speedup_vs_python": 83.76813687158821,
+      "vertex_count": 716112,
+      "workers": 1
+    },
+    {
+      "checksum": 10025764477037659827,
+      "cpp_median_ns": 9582848,
+      "path_count": 4096,
+      "speedup_vs_python": 147.1257118969225,
+      "vertex_count": 716112,
+      "workers": 2
+    },
+    {
+      "checksum": 10025764477037659827,
+      "cpp_median_ns": 7933787,
+      "path_count": 4096,
+      "speedup_vs_python": 177.70622453060562,
+      "vertex_count": 716112,
+      "workers": 8
+    }
+  ],
+  "fingerprint": {
+    "checksum": 10025764477037659827,
+    "path_count": 4096,
+    "vertex_count": 716112
+  },
+  "python_median_ns": 1409883334,
+  "repetitions": 3,
+  "status": "PASS",
+  "warmups": 1
+}

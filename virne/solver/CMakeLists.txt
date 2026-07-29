@@ -1,3 +1,22 @@
+find_package(Threads REQUIRED)
+
+add_library(vne_link_rank
+    rank/link_rank.cpp
+)
+
+target_include_directories(
+    vne_link_rank
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_link_libraries(
+    vne_link_rank
+    PUBLIC
+    vne_base_network
+    Threads::Threads
+)
+
 add_library(vne_solver)
 
 target_sources(vne_solver PRIVATE
@@ -19,7 +38,6 @@ target_sources(vne_solver PRIVATE
     heuristic/nrm_par_solver.cpp
 
     rank/node_rank.cpp
-    rank/link_rank.cpp
 )
 
 target_include_directories(
@@ -32,4 +50,5 @@ target_link_libraries(
     vne_solver
     PUBLIC
     vne_network
+    vne_link_rank
 )

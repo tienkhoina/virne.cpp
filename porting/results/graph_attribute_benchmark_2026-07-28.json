@@ -1,0 +1,62 @@
+{
+  "benchmark_sha256": "23c70bde125abdad61a2a07a3dbefdc354fa08e83a79e6c3de39605b18adf270",
+  "networkx_version": "3.4.2",
+  "numpy_version": "2.2.6",
+  "protocol": {
+    "count": 20000,
+    "fixture_creation_and_checksum_excluded": true,
+    "process_startup_excluded": true,
+    "repetitions": 3,
+    "single_workload": true,
+    "warmups": 1,
+    "workers": [
+      1,
+      2,
+      8
+    ]
+  },
+  "result": "PASS",
+  "rows": [
+    {
+      "bits": "raw64",
+      "checksum": 5125455356797706885,
+      "count": 20000,
+      "cpp_median_ms": 5.305297,
+      "kind": "independent_roundtrip",
+      "output_bytes": 160000,
+      "python_median_ms": 13.767438,
+      "speedup": 2.5950362439652293,
+      "type_tag": "double",
+      "workers": 1
+    },
+    {
+      "bits": "raw64",
+      "checksum": 5125455356797706885,
+      "count": 20000,
+      "cpp_median_ms": 7.530612,
+      "kind": "independent_roundtrip",
+      "output_bytes": 160000,
+      "python_median_ms": 13.767438,
+      "speedup": 1.8281964334372824,
+      "type_tag": "double",
+      "workers": 2
+    },
+    {
+      "bits": "raw64",
+      "checksum": 5125455356797706885,
+      "count": 20000,
+      "cpp_median_ms": 11.388209,
+      "kind": "independent_roundtrip",
+      "output_bytes": 160000,
+      "python_median_ms": 13.767438,
+      "speedup": 1.2089203842324987,
+      "type_tag": "double",
+      "workers": 8
+    }
+  ],
+  "runtime": {
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+    "python": "3.10.20"
+  },
+  "source_sha256": "dfa858918068a792cb0a673b400ee6f3f93107f1d17baad28f72546f50fbcede"
+}

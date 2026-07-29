@@ -1,0 +1,141 @@
+{
+  "benchmark_sha256": "2acc7804648f0aa0f9343d1df5cd59b5e31b1fa8ed86a2f5454f3833df784621",
+  "networkx_version": "3.4.2",
+  "numpy_version": "2.2.6",
+  "protocol": {
+    "caller_configured_workers": true,
+    "count": 8192,
+    "cpp_process_startup_excluded": true,
+    "fingerprint_excluded": true,
+    "fixture_and_input_creation_excluded": true,
+    "operations": [
+      "get",
+      "set",
+      "manager"
+    ],
+    "raw_types_bits_order_gate_before_timing": true,
+    "repetitions": 3,
+    "warmups": 1,
+    "workers": [
+      1,
+      2,
+      8
+    ]
+  },
+  "result": "PASS",
+  "rows": [
+    {
+      "checksum": 3693647448735006061,
+      "count": 8192,
+      "cpp_median_ms": 3.243619,
+      "entry_count": 49146,
+      "operation": "get",
+      "output_bytes": 611681,
+      "python_median_ms": 20.519328,
+      "speedup": 6.3260598732465185,
+      "type_tag": "attrvalue_bits_order_v1",
+      "workers": 1
+    },
+    {
+      "checksum": 3693647448735006061,
+      "count": 8192,
+      "cpp_median_ms": 3.933634,
+      "entry_count": 49146,
+      "operation": "get",
+      "output_bytes": 611681,
+      "python_median_ms": 20.519328,
+      "speedup": 5.216379561494537,
+      "type_tag": "attrvalue_bits_order_v1",
+      "workers": 2
+    },
+    {
+      "checksum": 3693647448735006061,
+      "count": 8192,
+      "cpp_median_ms": 6.322977,
+      "entry_count": 49146,
+      "operation": "get",
+      "output_bytes": 611681,
+      "python_median_ms": 20.519328,
+      "speedup": 3.245200480722925,
+      "type_tag": "attrvalue_bits_order_v1",
+      "workers": 8
+    },
+    {
+      "checksum": 2294184608147702832,
+      "count": 8192,
+      "cpp_median_ms": 3.148405,
+      "entry_count": 49146,
+      "operation": "set",
+      "output_bytes": 611588,
+      "python_median_ms": 20.447408,
+      "speedup": 6.494529134593548,
+      "type_tag": "attrvalue_bits_order_v1",
+      "workers": 1
+    },
+    {
+      "checksum": 2294184608147702832,
+      "count": 8192,
+      "cpp_median_ms": 4.593106,
+      "entry_count": 49146,
+      "operation": "set",
+      "output_bytes": 611588,
+      "python_median_ms": 20.447408,
+      "speedup": 4.4517605298027085,
+      "type_tag": "attrvalue_bits_order_v1",
+      "workers": 2
+    },
+    {
+      "checksum": 2294184608147702832,
+      "count": 8192,
+      "cpp_median_ms": 8.525752,
+      "entry_count": 49146,
+      "operation": "set",
+      "output_bytes": 611588,
+      "python_median_ms": 20.447408,
+      "speedup": 2.3983113747620153,
+      "type_tag": "attrvalue_bits_order_v1",
+      "workers": 8
+    },
+    {
+      "checksum": 7234129939705340940,
+      "count": 8192,
+      "cpp_median_ms": 5.659331,
+      "entry_count": 3,
+      "operation": "manager",
+      "output_bytes": 98,
+      "python_median_ms": 588.476812,
+      "speedup": 103.98345882225301,
+      "type_tag": "attrvalue_bits_order_v1",
+      "workers": 1
+    },
+    {
+      "checksum": 7234129939705340940,
+      "count": 8192,
+      "cpp_median_ms": 8.670046,
+      "entry_count": 3,
+      "operation": "manager",
+      "output_bytes": 98,
+      "python_median_ms": 588.476812,
+      "speedup": 67.87470470168209,
+      "type_tag": "attrvalue_bits_order_v1",
+      "workers": 2
+    },
+    {
+      "checksum": 7234129939705340940,
+      "count": 8192,
+      "cpp_median_ms": 8.281702,
+      "entry_count": 3,
+      "operation": "manager",
+      "output_bytes": 98,
+      "python_median_ms": 588.476812,
+      "speedup": 71.05747248572817,
+      "type_tag": "attrvalue_bits_order_v1",
+      "workers": 8
+    }
+  ],
+  "runtime": {
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+    "python": "3.10.20"
+  },
+  "source_sha256": "94cb1185b5e6f0046d9393f97af1ee0dd1c0d688596b102a0ec3cc98314addce"
+}

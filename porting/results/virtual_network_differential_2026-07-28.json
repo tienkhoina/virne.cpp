@@ -1,0 +1,34 @@
+{
+  "base_source_sha256": "94cb1185b5e6f0046d9393f97af1ee0dd1c0d688596b102a0ec3cc98314addce",
+  "case_count": 20,
+  "native_extension_cases": [
+    "native_move"
+  ],
+  "networkx_version": "3.4.2",
+  "numpy_version": "2.2.6",
+  "python_only_boundaries": {
+    "arbitrary_numpy_dtype": "Object/string/custom NumPy dtype promotion and user numeric protocols are outside AttrValue numeric lanes.",
+    "arbitrary_reflection": "Python permits arbitrary attributes and descriptors; fixed native request fields are direct optionals.",
+    "cached_property_deletion": "Python deletes a cached_property through __dict__; native code exposes explicit invalidation.",
+    "numpy_pairwise_extremes": "Adversarial overflow and payload-sensitive NumPy reduction details remain a dynamic numeric boundary.",
+    "sparse_hashable_labels": "Python accepts arbitrary hashable labels; the frozen native graph uses dense vertices."
+  },
+  "result": "PASS",
+  "shared_cases": [
+    "empty",
+    "fixed_metadata",
+    "fixed_assignment",
+    "demand_w0",
+    "demand_w1",
+    "demand_w2",
+    "demand_w8",
+    "cached_stale",
+    "native_cache_invalidate",
+    "no_resources",
+    "bool_integer",
+    "ragged_zero",
+    "nonnumeric_zero",
+    "clone"
+  ],
+  "source_sha256": "0b73e73feb43793559976f08fd93ed227698b810ed8741ea5bcc1534adb3768c"
+}

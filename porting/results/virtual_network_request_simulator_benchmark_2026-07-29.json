@@ -1,0 +1,95 @@
+{
+  "benchmark_sha256": "55f299077a4a62013a4bc969f4bfe1f2a5fc20e66a36fbc011aaca42a9ec6e2d",
+  "protocol": {
+    "binary_output_gate_before_acceptance": true,
+    "caller_configured_workers": true,
+    "count": 65536,
+    "cpp_process_startup_excluded": true,
+    "fingerprint_excluded": true,
+    "fixture_creation_excluded": true,
+    "repetitions": 3,
+    "warmups": 1,
+    "worker_auto_tuning": false,
+    "workers": [
+      1,
+      2,
+      8
+    ]
+  },
+  "result": "PASS",
+  "rows": [
+    {
+      "checksum": 2996903216629242145,
+      "count": 65536,
+      "cpp_median_ms": 2.491562,
+      "entry_count": 65536,
+      "kind": "simulator_arrange",
+      "output_bytes": 1572868,
+      "python_median_ms": 6.993699,
+      "speedup": 2.80695362989161,
+      "workers": 1
+    },
+    {
+      "checksum": 2996903216629242145,
+      "count": 65536,
+      "cpp_median_ms": 3.338535,
+      "entry_count": 65536,
+      "kind": "simulator_arrange",
+      "output_bytes": 1572868,
+      "python_median_ms": 6.993699,
+      "speedup": 2.0948407010859555,
+      "workers": 2
+    },
+    {
+      "checksum": 2996903216629242145,
+      "count": 65536,
+      "cpp_median_ms": 3.5209,
+      "entry_count": 65536,
+      "kind": "simulator_arrange",
+      "output_bytes": 1572868,
+      "python_median_ms": 6.993699,
+      "speedup": 1.986338436195291,
+      "workers": 8
+    },
+    {
+      "checksum": 18354752673813279486,
+      "count": 65536,
+      "cpp_median_ms": 15.298536,
+      "entry_count": 131072,
+      "kind": "simulator_schedule",
+      "output_bytes": 3276800,
+      "python_median_ms": 346.722896,
+      "speedup": 22.663795803729194,
+      "workers": 1
+    },
+    {
+      "checksum": 18354752673813279486,
+      "count": 65536,
+      "cpp_median_ms": 13.215411,
+      "entry_count": 131072,
+      "kind": "simulator_schedule",
+      "output_bytes": 3276800,
+      "python_median_ms": 346.722896,
+      "speedup": 26.236255232621975,
+      "workers": 2
+    },
+    {
+      "checksum": 18354752673813279486,
+      "count": 65536,
+      "cpp_median_ms": 16.721802,
+      "entry_count": 131072,
+      "kind": "simulator_schedule",
+      "output_bytes": 3276800,
+      "python_median_ms": 346.722896,
+      "speedup": 20.734780617543493,
+      "workers": 8
+    }
+  ],
+  "runtime": {
+    "numpy": "2.2.6",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+    "python": "3.10.20"
+  },
+  "source_sha256": "970e63f9dac59f60e2ed1786606dc87d3271af062ba1d8d6c67aef8d3c7478e1",
+  "torch_imported": false
+}

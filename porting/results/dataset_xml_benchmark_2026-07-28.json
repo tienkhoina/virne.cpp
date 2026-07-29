@@ -1,0 +1,570 @@
+{
+  "affinity_cpus": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "batch_documents": 16,
+  "compiler_binary_sha256": "2d8608b6ab07e9a4147a0974a9247170f5b94a84bc1d1b3c3b6ac3ac75ecc766",
+  "networkx": "3.4.2",
+  "performance_gate": true,
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+  "python": "3.10.20",
+  "python_source_sha256": "269650ebcc373d7bdf79fa17346bd6f847973f17e60c1ac9bcae7cfd97bf936f",
+  "repetitions": 31,
+  "results": [
+    {
+      "checksum": 7526736259187518296,
+      "cpp": {
+        "mad_ms": 0.15958300000000003,
+        "median_ms": 1.366041,
+        "p95_ms": 1.944058
+      },
+      "documents": 1,
+      "inner_repetitions": 1,
+      "kind": "brain_parse_single",
+      "output_bytes": 36973,
+      "python": {
+        "mad_ms": 3.761744,
+        "median_ms": 37.983588,
+        "p95_ms": 91.95598
+      },
+      "speedup": 27.80559880706362,
+      "workers": 1
+    },
+    {
+      "checksum": 7526736259187518296,
+      "cpp": {
+        "mad_ms": 0.1383859999999999,
+        "median_ms": 1.326932,
+        "p95_ms": 2.253337
+      },
+      "documents": 1,
+      "inner_repetitions": 1,
+      "kind": "brain_parse_single",
+      "output_bytes": 36973,
+      "python": {
+        "mad_ms": 3.761744,
+        "median_ms": 37.983588,
+        "p95_ms": 91.95598
+      },
+      "speedup": 28.625120202090233,
+      "workers": 0
+    },
+    {
+      "checksum": 7526736259187518296,
+      "cpp": {
+        "mad_ms": 0.11091099999999998,
+        "median_ms": 1.331927,
+        "p95_ms": 1.742376
+      },
+      "documents": 1,
+      "inner_repetitions": 1,
+      "kind": "brain_parse_single",
+      "output_bytes": 36973,
+      "python": {
+        "mad_ms": 3.761744,
+        "median_ms": 37.983588,
+        "p95_ms": 91.95598
+      },
+      "speedup": 28.51777011803199,
+      "workers": 2
+    },
+    {
+      "checksum": 7526736259187518296,
+      "cpp": {
+        "mad_ms": 0.06549699999999992,
+        "median_ms": 1.315421,
+        "p95_ms": 1.597796
+      },
+      "documents": 1,
+      "inner_repetitions": 1,
+      "kind": "brain_parse_single",
+      "output_bytes": 36973,
+      "python": {
+        "mad_ms": 3.761744,
+        "median_ms": 37.983588,
+        "p95_ms": 91.95598
+      },
+      "speedup": 28.87561320672241,
+      "workers": 3
+    },
+    {
+      "checksum": 7526736259187518296,
+      "cpp": {
+        "mad_ms": 0.213171,
+        "median_ms": 1.428468,
+        "p95_ms": 2.173998
+      },
+      "documents": 1,
+      "inner_repetitions": 1,
+      "kind": "brain_parse_single",
+      "output_bytes": 36973,
+      "python": {
+        "mad_ms": 3.761744,
+        "median_ms": 37.983588,
+        "p95_ms": 91.95598
+      },
+      "speedup": 26.590436747620526,
+      "workers": 4
+    },
+    {
+      "checksum": 7526736259187518296,
+      "cpp": {
+        "mad_ms": 0.15876099999999993,
+        "median_ms": 1.427924,
+        "p95_ms": 2.096285
+      },
+      "documents": 1,
+      "inner_repetitions": 1,
+      "kind": "brain_parse_single",
+      "output_bytes": 36973,
+      "python": {
+        "mad_ms": 3.761744,
+        "median_ms": 37.983588,
+        "p95_ms": 91.95598
+      },
+      "speedup": 26.600566976953953,
+      "workers": 5
+    },
+    {
+      "checksum": 7526736259187518296,
+      "cpp": {
+        "mad_ms": 0.1509830000000001,
+        "median_ms": 1.369747,
+        "p95_ms": 2.435044
+      },
+      "documents": 1,
+      "inner_repetitions": 1,
+      "kind": "brain_parse_single",
+      "output_bytes": 36973,
+      "python": {
+        "mad_ms": 3.761744,
+        "median_ms": 37.983588,
+        "p95_ms": 91.95598
+      },
+      "speedup": 27.730367724842615,
+      "workers": 6
+    },
+    {
+      "checksum": 7526736259187518296,
+      "cpp": {
+        "mad_ms": 0.12366999999999995,
+        "median_ms": 1.373165,
+        "p95_ms": 2.277395
+      },
+      "documents": 1,
+      "inner_repetitions": 1,
+      "kind": "brain_parse_single",
+      "output_bytes": 36973,
+      "python": {
+        "mad_ms": 3.761744,
+        "median_ms": 37.983588,
+        "p95_ms": 91.95598
+      },
+      "speedup": 27.661342955872016,
+      "workers": 7
+    },
+    {
+      "checksum": 7526736259187518296,
+      "cpp": {
+        "mad_ms": 0.11083700000000007,
+        "median_ms": 1.413307,
+        "p95_ms": 2.239152
+      },
+      "documents": 1,
+      "inner_repetitions": 1,
+      "kind": "brain_parse_single",
+      "output_bytes": 36973,
+      "python": {
+        "mad_ms": 3.761744,
+        "median_ms": 37.983588,
+        "p95_ms": 91.95598
+      },
+      "speedup": 26.87568093839484,
+      "workers": 8
+    },
+    {
+      "checksum": 12260851613415961376,
+      "cpp": {
+        "mad_ms": 0.6796679999999995,
+        "median_ms": 14.837138,
+        "p95_ms": 20.790551
+      },
+      "documents": 16,
+      "inner_repetitions": 1,
+      "kind": "brain_parse_batch",
+      "output_bytes": 591314,
+      "python": {
+        "mad_ms": 27.782062999999994,
+        "median_ms": 826.902155,
+        "p95_ms": 938.322247
+      },
+      "speedup": 55.73191777282115,
+      "workers": 1
+    },
+    {
+      "checksum": 12260851613415961376,
+      "cpp": {
+        "mad_ms": 0.8158659999999998,
+        "median_ms": 5.533607,
+        "p95_ms": 9.735412
+      },
+      "documents": 16,
+      "inner_repetitions": 1,
+      "kind": "brain_parse_batch",
+      "output_bytes": 591314,
+      "python": {
+        "mad_ms": 27.782062999999994,
+        "median_ms": 826.902155,
+        "p95_ms": 938.322247
+      },
+      "speedup": 149.43275787384252,
+      "workers": 0
+    },
+    {
+      "checksum": 12260851613415961376,
+      "cpp": {
+        "mad_ms": 0.31559700000000035,
+        "median_ms": 8.081801,
+        "p95_ms": 14.675038
+      },
+      "documents": 16,
+      "inner_repetitions": 1,
+      "kind": "brain_parse_batch",
+      "output_bytes": 591314,
+      "python": {
+        "mad_ms": 27.782062999999994,
+        "median_ms": 826.902155,
+        "p95_ms": 938.322247
+      },
+      "speedup": 102.31656966064865,
+      "workers": 2
+    },
+    {
+      "checksum": 12260851613415961376,
+      "cpp": {
+        "mad_ms": 0.8456020000000004,
+        "median_ms": 6.948318,
+        "p95_ms": 11.230659
+      },
+      "documents": 16,
+      "inner_repetitions": 1,
+      "kind": "brain_parse_batch",
+      "output_bytes": 591314,
+      "python": {
+        "mad_ms": 27.782062999999994,
+        "median_ms": 826.902155,
+        "p95_ms": 938.322247
+      },
+      "speedup": 119.00752887245517,
+      "workers": 3
+    },
+    {
+      "checksum": 12260851613415961376,
+      "cpp": {
+        "mad_ms": 1.2562430000000004,
+        "median_ms": 6.393638,
+        "p95_ms": 9.476533
+      },
+      "documents": 16,
+      "inner_repetitions": 1,
+      "kind": "brain_parse_batch",
+      "output_bytes": 591314,
+      "python": {
+        "mad_ms": 27.782062999999994,
+        "median_ms": 826.902155,
+        "p95_ms": 938.322247
+      },
+      "speedup": 129.3320258356823,
+      "workers": 4
+    },
+    {
+      "checksum": 12260851613415961376,
+      "cpp": {
+        "mad_ms": 0.6627559999999999,
+        "median_ms": 6.928609,
+        "p95_ms": 9.510551
+      },
+      "documents": 16,
+      "inner_repetitions": 1,
+      "kind": "brain_parse_batch",
+      "output_bytes": 591314,
+      "python": {
+        "mad_ms": 27.782062999999994,
+        "median_ms": 826.902155,
+        "p95_ms": 938.322247
+      },
+      "speedup": 119.34605560798711,
+      "workers": 5
+    },
+    {
+      "checksum": 12260851613415961376,
+      "cpp": {
+        "mad_ms": 0.8172280000000001,
+        "median_ms": 7.252863,
+        "p95_ms": 8.906792
+      },
+      "documents": 16,
+      "inner_repetitions": 1,
+      "kind": "brain_parse_batch",
+      "output_bytes": 591314,
+      "python": {
+        "mad_ms": 27.782062999999994,
+        "median_ms": 826.902155,
+        "p95_ms": 938.322247
+      },
+      "speedup": 114.01044732266418,
+      "workers": 6
+    },
+    {
+      "checksum": 12260851613415961376,
+      "cpp": {
+        "mad_ms": 0.5364199999999997,
+        "median_ms": 7.195602,
+        "p95_ms": 9.217625
+      },
+      "documents": 16,
+      "inner_repetitions": 1,
+      "kind": "brain_parse_batch",
+      "output_bytes": 591314,
+      "python": {
+        "mad_ms": 27.782062999999994,
+        "median_ms": 826.902155,
+        "p95_ms": 938.322247
+      },
+      "speedup": 114.917717099973,
+      "workers": 7
+    },
+    {
+      "checksum": 12260851613415961376,
+      "cpp": {
+        "mad_ms": 0.506697,
+        "median_ms": 6.337351,
+        "p95_ms": 9.650437
+      },
+      "documents": 16,
+      "inner_repetitions": 1,
+      "kind": "brain_parse_batch",
+      "output_bytes": 591314,
+      "python": {
+        "mad_ms": 27.782062999999994,
+        "median_ms": 826.902155,
+        "p95_ms": 938.322247
+      },
+      "speedup": 130.48072530620445,
+      "workers": 8
+    },
+    {
+      "checksum": 7124838808799260864,
+      "cpp": {
+        "mad_ms": 2.3837069999999976,
+        "median_ms": 32.396412,
+        "p95_ms": 74.440768
+      },
+      "documents": 16,
+      "inner_repetitions": 1,
+      "kind": "synthetic_parse_batch",
+      "output_bytes": 2206290,
+      "python": {
+        "mad_ms": 43.562446000000136,
+        "median_ms": 1687.22279,
+        "p95_ms": 1783.207707
+      },
+      "speedup": 52.08054490725702,
+      "workers": 1
+    },
+    {
+      "checksum": 7124838808799260864,
+      "cpp": {
+        "mad_ms": 2.354765000000002,
+        "median_ms": 15.703109,
+        "p95_ms": 19.993751
+      },
+      "documents": 16,
+      "inner_repetitions": 1,
+      "kind": "synthetic_parse_batch",
+      "output_bytes": 2206290,
+      "python": {
+        "mad_ms": 43.562446000000136,
+        "median_ms": 1687.22279,
+        "p95_ms": 1783.207707
+      },
+      "speedup": 107.44514286947891,
+      "workers": 0
+    },
+    {
+      "checksum": 7124838808799260864,
+      "cpp": {
+        "mad_ms": 3.231924000000003,
+        "median_ms": 21.477019,
+        "p95_ms": 28.034577
+      },
+      "documents": 16,
+      "inner_repetitions": 1,
+      "kind": "synthetic_parse_batch",
+      "output_bytes": 2206290,
+      "python": {
+        "mad_ms": 43.562446000000136,
+        "median_ms": 1687.22279,
+        "p95_ms": 1783.207707
+      },
+      "speedup": 78.5594495213698,
+      "workers": 2
+    },
+    {
+      "checksum": 7124838808799260864,
+      "cpp": {
+        "mad_ms": 2.1604810000000008,
+        "median_ms": 16.61108,
+        "p95_ms": 35.156801
+      },
+      "documents": 16,
+      "inner_repetitions": 1,
+      "kind": "synthetic_parse_batch",
+      "output_bytes": 2206290,
+      "python": {
+        "mad_ms": 43.562446000000136,
+        "median_ms": 1687.22279,
+        "p95_ms": 1783.207707
+      },
+      "speedup": 101.57213077054593,
+      "workers": 3
+    },
+    {
+      "checksum": 7124838808799260864,
+      "cpp": {
+        "mad_ms": 1.7534150000000004,
+        "median_ms": 15.790232,
+        "p95_ms": 18.41375
+      },
+      "documents": 16,
+      "inner_repetitions": 1,
+      "kind": "synthetic_parse_batch",
+      "output_bytes": 2206290,
+      "python": {
+        "mad_ms": 43.562446000000136,
+        "median_ms": 1687.22279,
+        "p95_ms": 1783.207707
+      },
+      "speedup": 106.85231160631459,
+      "workers": 4
+    },
+    {
+      "checksum": 7124838808799260864,
+      "cpp": {
+        "mad_ms": 1.5818990000000017,
+        "median_ms": 14.601483,
+        "p95_ms": 20.83449
+      },
+      "documents": 16,
+      "inner_repetitions": 1,
+      "kind": "synthetic_parse_batch",
+      "output_bytes": 2206290,
+      "python": {
+        "mad_ms": 43.562446000000136,
+        "median_ms": 1687.22279,
+        "p95_ms": 1783.207707
+      },
+      "speedup": 115.55146761462517,
+      "workers": 5
+    },
+    {
+      "checksum": 7124838808799260864,
+      "cpp": {
+        "mad_ms": 0.9841439999999988,
+        "median_ms": 14.736678,
+        "p95_ms": 23.426115
+      },
+      "documents": 16,
+      "inner_repetitions": 1,
+      "kind": "synthetic_parse_batch",
+      "output_bytes": 2206290,
+      "python": {
+        "mad_ms": 43.562446000000136,
+        "median_ms": 1687.22279,
+        "p95_ms": 1783.207707
+      },
+      "speedup": 114.49139283629594,
+      "workers": 6
+    },
+    {
+      "checksum": 7124838808799260864,
+      "cpp": {
+        "mad_ms": 1.1228430000000014,
+        "median_ms": 14.533665,
+        "p95_ms": 25.093215
+      },
+      "documents": 16,
+      "inner_repetitions": 1,
+      "kind": "synthetic_parse_batch",
+      "output_bytes": 2206290,
+      "python": {
+        "mad_ms": 43.562446000000136,
+        "median_ms": 1687.22279,
+        "p95_ms": 1783.207707
+      },
+      "speedup": 116.09066192182082,
+      "workers": 7
+    },
+    {
+      "checksum": 7124838808799260864,
+      "cpp": {
+        "mad_ms": 1.170197,
+        "median_ms": 13.731753,
+        "p95_ms": 21.234113
+      },
+      "documents": 16,
+      "inner_repetitions": 1,
+      "kind": "synthetic_parse_batch",
+      "output_bytes": 2206290,
+      "python": {
+        "mad_ms": 43.562446000000136,
+        "median_ms": 1687.22279,
+        "p95_ms": 1783.207707
+      },
+      "speedup": 122.87016741416774,
+      "workers": 8
+    },
+    {
+      "checksum": 1747291634658896635,
+      "cpp": {
+        "mad_ms": 0.07687,
+        "median_ms": 1.580773,
+        "p95_ms": 1.883894
+      },
+      "documents": 1,
+      "gml_sha256": "0f30d85c53ecc94461fe7dd00d627f1f91492428266f37528642f29ea2965a3f",
+      "graph_sha256": "7a6f570a13634abfa9c1cae79526e2d91726442d61a169b6a0a37d5f29aabc9e",
+      "inner_repetitions": 5,
+      "kind": "brain_preprocess",
+      "output_bytes": 69369,
+      "python": {
+        "mad_ms": 3.245570999999998,
+        "median_ms": 59.732092,
+        "p95_ms": 70.815933
+      },
+      "speedup": 37.78663476666163,
+      "workers": 1
+    }
+  ],
+  "status": "PASS",
+  "warmups": 5,
+  "worker_policy_gate": true,
+  "workers": [
+    1,
+    0,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ]
+}

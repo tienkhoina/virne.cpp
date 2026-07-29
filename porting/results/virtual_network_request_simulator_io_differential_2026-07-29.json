@@ -1,0 +1,32 @@
+{
+  "case_count": 19,
+  "native_extension_cases": [],
+  "numpy_version": "2.2.6",
+  "python_only_boundaries": {
+    "gml_byte_encoding": "This simulator gate compares loaded graph semantics; exact NetworkX-compatible GML bytes remain frozen by the completed GML/network gates.",
+    "parallel_io_workers": "Python exposes only ordered sequential I/O; native workers retain the same semantic output and lowest sorted failure.",
+    "typed_error_taxonomy": "Native stable error enums normalize Python AssertionError, ValueError, KeyError, and filesystem exceptions."
+  },
+  "pyyaml_version": "6.0.1",
+  "result": "PASS",
+  "shared_cases": [
+    "raw_decode_snapshot",
+    "save_load_w0",
+    "save_load_w1",
+    "save_load_w2",
+    "save_load_w8",
+    "hardcoded_load_names",
+    "layout_missing_root",
+    "layout_missing_vnets",
+    "layout_missing_events",
+    "layout_missing_setting",
+    "event_cardinality",
+    "invalid_event_setting",
+    "sorted_entry_error_w1",
+    "sorted_entry_error_w8",
+    "cache_seed",
+    "cache_nonseed"
+  ],
+  "source_sha256": "970e63f9dac59f60e2ed1786606dc87d3271af062ba1d8d6c67aef8d3c7478e1",
+  "torch_imported": false
+}

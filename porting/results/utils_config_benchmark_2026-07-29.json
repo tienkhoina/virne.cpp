@@ -1,0 +1,60 @@
+{
+  "checksum": 6644728919515556009,
+  "component": "virne.utils.config",
+  "config_source_sha256": "ad1d32e6b2db842c958240301535d356919dbd822e403d6a767ce2ed2bbfe787",
+  "count": 2048,
+  "dataset_source_sha256": "269650ebcc373d7bdf79fa17346bd6f847973f17e60c1ac9bcae7cfd97bf936f",
+  "date": "2026-07-29",
+  "entry_count": 2048,
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+  "python_elapsed_ns": [
+    144391386,
+    145283283,
+    144050056
+  ],
+  "python_version": "3.10.20 (main, Jul 14 2026, 02:11:34) [GCC 14.2.0]",
+  "repetitions": 3,
+  "result": "PASS",
+  "rows": [
+    {
+      "cpp_elapsed_ns": [
+        5386719,
+        3973181,
+        3667737
+      ],
+      "cpp_median_ns": 3973181,
+      "python_median_ns": 144391386,
+      "speedup": 36.3415072205369,
+      "workers": 1
+    },
+    {
+      "cpp_elapsed_ns": [
+        4260539,
+        2562799,
+        2731237
+      ],
+      "cpp_median_ns": 2731237,
+      "python_median_ns": 144391386,
+      "speedup": 52.86666298091304,
+      "workers": 2
+    },
+    {
+      "cpp_elapsed_ns": [
+        3339193,
+        2908655,
+        6205848
+      ],
+      "cpp_median_ns": 3339193,
+      "python_median_ns": 144391386,
+      "speedup": 43.24140173988146,
+      "workers": 8
+    }
+  ],
+  "warmups": 1,
+  "workers": [
+    1,
+    2,
+    8
+  ],
+  "workload": "typed simulation summary derivation"
+}

@@ -1,0 +1,31 @@
+{
+  "case": "node_batch",
+  "component": "core.controller.ConstraintChecker",
+  "count": 32768,
+  "cpp": [
+    {
+      "cpp_median_ns": 5256938,
+      "speedup_vs_python": 46.383827619804535,
+      "workers": 1
+    },
+    {
+      "cpp_median_ns": 5222010,
+      "speedup_vs_python": 46.694071056930184,
+      "workers": 2
+    },
+    {
+      "cpp_median_ns": 3264485,
+      "speedup_vs_python": 74.69383562797807,
+      "workers": 8
+    }
+  ],
+  "fingerprint": {
+    "checksum": 11118347938320421286,
+    "entry_count": 32768,
+    "feasible_count": 24576
+  },
+  "python_median_ns": 243836906,
+  "repetitions": 3,
+  "status": "PASS",
+  "warmups": 1
+}

@@ -1,0 +1,12 @@
+{
+  "component": "core.controller.TopologyAnalyzer",
+  "python_only_boundaries": {
+    "broken_python_direct_bfs": "The pinned direct Python helper raises on no-path and mishandles identical endpoints; the native typed helper deliberately returns nullopt or {source}, while high-level no-path remains empty.",
+    "dynamic_methods": "Python validates method spellings with assert; native public methods are an enum and invalid underlying enum values produce a typed error.",
+    "dynamic_names": "Python resource dictionaries hash names in every edge predicate; native prepare resolves names once and hot loops use graph-local IDs and direct typed pointers.",
+    "native_parallelism": "Configurable deterministic mask and request workers are a native extension; Python exposes scalar traversal only."
+  },
+  "shared_case_count": 24,
+  "source_sha256": "665519C5C4BF50C2318E2D22D30679881DDA0EDCBC0B618C4FB2055AC5A01B28",
+  "status": "PASS"
+}

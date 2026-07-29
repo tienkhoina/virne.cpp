@@ -1,0 +1,34 @@
+{
+  "benchmark_sha256": "13007B8F61CBE48C5C3A0F630748BCDD83E212A6DC2996321B80AE264B41B2A8",
+  "case": "prepared_arrival_plus_deep_history_snapshot",
+  "component": "core.Recorder",
+  "counter_source_sha256": "574745F86E99CD656CB0165330E3196B4F5EBF4EAA0687B076B8D9602DB4D637",
+  "cpp": [
+    {"cpp_median_ns": 3517943, "speedup_vs_python": 24.90691747990232, "workers": 1},
+    {"cpp_median_ns": 5135630, "speedup_vs_python": 17.061415249930388, "workers": 2},
+    {"cpp_median_ns": 11834304, "speedup_vs_python": 7.403994016040149, "workers": 8}
+  ],
+  "fingerprint": {"checksum": 8168332940057982619, "output_bytes": 717741},
+  "oracle": {
+    "fake_boundary": "typed network/Solution protocols only; no Recorder/Counter logic, Pandas, RL, ML, solver, or system emulation",
+    "loader": "exact Recorder and Counter single-class AST isolation",
+    "numpy_version": "2.2.6"
+  },
+  "protocol": {
+    "item_count": 8192,
+    "entry_count": 32767,
+    "workers": [1, 2, 8],
+    "warmups": 1,
+    "repetitions": 3,
+    "fixture_prepare_and_io_excluded": true,
+    "process_startup_excluded": true,
+    "fingerprint_excluded": true,
+    "native_uses_prepared_counter_ids": true,
+    "timed_operation": "arrival count plus deep history snapshot",
+    "result_gate": "all fixed state/Solution fields, ordered mappings, history, membership, raw64 doubles, FNV checksum, and output bytes"
+  },
+  "python_median_ns": 87621116,
+  "runtime": {"python": "3.10.20", "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41"},
+  "source_sha256": "41E66702F29644E6F8A374EF909A1C41F87982558863BE17B6FDF72CEB971F4A",
+  "status": "PASS"
+}

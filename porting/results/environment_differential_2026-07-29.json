@@ -1,0 +1,17 @@
+{
+  "boundaries": {
+    "admission_logger": "The admission branch passes extra positional values to Logger.warning; the fake accepts them so the intended rejection/rollback lifecycle remains observable.",
+    "deferred_surfaces": "Solver registries, JointPR, observations, reward implementations, action masks, RL, Torch, ML, logging backends, datasets, and persistence are excluded.",
+    "dense_shared_ids": "The pinned Python ready/transit methods index vectors with request/event IDs. Shared cases use dense IDs; native sparse-ID preparation belongs to the unit gate.",
+    "dependency_fakes": "Controller, Counter, Recorder, Logger, simulator, clock, and filesystem are narrow deterministic fakes; their production leaves retain independent frozen gates."
+  },
+  "component": "core.BaseEnvironment",
+  "native_workers": [
+    1,
+    2,
+    8
+  ],
+  "shared_case_count": 9,
+  "source_sha256": "6004CFF2114E504E30C5490232763F71CB9E7799216C4F6CE8BADC27A0E42B34",
+  "status": "PASS"
+}

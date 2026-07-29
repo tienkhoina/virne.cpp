@@ -1,0 +1,85 @@
+{
+  "benchmark_sha256": "8fcd81592a994f05a82914635d01243ef3ffb5d8b7f9e5d8bf82dae4f2981878",
+  "networkx_version": "3.4.2",
+  "numpy_version": "2.2.6",
+  "protocol": {
+    "count": 50000,
+    "fixture_creation_and_checksum_excluded": true,
+    "process_startup_excluded": true,
+    "repetitions": 3,
+    "warmups": 1,
+    "workers": [
+      1,
+      2,
+      8
+    ]
+  },
+  "result": "PASS",
+  "rows": [
+    {
+      "checksum": 9156599227230270645,
+      "count": 50000,
+      "cpp_median_ms": 17.214467,
+      "kind": "dense_roundtrip",
+      "output_bytes": 400000,
+      "python_median_ms": 105.988164,
+      "speedup": 6.1569239407760925,
+      "workers": 1
+    },
+    {
+      "checksum": 9156599227230270645,
+      "count": 50000,
+      "cpp_median_ms": 14.307932,
+      "kind": "dense_roundtrip",
+      "output_bytes": 400000,
+      "python_median_ms": 105.988164,
+      "speedup": 7.40765080516178,
+      "workers": 2
+    },
+    {
+      "checksum": 9156599227230270645,
+      "count": 50000,
+      "cpp_median_ms": 18.523222,
+      "kind": "dense_roundtrip",
+      "output_bytes": 400000,
+      "python_median_ms": 105.988164,
+      "speedup": 5.721907560142615,
+      "workers": 8
+    },
+    {
+      "checksum": 5140836962424503694,
+      "count": 50000,
+      "cpp_median_ms": 8.709616,
+      "kind": "position_latency",
+      "output_bytes": 400000,
+      "python_median_ms": 443.752286,
+      "speedup": 50.94969583044763,
+      "workers": 1
+    },
+    {
+      "checksum": 5140836962424503694,
+      "count": 50000,
+      "cpp_median_ms": 6.097162,
+      "kind": "position_latency",
+      "output_bytes": 400000,
+      "python_median_ms": 443.752286,
+      "speedup": 72.78013705392772,
+      "workers": 2
+    },
+    {
+      "checksum": 5140836962424503694,
+      "count": 50000,
+      "cpp_median_ms": 51.901279,
+      "kind": "position_latency",
+      "output_bytes": 400000,
+      "python_median_ms": 443.752286,
+      "speedup": 8.549929684777132,
+      "workers": 8
+    }
+  ],
+  "runtime": {
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+    "python": "3.10.20"
+  },
+  "source_sha256": "a95cfd2b8e2b46d4de23f70934ca942de502e674e2a7eaa139482df640e8646f"
+}

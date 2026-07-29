@@ -1,0 +1,10 @@
+{
+  "dataset_source_sha256": "269650ebcc373d7bdf79fa17346bd6f847973f17e60c1ac9bcae7cfd97bf936f",
+  "generation_cases": 28,
+  "harness_sha256": "6f29269c19f20f64f79a2742aba9cf95c36ea6c7c8c04bdd4ec486c018112a00",
+  "numpy_version": "2.2.6",
+  "result": "PASS",
+  "source_sha256": "103c5c16126ca76e782c2191ff0811b95ed88a0c3637f3a61e84c0b22df42e8e",
+  "static_cases": 4,
+  "total_cases": 32
+}

@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "raw_artifact_sha256": "651d125ee1bc996e32b08ed8d59345a5b855221f55fb8939fe6a55602fc6f0bd",
+  "python_source_sha256": "e17499af8e6ffbdb12f2100dd58abeab48dd06d92feb442ef192f8b9310b6b4f",
+  "harness_sha256": "640f6db56ae35bd88d1370e7eefe47d910e054334eba9fc926b10cf37bd2a782",
+  "scalar_cases": 93,
+  "batch_cases": 30,
+  "combined_cases": 123,
+  "batch_values_per_case": 17,
+  "batch_operations": ["ge", "le", "eq"],
+  "batch_restrictions": ["hard", "soft"],
+  "batch_workers": [0, 1, 2, 3, 8],
+  "qnan_payloads": 5,
+  "signaling_nan_enabled": true,
+  "all_flags_and_offset_bits_exact": true
+}

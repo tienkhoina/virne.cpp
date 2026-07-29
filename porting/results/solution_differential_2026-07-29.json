@@ -1,0 +1,34 @@
+{
+  "case_count": 23,
+  "native_extension_cases": [
+    "compact_numeric_entry_ids",
+    "direct_attribute_registry_slots"
+  ],
+  "python_only_boundaries": {
+    "arbitrary_reflection": "Python update/setattr can add or type-change arbitrary fields; native fixed fields are typed and direct.",
+    "dynamic_attribute_names": "Python resource and constraint dictionaries use names; native boundaries resolve each name once to a registry ID and hot access uses direct slots.",
+    "method_shadowing": "Python instance attributes may shadow methods and dunder behavior; native methods cannot be replaced by data.",
+    "unbounded_python_scalars": "Python accepts arbitrary ID/integer/object payloads; native IDs are int64/size_t and attribute values use the frozen numeric lanes."
+  },
+  "result": "PASS",
+  "shared_cases": [
+    "construction",
+    "repr",
+    "feasible_false",
+    "feasible_zero",
+    "feasible_negative",
+    "feasible_positive",
+    "feasible_nan",
+    "typed_mappings",
+    "reset_dirty",
+    "typed_update",
+    "missing_id",
+    "missing_lifetime",
+    "missing_arrival",
+    "batch_w0",
+    "batch_w1",
+    "batch_w2",
+    "batch_w8"
+  ],
+  "source_sha256": "ec5d64ef6695350f718a818461fbf60934b5077d8add39bb7ee8be18cfe1e78b"
+}

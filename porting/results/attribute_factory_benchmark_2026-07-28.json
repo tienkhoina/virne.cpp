@@ -1,0 +1,62 @@
+{
+  "benchmark_sha256": "ac9c7757d64fa8de8a3a9b67d489877304b0c0a31c914701b35a55bc84ace222",
+  "numpy_version": "2.2.6",
+  "protocol": {
+    "count": 32768,
+    "cpp_process_startup_excluded": true,
+    "fixture_creation_and_fingerprint_excluded": true,
+    "ordered_direct_field_gate_before_timing": true,
+    "repetitions": 3,
+    "single_workload": true,
+    "warmups": 1,
+    "workers": [
+      1,
+      2,
+      8
+    ]
+  },
+  "result": "PASS",
+  "rows": [
+    {
+      "checksum": 13127048606653777947,
+      "count": 32768,
+      "cpp_median_ms": 19.154425,
+      "entry_count": 32768,
+      "kind": "typed_attribute_factory",
+      "output_bytes": 10326911,
+      "python_median_ms": 114.526599,
+      "speedup": 5.979119655118857,
+      "type_tag": "ordered_factory_v1",
+      "workers": 1
+    },
+    {
+      "checksum": 13127048606653777947,
+      "count": 32768,
+      "cpp_median_ms": 17.849414,
+      "entry_count": 32768,
+      "kind": "typed_attribute_factory",
+      "output_bytes": 10326911,
+      "python_median_ms": 114.526599,
+      "speedup": 6.416266606847709,
+      "type_tag": "ordered_factory_v1",
+      "workers": 2
+    },
+    {
+      "checksum": 13127048606653777947,
+      "count": 32768,
+      "cpp_median_ms": 23.752271,
+      "entry_count": 32768,
+      "kind": "typed_attribute_factory",
+      "output_bytes": 10326911,
+      "python_median_ms": 114.526599,
+      "speedup": 4.821711532341476,
+      "type_tag": "ordered_factory_v1",
+      "workers": 8
+    }
+  ],
+  "runtime": {
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+    "python": "3.10.20"
+  },
+  "source_sha256": "11ac0c2235ba02f6538427f3774c93766820ea640531c97c94f4b4daf2d7b010"
+}

@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "raw_artifact_sha256": "e80d6c13b700cc102e067a19b4cb48fe2ebd69df26350b39ac72aae5be76d6a8",
+  "python_source_sha256": "e17499af8e6ffbdb12f2100dd58abeab48dd06d92feb442ef192f8b9310b6b4f",
+  "harness_sha256": "640f6db56ae35bd88d1370e7eefe47d910e054334eba9fc926b10cf37bd2a782",
+  "warmups": 1,
+  "samples": 3,
+  "count": 10000,
+  "all_checksums_exact": true,
+  "performance_gate": true,
+  "speedups": {
+    "resource_add_int": 50.67098,
+    "resource_sub_double": 115.556359,
+    "guarded_subtract_int": 85.662914,
+    "hard_ge_int": 24.545575,
+    "hard_le_double": 23.0579,
+    "hard_eq_double": 19.044881,
+    "soft_ge_int": 22.670592
+  },
+  "exception_only_guard_failure_speedup_report_only": 0.944572
+}
