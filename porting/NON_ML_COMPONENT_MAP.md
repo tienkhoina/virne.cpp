@@ -2,12 +2,14 @@
 
 Progress note (2026-07-29): the complete non-solver/non-system non-ML inventory
 through `core.Environment` and the independent non-ML `solver.rank.LinkRank`
-and `solver.rank.NodeRank` leaves are complete/frozen. The next leaf is the
-non-ML `solver.base_solver` foundation. Read only completed component/API
-documents for dependencies before implementation; open dependency code only
-where an API is genuinely unclear or a measured hot-path optimization requires
-it. Torch-backed seeding, ML/RL, MCF, concrete solver execution, and system
-orchestration remain deferred.
+and `solver.rank.NodeRank` leaves plus the non-ML `solver.base_solver`
+foundation are complete/frozen. The next independent leaf is
+`solver.heuristic.node_rank.OrderRankSolver`, implemented over a reusable typed
+`BaseNodeRankSolver` engine. Read only completed component/API documents for
+dependencies before implementation; open dependency code only where an API is
+genuinely unclear or a measured hot-path optimization requires it.
+Torch-backed seeding, ML/RL, MCF, candidate-search-dependent heuristics, and
+system orchestration remain deferred.
 
 Source inventory was taken at original Virne commit
 `d1ec1e4a20461fc9bad50612ad5026fd31e693a8`. The checkout was clean.

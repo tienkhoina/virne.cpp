@@ -79,7 +79,8 @@ A component is `COMPLETE` only when all of the following exist and pass:
 | Core runtime | environments | **COMPLETE / FROZEN (NON-RL)** | `porting/components/environment.md`, `porting/results/environment_2026-07-29.md` |
 | Non-ML solver | `solver.rank.LinkRank` | **COMPLETE / FROZEN** | `porting/components/link_rank.md`, `porting/results/link_rank_2026-07-29.md` |
 | Non-ML solver | `solver.rank.NodeRank` | **COMPLETE / FROZEN** | `porting/components/node_rank.md`, `porting/results/node_rank_2026-07-29.md` |
-| Non-ML solver | base, remaining heuristic, exact, meta-heuristic | NOT STARTED | exact layer additionally needs OR-Tools |
+| Non-ML solver | `solver.base_solver` | **COMPLETE / FROZEN** | `porting/components/base_solver.md`, `porting/results/base_solver_2026-07-29.md` |
+| Non-ML solver | remaining heuristic, exact, meta-heuristic | NOT STARTED | exact layer additionally needs OR-Tools |
 | System | online/offline/changeable/time-window | NOT STARTED | Python base has an eager `RLSolver` dependency to cut |
 | Learning/ML | `solver/learning/**` | OUT OF SCOPE | explicitly deferred |
 
@@ -630,11 +631,31 @@ and the generic CPython 3.10.20 Timsort probe passed. Its permanently frozen
 `11449996351475094403`; C++ was 1.277x, 1.279x, and 1.312x faster at workers
 `1/2/8`. See `porting/results/node_rank_2026-07-29.md`.
 
+The non-ML `solver.base_solver` foundation is complete. Fixed config, ranking,
+mapping, path, action, counter, category, operation, and error state are direct
+fields/enums. Controller/Counter are retained as const references;
+Recorder/Logger as mutable references. Dynamic solver names are owned only by
+the startup registry, resolve once to stable `SolverId`, and never enter the
+frozen descriptor/factory creation path. Explicit registration replaces
+Python import side effects; learning categories remain dependency-free enum
+seams only.
+
+The exact AST-isolated differential passed 13/13 shared cases at native
+workers `1/2/8`. Focused unit/concurrency coverage, strict GCC 11 production,
+unit and harness builds, ASan/UBSan/leaks, targeted CTest, aggregate solver
+integration, frozen-component integrity, and the hot-ID audit passed. Its
+permanently frozen 32-descriptor / 4,096-holder benchmark retained 419,498
+bytes and checksum `13751587758314786690`; C++ was 11.174x, 9.906x, and
+10.401x faster at workers `1/2/8`. See
+`porting/results/base_solver_2026-07-29.md`.
+
 ## Next component
 
-Continue with the non-ML `solver.base_solver` foundation. Reuse only documented
-and frozen graph, network, core, environment, LinkRank, NodeRank, configuration,
-and random APIs. Fixed registry/solver schemas stay in direct fields/enums;
-dynamic names resolve once at the boundary and no string enters a hot loop.
-This leaf prepares optional learning/RL seams without implementing ML, RL,
-Torch, CUDA, system orchestration, MCF, or concrete solver search.
+Continue with the non-ML
+`solver.heuristic.node_rank.OrderRankSolver` leaf and its reusable typed
+`BaseNodeRankSolver` engine. Reuse only documented and frozen BaseSolver,
+Solution, Controller/NodeMapper/LinkMapper, NodeRank, graph, network,
+configuration, and random APIs. Ranking and mapping loops retain compact
+node/edge/attribute IDs and fixed fields; the dynamic name `order_rank` is a
+startup registration boundary only. ML/RL, Torch/CUDA, system orchestration,
+MCF, and candidate-search-dependent heuristics remain deferred.

@@ -1,0 +1,72 @@
+{
+  "component": "solver.base_solver",
+  "cpp": {
+    "1": {
+      "bytes": 419498,
+      "checksum": 13751587758314786690,
+      "entries": 4096,
+      "median_ms": 1.594245,
+      "median_ns": 1594245,
+      "samples_ns": [
+        1754937,
+        1594245,
+        1537401
+      ],
+      "speedup_vs_python": 11.173608196983524,
+      "workers": 1
+    },
+    "2": {
+      "bytes": 419498,
+      "checksum": 13751587758314786690,
+      "entries": 4096,
+      "median_ms": 1.798216,
+      "median_ns": 1798216,
+      "samples_ns": [
+        1798216,
+        2007780,
+        1513841
+      ],
+      "speedup_vs_python": 9.906189801447656,
+      "workers": 2
+    },
+    "8": {
+      "bytes": 419498,
+      "checksum": 13751587758314786690,
+      "entries": 4096,
+      "median_ms": 1.71272,
+      "median_ns": 1712720,
+      "samples_ns": [
+        1712720,
+        1790436,
+        1600216
+      ],
+      "speedup_vs_python": 10.400689546452426,
+      "workers": 8
+    }
+  },
+  "fixture": {
+    "holders": 4096,
+    "registered_descriptors": 32,
+    "samples": 3,
+    "warmups": 1
+  },
+  "output": {
+    "bytes": 419498,
+    "checksum": 13751587758314786690,
+    "entries": 4096
+  },
+  "python": {
+    "bytes": 419498,
+    "checksum": 13751587758314786690,
+    "entries": 4096,
+    "median_ms": 17.813469,
+    "median_ns": 17813469,
+    "samples_ns": [
+      11608061,
+      25095110,
+      17813469
+    ]
+  },
+  "source_sha256": "196573E631654A6D14888685B93977601412F110A9B5620398850CCE121A2806",
+  "status": "PASS"
+}

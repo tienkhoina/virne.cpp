@@ -1342,3 +1342,60 @@ target_link_libraries(
         vne_node_rank
         Threads::Threads
 )
+
+add_executable(
+    vne_base_solver_unit
+    base_solver_unit.cpp
+)
+
+target_link_libraries(
+    vne_base_solver_unit
+    PRIVATE
+        vne_base_solver
+        vne_controller
+        vne_counter
+        vne_recorder
+        vne_logger
+        vne_physical_network
+        vne_virtual_network
+        Threads::Threads
+)
+
+add_test(
+    NAME vne_base_solver_unit
+    COMMAND vne_base_solver_unit
+)
+
+add_executable(
+    vne_base_solver_harness
+    base_solver_harness.cpp
+)
+
+target_link_libraries(
+    vne_base_solver_harness
+    PRIVATE
+        vne_base_solver
+        vne_controller
+        vne_counter
+        vne_recorder
+        vne_logger
+        vne_physical_network
+        vne_virtual_network
+        Threads::Threads
+)
+
+add_executable(
+    vne_base_solver_benchmark
+    base_solver_benchmark.cpp
+)
+
+target_link_libraries(
+    vne_base_solver_benchmark
+    PRIVATE
+        vne_base_solver
+        vne_controller
+        vne_counter
+        vne_recorder
+        vne_logger
+        Threads::Threads
+)

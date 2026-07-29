@@ -1,0 +1,18 @@
+{
+  "boundaries": {
+    "config_identity": "Python retains the dynamic config object identity; native copies one typed fixed-field snapshot before solve loops.",
+    "dynamic_kwargs": "Python ignores every constructor kwarg except verbose. Native accepts only the typed SolverConfigInput boundary.",
+    "environment_class": "Python registry env_cls is dead input. Native reserves no environment dependency in the base registry.",
+    "learning": "Learning categories are enum seams only; no RL/Torch/CUDA factory or import is linked.",
+    "registry_freeze": "Native explicitly freezes registration, then reads compact SolverId slots concurrently without name lookup."
+  },
+  "component": "solver.base_solver",
+  "native_workers": [
+    1,
+    2,
+    8
+  ],
+  "shared_case_count": 13,
+  "source_sha256": "196573E631654A6D14888685B93977601412F110A9B5620398850CCE121A2806",
+  "status": "PASS"
+}

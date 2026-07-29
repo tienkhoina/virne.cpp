@@ -39,11 +39,28 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(vne_node_rank PRIVATE -ffp-contract=off)
 endif()
 
+add_library(vne_base_solver
+    base_solver.cpp
+)
+
+target_include_directories(
+    vne_base_solver
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_link_libraries(
+    vne_base_solver
+    PUBLIC
+    vne_solution
+    vne_utils_config
+    Threads::Threads
+)
+
 add_library(vne_solver)
 
 target_sources(vne_solver PRIVATE
 
-    base_solver.cpp
     debug_obs.cpp
 
     heuristic/bfs_trials.cpp
@@ -71,6 +88,7 @@ target_link_libraries(
     vne_solver
     PUBLIC
     vne_network
+    vne_base_solver
     vne_link_rank
     vne_node_rank
 )

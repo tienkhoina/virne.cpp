@@ -672,3 +672,22 @@ hashes, and timings are in `components/node_rank.md`,
 `results/node_rank_2026-07-29.md`,
 `results/node_rank_differential_2026-07-29.json`, and
 `results/node_rank_benchmark_2026-07-29.json`.
+
+## BaseSolver gate
+
+Read `components/base_solver.md` before building a concrete solver. The
+accepted differential and cold-start benchmark are frozen provenance; never
+rerun or edit their source, drivers, JSON, result, or timings. Focused unit,
+sanitizer, and integration regressions remain allowed when a downstream leaf
+requires them.
+
+The accepted exact differential is 13/13 shared cases at native workers
+`1/2/8`. Unit/concurrency coverage, strict GCC 11 production/unit/harness,
+ASan/UBSan/leaks, targeted CTest, aggregate solver integration, frozen
+integrity, and the hot-ID audit passed. The frozen 32-descriptor / 4,096-holder
+workload retained 419,498 bytes and checksum `13751587758314786690`; C++ was
+`11.174x`, `9.906x`, and `10.401x` faster at workers `1/2/8`. API, boundaries,
+hashes, and timings are in `components/base_solver.md`,
+`results/base_solver_2026-07-29.md`,
+`results/base_solver_differential_2026-07-29.json`, and
+`results/base_solver_benchmark_2026-07-29.json`.
