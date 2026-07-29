@@ -1399,3 +1399,62 @@ target_link_libraries(
         vne_logger
         Threads::Threads
 )
+
+add_executable(
+    vne_heuristic_node_rank_unit
+    heuristic_node_rank_unit.cpp
+)
+
+target_link_libraries(
+    vne_heuristic_node_rank_unit
+    PRIVATE
+        vne_heuristic_node_rank
+        vne_controller
+        vne_counter
+        vne_recorder
+        vne_logger
+        vne_physical_network
+        vne_virtual_network
+        Threads::Threads
+)
+
+add_test(
+    NAME vne_heuristic_node_rank_unit
+    COMMAND vne_heuristic_node_rank_unit
+)
+
+add_executable(
+    vne_heuristic_node_rank_harness
+    heuristic_node_rank_harness.cpp
+)
+
+target_link_libraries(
+    vne_heuristic_node_rank_harness
+    PRIVATE
+        vne_heuristic_node_rank
+        vne_controller
+        vne_counter
+        vne_recorder
+        vne_logger
+        vne_physical_network
+        vne_virtual_network
+        Threads::Threads
+)
+
+add_executable(
+    vne_heuristic_node_rank_benchmark
+    heuristic_node_rank_benchmark.cpp
+)
+
+target_link_libraries(
+    vne_heuristic_node_rank_benchmark
+    PRIVATE
+        vne_heuristic_node_rank
+        vne_controller
+        vne_counter
+        vne_recorder
+        vne_logger
+        vne_physical_network
+        vne_virtual_network
+        Threads::Threads
+)

@@ -1,0 +1,19 @@
+{
+  "boundaries": {
+    "dependency_scope": "NodeRank, constraint/resource checks, path search and mapper numeric tables remain covered by their frozen differentials; this gate isolates solver ordering and returned mappings.",
+    "native_clone": "Native solves on one private physical clone and proves the const input resources unchanged; Python mapper mutation is not a shared SolverInstance observable.",
+    "python_isolation": "Only exact BaseNodeRankSolver and OrderRankSolver AST nodes execute with minimal deterministic dependency fakes; no learning package is imported."
+  },
+  "component": "solver.heuristic.node_rank",
+  "native_workers": [
+    0,
+    1,
+    2,
+    8
+  ],
+  "shared_case_count": 6,
+  "solution_case_count": 5,
+  "solver": "order_rank",
+  "source_sha256": "44A6F63F1A1798935453C057C6981A692F5DC4F03BDE6A6535607AECBDC61389",
+  "status": "PASS"
+}

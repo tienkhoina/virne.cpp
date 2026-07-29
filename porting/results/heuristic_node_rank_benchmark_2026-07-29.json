@@ -1,0 +1,80 @@
+{
+  "component": "heuristic_node_rank_order_solve",
+  "cpp": [
+    {
+      "bytes": 87752,
+      "checksum": 9328970994111537605,
+      "entries": 64,
+      "median_ns": 3612310,
+      "ns_per_solve": 56442.34375,
+      "samples_ns": [
+        4242955,
+        3612310,
+        3162196
+      ],
+      "speedup_vs_python": 1.5507459215848032,
+      "workers": 1
+    },
+    {
+      "bytes": 87752,
+      "checksum": 9328970994111537605,
+      "entries": 64,
+      "median_ns": 125296850,
+      "ns_per_solve": 1957763.28125,
+      "samples_ns": [
+        141689285,
+        125296850,
+        113537881
+      ],
+      "speedup_vs_python": 0.044708027376586086,
+      "workers": 2
+    },
+    {
+      "bytes": 87752,
+      "checksum": 9328970994111537605,
+      "entries": 64,
+      "median_ns": 444591684,
+      "ns_per_solve": 6946745.0625,
+      "samples_ns": [
+        444591684,
+        451406376,
+        407448030
+      ],
+      "speedup_vs_python": 0.012599819568375012,
+      "workers": 8
+    }
+  ],
+  "fixture": {
+    "matching": "greedy",
+    "native_hard_constraints": 2,
+    "native_resource_updates": 0,
+    "physical_links": 31,
+    "physical_nodes": 32,
+    "python_dependency_model": "AST-isolated target with lightweight deterministic rank/mapper doubles",
+    "repetitions": 64,
+    "samples": 3,
+    "shortest_path": "bfs_shortest",
+    "virtual_links": 17,
+    "virtual_nodes": 16,
+    "warmups": 1
+  },
+  "output_gate": {
+    "bytes": 87752,
+    "checksum": 9328970994111537605,
+    "entries": 64
+  },
+  "python_sequential": {
+    "bytes": 87752,
+    "checksum": 9328970994111537605,
+    "entries": 64,
+    "median_ns": 5601775,
+    "ns_per_solve": 87527.734375,
+    "samples_ns": [
+      5601775,
+      5582027,
+      10341473
+    ]
+  },
+  "source_sha256": "44A6F63F1A1798935453C057C6981A692F5DC4F03BDE6A6535607AECBDC61389",
+  "status": "PASS"
+}

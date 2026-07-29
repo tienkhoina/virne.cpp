@@ -80,7 +80,8 @@ A component is `COMPLETE` only when all of the following exist and pass:
 | Non-ML solver | `solver.rank.LinkRank` | **COMPLETE / FROZEN** | `porting/components/link_rank.md`, `porting/results/link_rank_2026-07-29.md` |
 | Non-ML solver | `solver.rank.NodeRank` | **COMPLETE / FROZEN** | `porting/components/node_rank.md`, `porting/results/node_rank_2026-07-29.md` |
 | Non-ML solver | `solver.base_solver` | **COMPLETE / FROZEN** | `porting/components/base_solver.md`, `porting/results/base_solver_2026-07-29.md` |
-| Non-ML solver | remaining heuristic, exact, meta-heuristic | NOT STARTED | exact layer additionally needs OR-Tools |
+| Non-ML solver | `solver.heuristic.node_rank.OrderRankSolver` | **COMPLETE / FROZEN** | `porting/components/heuristic_node_rank.md`, `porting/results/heuristic_node_rank_differential_2026-07-29.json`, `porting/results/heuristic_node_rank_benchmark_2026-07-29.json` |
+| Non-ML solver | remaining heuristic, exact, meta-heuristic | NOT STARTED | next leaf: `FFDRankSolver`; exact layer additionally needs OR-Tools |
 | System | online/offline/changeable/time-window | NOT STARTED | Python base has an eager `RLSolver` dependency to cut |
 | Learning/ML | `solver/learning/**` | OUT OF SCOPE | explicitly deferred |
 
@@ -649,13 +650,36 @@ bytes and checksum `13751587758314786690`; C++ was 11.174x, 9.906x, and
 10.401x faster at workers `1/2/8`. See
 `porting/results/base_solver_2026-07-29.md`.
 
+The first non-ML concrete node-ranking solver leaf is complete and frozen.
+`OrderRankSolver` registers `order_rank` explicitly and reuses one typed
+`BaseNodeRankSolver` engine with cached Controller selection IDs, direct config
+enums, private physical-network cloning, and the frozen `NodeRank::order`,
+NodeMapper, and LinkMapper APIs. Fixed state never enters a string map; the
+dynamic solver name is confined to the cold registry boundary. Caller worker
+widths `0/1/2/8` retain exact result, partial-state, flag, link-order, and
+unchanged-input behavior.
+
+The focused unit/concurrency, strict/sanitizer/CTest/frozen-integrity and
+hot-ID gates passed. The exact AST-isolated differential passed six shared
+cases (five Solution cases plus empty-virtual rank precedence) at native
+workers `0/1/2/8`. The frozen conservative mixed-dependency microbenchmark
+retained 64 outputs, 87,752 bytes, and checksum `9328970994111537605`.
+Sequential Python measured 87,527.734 ns/solve; C++ worker 1 measured
+56,442.344 ns/solve, or `1.551x` faster. Explicit workers 2 and 8 measured
+1,957,763.281 and 6,946,745.063 ns/solve and are slower on this small case;
+worker width remains caller configuration and no automatic host policy is
+embedded. See `porting/components/heuristic_node_rank.md` and the two
+`porting/results/heuristic_node_rank_*_2026-07-29.json` artifacts. Do not rerun
+or update the accepted benchmark.
+
 ## Next component
 
 Continue with the non-ML
-`solver.heuristic.node_rank.OrderRankSolver` leaf and its reusable typed
-`BaseNodeRankSolver` engine. Reuse only documented and frozen BaseSolver,
-Solution, Controller/NodeMapper/LinkMapper, NodeRank, graph, network,
-configuration, and random APIs. Ranking and mapping loops retain compact
-node/edge/attribute IDs and fixed fields; the dynamic name `order_rank` is a
-startup registration boundary only. ML/RL, Torch/CUDA, system orchestration,
-MCF, and candidate-search-dependent heuristics remain deferred.
+`solver.heuristic.node_rank.FFDRankSolver` leaf. Reuse the completed
+`BaseNodeRankSolver` engine unchanged and select the frozen `NodeRank::ffd`
+method; do not rebuild ranking or mapper dependencies. Ranking and mapping hot
+loops continue to retain compact node/edge/attribute IDs and direct fields.
+Keep `RandomRankSolver` deferred until its API carries an explicit
+caller-owned `NumpyRandomState`; do not introduce hidden or host-derived RNG
+state. ML/RL, Torch/CUDA, system orchestration, MCF, and
+candidate-search-dependent heuristics remain deferred.

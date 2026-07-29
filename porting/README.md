@@ -691,3 +691,34 @@ hashes, and timings are in `components/base_solver.md`,
 `results/base_solver_2026-07-29.md`,
 `results/base_solver_differential_2026-07-29.json`, and
 `results/base_solver_benchmark_2026-07-29.json`.
+
+## OrderRankSolver gate
+
+Read `components/heuristic_node_rank.md` before extending the completed typed
+`BaseNodeRankSolver` engine. The accepted OrderRank differential and benchmark
+are frozen provenance; never rerun or edit their source, drivers, JSON,
+results, or timings. Focused unit, sanitizer, and integration regressions may
+still be run when required by a downstream solver leaf.
+
+The focused unit/concurrency, strict/sanitizer/CTest/frozen-integrity and
+hot-ID gates passed. The exact AST-isolated differential passed six shared
+cases at native workers `0/1/2/8`, covering five Solution paths plus typed
+empty-virtual rank precedence. The frozen benchmark is deliberately labeled a
+conservative mixed-dependency microbenchmark: Python executes the exact target
+class AST with lightweight deterministic rank/mapper doubles, while native
+executes the production solver pipeline. Its exact gate is 64 outputs, 87,752
+bytes, and checksum `9328970994111537605`.
+
+Python sequential time was 87,527.734 ns/solve. Native worker 1 was 56,442.344
+ns/solve, or `1.551x` faster; explicit workers 2 and 8 were slower at
+1,957,763.281 and 6,946,745.063 ns/solve. Those widths remain deterministic
+caller configuration, not an automatic policy or acceptance requirement for
+this small fixture. API, boundaries, and frozen evidence are in
+`components/heuristic_node_rank.md`,
+`results/heuristic_node_rank_differential_2026-07-29.json`, and
+`results/heuristic_node_rank_benchmark_2026-07-29.json`.
+
+The next leaf is `FFDRankSolver`: reuse `BaseNodeRankSolver` unchanged and use
+the frozen `NodeRank::ffd` path. `RandomRankSolver` remains deferred until an
+explicit caller-owned `NumpyRandomState` is part of its API; never hide RNG
+state in a solver or infer it from the host.

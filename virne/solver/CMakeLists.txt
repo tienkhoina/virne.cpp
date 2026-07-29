@@ -57,6 +57,26 @@ target_link_libraries(
     Threads::Threads
 )
 
+add_library(vne_heuristic_node_rank
+    heuristic/node_rank.cpp
+)
+
+target_include_directories(
+    vne_heuristic_node_rank
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_link_libraries(
+    vne_heuristic_node_rank
+    PUBLIC
+    vne_base_solver
+    vne_controller
+    vne_node_rank
+    vne_physical_network
+    Threads::Threads
+)
+
 add_library(vne_solver)
 
 target_sources(vne_solver PRIVATE
@@ -70,8 +90,6 @@ target_sources(vne_solver PRIVATE
 
     heuristic/nea_bc.cpp
     heuristic/nea_par.cpp
-
-    heuristic/node_rank.cpp
 
     heuristic/nrm_bc_env.cpp
     heuristic/nrm_par_solver.cpp
@@ -89,6 +107,7 @@ target_link_libraries(
     PUBLIC
     vne_network
     vne_base_solver
+    vne_heuristic_node_rank
     vne_link_rank
     vne_node_rank
 )
