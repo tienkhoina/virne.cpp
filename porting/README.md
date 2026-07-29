@@ -654,3 +654,21 @@ workers `1/2/8`. API, boundaries, hashes, and timings are in
 `components/link_rank.md`, `results/link_rank_2026-07-29.md`,
 `results/link_rank_differential_2026-07-29.json`, and
 `results/link_rank_benchmark_2026-07-29.json`.
+
+## NodeRank gate
+
+Read `components/node_rank.md` before using the completed leaf. Its accepted
+benchmark and exact differential are frozen provenance; never rerun or edit
+their drivers, binaries, JSON, result, or timings. Focused unit, sanitizer, and
+integration regressions remain allowed when required by a downstream change.
+
+The accepted exact differential is 13/13 shared cases at workers `1/2/8`, with
+ordered node IDs, raw binary64 equality, NPS distance/score lanes, and NumPy RNG
+continuation. Strict GCC 11, ASan/UBSan/leaks, targeted CTest, hot-ID review,
+and the generic CPython 3.10.20 Timsort probe passed. The frozen 131,072-node x
+8-resource FFD workload retained checksum `11449996351475094403`; C++ was
+`1.277x`, `1.279x`, and `1.312x` faster at workers `1/2/8`. API, boundaries,
+hashes, and timings are in `components/node_rank.md`,
+`results/node_rank_2026-07-29.md`,
+`results/node_rank_differential_2026-07-29.json`, and
+`results/node_rank_benchmark_2026-07-29.json`.

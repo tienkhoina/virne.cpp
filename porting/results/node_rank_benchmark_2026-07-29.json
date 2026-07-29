@@ -1,0 +1,70 @@
+{
+  "component": "solver.rank.NodeRank",
+  "cpp": {
+    "1": {
+      "bytes": 2097152,
+      "checksum": 11449996351475094403,
+      "entries": 131072,
+      "median_ms": 37.317814,
+      "median_ns": 37317814,
+      "samples_ns": [
+        37317814,
+        34798422,
+        38233530
+      ],
+      "speedup_vs_python": 1.2765382506059975,
+      "workers": 1
+    },
+    "2": {
+      "bytes": 2097152,
+      "checksum": 11449996351475094403,
+      "entries": 131072,
+      "median_ms": 37.238257,
+      "median_ns": 37238257,
+      "samples_ns": [
+        37238257,
+        36951670,
+        37895925
+      ],
+      "speedup_vs_python": 1.279265487640842,
+      "workers": 2
+    },
+    "8": {
+      "bytes": 2097152,
+      "checksum": 11449996351475094403,
+      "entries": 131072,
+      "median_ms": 36.310914,
+      "median_ns": 36310914,
+      "samples_ns": [
+        36310914,
+        47328407,
+        34565160
+      ],
+      "speedup_vs_python": 1.311936598456321,
+      "workers": 8
+    }
+  },
+  "fixture": {
+    "nodes": 131072,
+    "resources": 8,
+    "samples": 3,
+    "sort": false,
+    "warmups": 1
+  },
+  "output": {
+    "bytes": 2097152,
+    "checksum": 11449996351475094403,
+    "entries": 131072
+  },
+  "python": {
+    "median_ms": 47.637617,
+    "median_ns": 47637617,
+    "samples_ns": [
+      47637617,
+      57023317,
+      44398083
+    ]
+  },
+  "source_sha256": "428F0DEB188E685A9F3EB6177A70DF533519F62C560284063FC4CF6EC7624FFF",
+  "status": "PASS"
+}

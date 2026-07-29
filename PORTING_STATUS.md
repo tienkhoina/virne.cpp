@@ -77,7 +77,9 @@ A component is `COMPLETE` only when all of the following exist and pass:
 | Core runtime | `Recorder` | **COMPLETE** | non-ML typed API/result docs; RL only has an optional cold extension seam |
 | Core runtime | `Logger` | **COMPLETE** | non-ML console/file/CSV; optional sinks remain cold and dependency-free |
 | Core runtime | environments | **COMPLETE / FROZEN (NON-RL)** | `porting/components/environment.md`, `porting/results/environment_2026-07-29.md` |
-| Non-ML solver | base, rank, heuristic, exact, meta-heuristic | NOT STARTED | exact layer additionally needs OR-Tools |
+| Non-ML solver | `solver.rank.LinkRank` | **COMPLETE / FROZEN** | `porting/components/link_rank.md`, `porting/results/link_rank_2026-07-29.md` |
+| Non-ML solver | `solver.rank.NodeRank` | **COMPLETE / FROZEN** | `porting/components/node_rank.md`, `porting/results/node_rank_2026-07-29.md` |
+| Non-ML solver | base, remaining heuristic, exact, meta-heuristic | NOT STARTED | exact layer additionally needs OR-Tools |
 | System | online/offline/changeable/time-window | NOT STARTED | Python base has an eager `RLSolver` dependency to cut |
 | Learning/ML | `solver/learning/**` | OUT OF SCOPE | explicitly deferred |
 
@@ -611,11 +613,28 @@ retained checksum `10478239091350211214` and was 2.133x, 2.208x, and 2.227x
 faster at workers `1/2/8`. See
 `porting/results/link_rank_2026-07-29.md`.
 
+The non-ML `solver.rank.NodeRank` leaf is complete. Its eight methods, resource
+selection, parameters, options, errors, result variants, prepared bindings, and
+worker widths are typed fields/enums. Dynamic resource names resolve before
+this API; every node/resource/adjacency/matrix hot loop uses only vertices,
+registry/graph-local IDs, numeric lanes, and direct slots. Caller widths
+`0/1` are sequential; wider widths split only deterministic independent blocks.
+Random continuation, convergence reductions, Dijkstra, and Python-compatible
+finite/NaN ordering remain sequential where observable order matters.
+
+The exact differential passed 13/13 shared cases at workers `1/2/8`, including
+raw binary64 values, NPS tuple lanes, ordered node IDs, and NumPy RNG
+continuation. Strict GCC 11, ASan/UBSan/leaks, targeted CTest, hot-ID review,
+and the generic CPython 3.10.20 Timsort probe passed. Its permanently frozen
+131,072-node x 8-resource FFD benchmark retained checksum
+`11449996351475094403`; C++ was 1.277x, 1.279x, and 1.312x faster at workers
+`1/2/8`. See `porting/results/node_rank_2026-07-29.md`.
+
 ## Next component
 
-Continue with the independent non-ML `solver.rank.NodeRank` leaf. Reuse only
-the documented/frozen graph, attribute, BaseNetwork, configuration, and random
-APIs; fixed rank schema stays in direct fields/enums and every hot graph or
-resource loop must use vertices, typed IDs, and direct slots. Solver execution,
-candidate search, heuristic/system orchestration, MCF, and every learning/RL
-module remain outside this next leaf.
+Continue with the non-ML `solver.base_solver` foundation. Reuse only documented
+and frozen graph, network, core, environment, LinkRank, NodeRank, configuration,
+and random APIs. Fixed registry/solver schemas stay in direct fields/enums;
+dynamic names resolve once at the boundary and no string enters a hot loop.
+This leaf prepares optional learning/RL seams without implementing ML, RL,
+Torch, CUDA, system orchestration, MCF, or concrete solver search.

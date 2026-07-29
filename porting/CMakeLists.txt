@@ -1291,3 +1291,54 @@ target_link_libraries(
         vne_link_rank
         Threads::Threads
 )
+
+add_executable(
+    vne_node_rank_unit
+    node_rank_unit.cpp
+)
+
+target_link_libraries(
+    vne_node_rank_unit
+    PRIVATE
+        vne_node_rank
+        Threads::Threads
+)
+
+add_test(
+    NAME vne_node_rank_unit
+    COMMAND vne_node_rank_unit
+)
+
+add_executable(
+    vne_python310_generic_timsort_probe
+    python310_generic_timsort_probe.cpp
+)
+
+add_test(
+    NAME vne_python310_generic_timsort_probe
+    COMMAND vne_python310_generic_timsort_probe
+)
+
+add_executable(
+    vne_node_rank_harness
+    node_rank_harness.cpp
+)
+
+target_link_libraries(
+    vne_node_rank_harness
+    PRIVATE
+        vne_node_rank
+        Threads::Threads
+)
+
+add_executable(
+    vne_node_rank_benchmark
+    node_rank_benchmark.cpp
+)
+
+target_link_libraries(
+    vne_node_rank_benchmark
+    PRIVATE
+        vne_node_rank
+        Threads::Threads
+)

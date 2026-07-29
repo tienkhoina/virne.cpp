@@ -1,0 +1,20 @@
+{
+  "boundaries": {
+    "iterative_limit": "Pinned GRC/RW expose no maximum iteration count. Native nullopt preserves that default; an optional caller limit produces a typed deterministic failure for hostile parameters.",
+    "non_ml_oracle": "The oracle AST-loads only node_rank.py classes. GRC/RW matrix inputs and RW COO behavior use narrow NumPy fakes because the pinned non-ML image intentionally has no SciPy.",
+    "random_stream": "Pinned RandomNodeRank uses NumPy's mutable global legacy stream. Native code requires the completed caller-owned NumpyRandomState and preserves both shuffle values and continuation exactly.",
+    "resource_selection": "Native default selection uses exact typed AttributeKind::resource IDs. Python's string/list membership quirks for custom attribute protocol objects remain a cold dynamic boundary.",
+    "result_storage": "Pinned rank_nodes dynamically adds node_ranking/ranked_nodes/node_ranking_values to BaseNetwork. Native returns a typed ordered vector and does not mutate the frozen BaseNetwork schema."
+  },
+  "case_payload_sha256": "8F373451937E9DE30D5E445AC2D5C7195A041B3F20A14FD94FC526D8604C0F3D",
+  "component": "solver.rank.NodeRank",
+  "native_workers": [
+    1,
+    2,
+    8
+  ],
+  "payload_encoding": "canonical JSON; scalar rows are [node,s,score_raw64,+0_raw64], NPS rows are [node,p,nrm_raw64,distance_raw64]",
+  "shared_case_count": 13,
+  "source_sha256": "428F0DEB188E685A9F3EB6177A70DF533519F62C560284063FC4CF6EC7624FFF",
+  "status": "PASS"
+}
