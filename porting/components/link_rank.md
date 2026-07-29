@@ -1,6 +1,7 @@
 # Component API: `solver.rank.LinkRank`
 
-State: **IN PROGRESS** on 2026-07-29.
+State: **COMPLETE / FROZEN** on 2026-07-29. The accepted benchmark and its
+driver are provenance and must not be rerun or edited.
 
 Python oracle: `../virne/virne/solver/rank/link_rank.py`, commit
 `d1ec1e4a20461fc9bad50612ad5026fd31e693a8`, SHA-256
@@ -81,14 +82,21 @@ public:
         LinkRankMethod, LinkRankOptions = {}) const;
     LinkRanking rank_order(LinkRankOptions = {}) const;
     LinkRanking rank_ffd(LinkRankOptions = {}) const;
+    const std::vector<LinkRankResourceId>& resource_ids() const noexcept;
 };
 ```
 
-Exact error metadata and accessors are finalized in the public header. A rank
-entry carries both the stable edge ID and current ordered endpoints. Edge IDs
-may contain holes, so no score vector is indexed by `num_edges()` or by raw
-edge ID; the ordered result and any private work records are built in the same
-`Graph::edges()` traversal.
+`LinkRankErrorCode` has `unsupported_method`, `invalid_resource_selection`,
+`empty_resource_selection`, `ragged_resource_matrix`,
+`non_numeric_resource_value`, `ranking_length_mismatch`, and
+`invalid_prepared_state`. `LinkRankOperation` has `resolve_method`, `prepare`,
+`validate_prepared`, `gather`, `reduce`, and `sort`. `LinkRankException`
+exposes `code()`, `operation()`, `input_index()`, `resource_id()`, and
+`edge_id()`; an absent input position is
+`invalid_link_rank_input_index`. A rank entry carries both the stable edge ID
+and current ordered endpoints. Edge IDs may contain holes, so no score vector
+is indexed by `num_edges()` or by raw edge ID; the ordered result and any
+private work records are built in the same `Graph::edges()` traversal.
 
 ## Fixed fields, IDs, and numeric behavior
 
@@ -111,6 +119,9 @@ numeric domain:
 - edge order is the live frozen `Graph::edges()` order, not edge-ID order;
 - `sort=false` retains that order; `sort=true` is stable descending, so equal
   scores and signed-zero ties retain edge order;
+- finite sorted values use a strict weak-order `std::stable_sort`; any NaN
+  selects the vendored CPython 3.10.20 Timsort comparison schedule, preserving
+  Python's exact stable ordering even when `<` is unordered;
 - zero edges with at least one resource returns an empty ranking; an empty
   resource selection is a typed error for FFD but remains irrelevant to order;
 - missing values reproduce the completed LinkAttribute row-compaction model.
@@ -131,7 +142,9 @@ graph-local IDs. It may be reused while that network's graph/registry identity
 is unchanged. Value and ordinary edge mutation are observed on the next call;
 moving/replacing/rebinding the network or racing mutation invalidates the
 prepared object. Concurrent read-only calls are supported, as are independent
-rankers over independent immutable networks.
+rankers over independent immutable networks. Copies share a narrow mutex only
+around `Graph::edges()` lazy order normalization; numeric reduction remains
+parallel and never holds that mutex.
 
 Worker zero/one is the canonical sequential route. For FFD, wider caller
 widths split independent edge columns into deterministic contiguous blocks
@@ -141,20 +154,24 @@ and writes one pre-sized score slot. Final ordering is sequential and stable.
 There is no host-derived automatic width or compiled benchmark-selected policy.
 Order ranking stays sequential because it is already one contiguous emission.
 
-## Acceptance gate
+## Accepted gate
 
-The compact gate covers order sorted/unsorted, empty/one/non-monotonic edges,
+The unit gate passed order sorted/unsorted, empty/one/non-monotonic edges,
 edge-ID holes, explicit/default/duplicate resources, bool/int64 modular and
 mixed-double lanes, negatives, ties, signed zero, infinities, classified NaN
 ordering, missing/ragged/short/nonnumeric rows, workers `0/1/2/8`, prepared
 reuse after value/edge changes, invalidation boundaries, and concurrent
-read-only callers. The AST oracle locks the source hash, class inventory,
-functional FFD intent through a narrow fake, and the real BaseNetwork typo as
-a separate recorded boundary.
+read-only callers. Strict GCC 11, ASan/UBSan/leaks, and targeted CTest passed.
+The exact Python differential passed `12/12` shared cases with identical raw
+binary64 score bits and workers `1/2/8`; the real BaseNetwork FFD typo remains
+a separately recorded `AttributeError` boundary. The private Timsort gate
+matched CPython 3.10.20 for 4,569 cases / 445,868 entries, including all 720
+qNaN/sNaN permutations, and passed its `_GLIBCXX_DEBUG` corpus.
 
-After correctness passes, run exactly one compact FFD benchmark at configured
-workers `1/2/8`, one warm-up and three samples. Preparation, fixture creation,
-process startup, serialization, and checksum work stay outside timing. Gate
-ordered endpoints, edge IDs, raw score bits, output bytes, and checksum before
-accepting runtime. Freeze the benchmark immediately; never rerun completed
-dependency benchmarks.
+The single frozen FFD benchmark used 131,072 edges x 8 resources, sorting,
+one warm-up and three samples. Python measured `106.517902 ms`; C++ measured
+`49.931736`, `48.231020`, and `47.840837 ms` at workers `1/2/8`, or `2.133x`,
+`2.208x`, and `2.227x` faster. Every route produced 131,072 entries,
+3,145,728 bytes, and checksum `10478239091350211214`. Full provenance and
+hashes are in `../results/link_rank_2026-07-29.md`; the machine-readable
+differential and benchmark JSON files beside it are frozen.

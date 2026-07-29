@@ -595,11 +595,27 @@ checksum `5251282115348753471`, and 72,481 output bytes. It was 146.854x,
 JointPR, solver/system, RL and ML remain outside this component. See
 `porting/results/environment_2026-07-29.md`.
 
+The non-ML `solver.rank.LinkRank` leaf is complete. Methods, options, errors,
+operations, selection, edge identity, and result entries are direct
+fields/enums. Dynamic link-resource names resolve outside this API; preparation
+binds registry IDs once to graph-local IDs, and every gather/reduction loop uses
+only edge descriptors, typed IDs, numeric variants, and direct slots. Wider
+caller widths split independent edge score columns deterministically; ordering
+remains sequential and exactly Python-compatible, including classified NaNs.
+
+The exact differential passed 12/12 shared cases at workers `1/2/8`; the
+pinned Python BaseNetwork FFD typo is a recorded boundary. Strict GCC 11,
+ASan/UBSan/leaks, targeted CTest, hot-ID review, and the exhaustive Timsort
+probe passed. Its permanently frozen 131,072-edge x 8-resource benchmark
+retained checksum `10478239091350211214` and was 2.133x, 2.208x, and 2.227x
+faster at workers `1/2/8`. See
+`porting/results/link_rank_2026-07-29.md`.
+
 ## Next component
 
-The non-solver/non-system/non-ML Python inventory is complete. The only omitted
-utility, `virne.utils.virtualize`, is an eager Matplotlib animation demo and is
-now explicitly documented as an optional visualization boundary. Remaining
-implementation work starts in non-ML solver rank/base/heuristic code and the
-system layer; both remain deferred under the current instruction, together
-with MCF and every learning/RL module.
+Continue with the independent non-ML `solver.rank.NodeRank` leaf. Reuse only
+the documented/frozen graph, attribute, BaseNetwork, configuration, and random
+APIs; fixed rank schema stays in direct fields/enums and every hot graph or
+resource loop must use vertices, typed IDs, and direct slots. Solver execution,
+candidate search, heuristic/system orchestration, MCF, and every learning/RL
+module remain outside this next leaf.

@@ -1,0 +1,19 @@
+{
+  "boundaries": {
+    "base_network_typo": "Pinned FFDLinkRank calls network.get_attrs('link', 'resource'), but the pinned BaseNetwork exposes get_link_attrs(...). A dedicated case preserves that AttributeError; intended FFD arithmetic is isolated with a narrow fake that supplies get_attrs.",
+    "native_workers": "Python exposes no worker parameter. Repeated mixed cases compare native caller widths 1/2/8 while preserving identical ranking order and score bits.",
+    "numpy_reduction": "Int-only rows use NumPy int64 modular reduction before conversion to binary64; mixed rows use binary64 reduction. Every successful score is compared by its big-endian IEEE-754 bits.",
+    "resource_selection": "The intended fake returns link-resource rows in already-resolved registry order. Native code resolves dynamic resource selection once during preparation and ranks by numeric IDs/direct slots in hot loops."
+  },
+  "case_payload_sha256": "DC1B75C9D6F62D597BFDCB3211561B7993200419EB784A6A6FE9B98B37CBF0A6",
+  "component": "solver.rank.LinkRank",
+  "native_workers": [
+    1,
+    2,
+    8
+  ],
+  "payload_encoding": "canonical JSON; ranking entries are [u,v,big-endian IEEE-754 binary64 hex]",
+  "shared_case_count": 12,
+  "source_sha256": "C4D52BD389A004A91D8FCC7E0827BB9620252D9619D4F9121D11BA4E17FF0880",
+  "status": "PASS"
+}

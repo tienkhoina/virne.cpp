@@ -1,13 +1,13 @@
 # Non-ML Python component map
 
-Progress note (2026-07-28): all leaf utilities through `utils.manager`, all
-three non-Torch `utils.dataset` leaves, and their interface-only aggregate are
-complete. The independent typed-policy `attribute_method` and typed
-`BaseAttribute` generation leaves are also complete. The same-named
-Python/Torch seed facade remains explicitly deferred. The next leaf is
-`NodeAttribute`; read `components/base_attribute.md`,
-`components/attribute_method.md`, and `components/dataset.md` for stable
-dependency APIs.
+Progress note (2026-07-29): the complete non-solver/non-system non-ML inventory
+through `core.Environment` is frozen, and the independent non-ML
+`solver.rank.LinkRank` leaf is also complete/frozen. The next leaf is
+`solver.rank.NodeRank`. Read only the completed component/API documents for
+graph, attributes, BaseNetwork, configuration, random, and LinkRank before
+implementation; open dependency code only where an API is genuinely unclear
+or a measured hot-path optimization requires it. Torch-backed seeding, ML/RL,
+MCF, solver execution, and system orchestration remain deferred.
 
 Source inventory was taken at original Virne commit
 `d1ec1e4a20461fc9bad50612ad5026fd31e693a8`. The checkout was clean.

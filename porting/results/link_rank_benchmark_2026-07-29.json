@@ -1,0 +1,41 @@
+{
+  "component": "solver.rank.LinkRank",
+  "cpp": {
+    "1": {
+      "bytes": 3145728,
+      "checksum": 10478239091350211214,
+      "entries": 131072,
+      "median_ms": 49.931736,
+      "speedup_vs_python": 2.1332705516187143
+    },
+    "2": {
+      "bytes": 3145728,
+      "checksum": 10478239091350211214,
+      "entries": 131072,
+      "median_ms": 48.23102,
+      "speedup_vs_python": 2.208493662377449
+    },
+    "8": {
+      "bytes": 3145728,
+      "checksum": 10478239091350211214,
+      "entries": 131072,
+      "median_ms": 47.840837,
+      "speedup_vs_python": 2.2265058197037817
+    }
+  },
+  "fixture": {
+    "edges": 131072,
+    "resources": 8,
+    "samples": 3,
+    "sort": true,
+    "warmups": 1
+  },
+  "output": {
+    "bytes": 3145728,
+    "checksum": 10478239091350211214,
+    "entries": 131072
+  },
+  "python_median_ms": 106.517902,
+  "source_sha256": "C4D52BD389A004A91D8FCC7E0827BB9620252D9619D4F9121D11BA4E17FF0880",
+  "status": "PASS"
+}

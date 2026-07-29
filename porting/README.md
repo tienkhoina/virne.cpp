@@ -637,3 +637,20 @@ measured sparse ordered manager adapter. Get is `3.245x-6.326x`, set is
 `2.398x-6.495x`, and manager is `67.875x-103.983x` faster than Python. API,
 threading, cache/clone/view/serialization rules, hashes, and timings are in
 `components/base_network.md` and `results/base_network_2026-07-28.md`.
+
+## LinkRank gate
+
+Read `components/link_rank.md` before using the completed leaf. Its accepted
+benchmark is frozen provenance; never rerun or edit its source, driver, binary,
+JSON, result, or timings. Focused correctness and sanitizer regressions remain
+allowed when a downstream change requires them.
+
+The accepted exact differential is 12/12 shared cases at workers `1/2/8` with
+raw binary64 score equality. The CPython 3.10.20 ordering probe passed 4,569
+cases / 445,868 entries plus every qNaN/sNaN permutation. The frozen
+131,072-edge x 8-resource FFD workload retained checksum
+`10478239091350211214`; C++ was `2.133x`, `2.208x`, and `2.227x` faster at
+workers `1/2/8`. API, boundaries, hashes, and timings are in
+`components/link_rank.md`, `results/link_rank_2026-07-29.md`,
+`results/link_rank_differential_2026-07-29.json`, and
+`results/link_rank_benchmark_2026-07-29.json`.
