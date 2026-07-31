@@ -1,9 +1,10 @@
 #include "node_mapper.h"
 
+#include "../../utils/deterministic_executor.h"
+
 #include <algorithm>
 #include <cmath>
 #include <limits>
-#include <thread>
 #include <type_traits>
 #include <utility>
 
@@ -14,6 +15,11 @@ namespace
 
 using AttributeNumber = network::attribute::AttributeNumber;
 using ResourceUpdateOperation = network::attribute::ResourceUpdateOperation;
+
+constexpr std::size_t minimum_parallel_candidate_count = 128U;
+constexpr std::size_t maximum_sequential_probe_count = 8U;
+constexpr std::size_t minimum_candidate_window = 32U;
+constexpr std::size_t candidate_window_per_worker = 8U;
 
 SolutionNodeId solution_node_id(Vertex node) noexcept
 {
@@ -259,12 +265,13 @@ PreparedNodeMapper::PreparedNodeMapper(
 {
 }
 
-std::vector<ResourceAmount> PreparedNodeMapper::gather_node_resources(
+const std::vector<ResourceAmount>& PreparedNodeMapper::gather_node_resources(
     Vertex virtual_node,
-    SolutionAttributeValues* recorded_values) const
+    SolutionAttributeValues* recorded_values)
 {
     const AttrMap& node = virtual_network_->graph().node_attrs(virtual_node);
-    std::vector<ResourceAmount> resources;
+    auto& resources = resource_scratch_;
+    resources.clear();
     resources.reserve(node_resources_.size());
     for (const PreparedNodeResource& prepared : node_resources_)
     {
@@ -325,7 +332,7 @@ NodePlacementResult PreparedNodeMapper::commit_place_after_check(
     }
 
     SolutionAttributeValues recorded_values;
-    std::vector<ResourceAmount> resources =
+    const std::vector<ResourceAmount>& resources =
         gather_node_resources(virtual_node, &recorded_values);
     resource_updator_.update_node_resources(
         physical_node,
@@ -463,7 +470,8 @@ bool PreparedNodeMapper::undo_place(
 
     const SolutionAttributeValues& recorded =
         solution.node_slots_info.at(*info_id);
-    std::vector<ResourceAmount> resources;
+    auto& resources = resource_scratch_;
+    resources.clear();
     resources.reserve(node_resources_.size());
     for (const PreparedNodeResource& prepared : node_resources_)
     {
@@ -491,69 +499,51 @@ bool PreparedNodeMapper::undo_place(
     return true;
 }
 
-std::vector<PreparedNodeMapper::CandidateCheckOutcome>
+std::vector<PreparedNodeMapper::CandidateCheckOutcome>&
 PreparedNodeMapper::check_candidates_ordered(
     Vertex virtual_node,
     const std::vector<Vertex>& physical_nodes,
-    std::size_t workers) const
+    std::size_t begin_index,
+    std::size_t end_index,
+    std::size_t workers)
 {
-    std::vector<CandidateCheckOutcome> outcomes(physical_nodes.size());
+    const std::size_t count = end_index - begin_index;
+    auto& outcomes = candidate_check_scratch_;
+    outcomes.assign(count, CandidateCheckOutcome{});
     const auto check_range =
-        [this, virtual_node, &physical_nodes, &outcomes](
+        [this,
+         virtual_node,
+         &physical_nodes,
+         &outcomes,
+         begin_index](
             std::size_t begin,
             std::size_t end)
         {
-            for (std::size_t index = begin; index < end; ++index)
+            for (std::size_t local_index = begin;
+                 local_index < end;
+                 ++local_index)
             {
+                const std::size_t candidate_index =
+                    begin_index + local_index;
                 try
                 {
-                    outcomes[index].result.emplace(
+                    outcomes[local_index].result.emplace(
                         constraint_checker_.check_node_level_constraints(
-                            virtual_node, physical_nodes[index]));
+                            virtual_node,
+                            physical_nodes[candidate_index]));
                 }
                 catch (...)
                 {
-                    outcomes[index].error = std::current_exception();
+                    outcomes[local_index].error = std::current_exception();
                 }
             }
         };
 
-    if (workers <= 1U || physical_nodes.size() <= 1U)
-    {
-        check_range(0U, physical_nodes.size());
-        return outcomes;
-    }
-
-    const std::size_t active_workers =
-        std::min(workers, physical_nodes.size());
-    std::vector<std::thread> threads;
-    threads.reserve(active_workers);
-    try
-    {
-        for (std::size_t worker = 0U; worker < active_workers; ++worker)
-        {
-            const std::size_t begin =
-                (physical_nodes.size() * worker) / active_workers;
-            const std::size_t end =
-                (physical_nodes.size() * (worker + 1U)) / active_workers;
-            threads.emplace_back(check_range, begin, end);
-        }
-    }
-    catch (...)
-    {
-        for (std::thread& thread : threads)
-        {
-            if (thread.joinable())
-            {
-                thread.join();
-            }
-        }
-        throw;
-    }
-    for (std::thread& thread : threads)
-    {
-        thread.join();
-    }
+    virne::utils::deterministic_parallel_blocks(
+        count,
+        workers,
+        1U,
+        check_range);
     return outcomes;
 }
 
@@ -664,7 +654,30 @@ bool PreparedNodeMapper::node_mapping_inplace(
         bool placed = false;
         ConstraintCheckResult last_check;
         bool has_last_check = false;
-        if (options.candidate_workers <= 1U || candidates.size() <= 1U)
+        const auto commit_candidate =
+            [&](std::size_t index, ConstraintCheckResult check)
+            {
+                NodePlacementResult placement = commit_place_after_check(
+                    virtual_node,
+                    candidates[index],
+                    solution,
+                    std::move(check),
+                    false);
+                record_place_constraint_violation(
+                    virtual_node, placement.check.offsets, solution);
+                if (!options.reusable)
+                {
+                    candidates.erase(
+                        candidates.begin() +
+                        static_cast<std::ptrdiff_t>(index));
+                }
+                placed = true;
+            };
+
+        const bool use_parallel_windows =
+            options.candidate_workers > 1U &&
+            candidates.size() >= minimum_parallel_candidate_count;
+        if (!use_parallel_windows)
         {
             for (std::size_t index = 0U; index < candidates.size(); ++index)
             {
@@ -676,64 +689,89 @@ bool PreparedNodeMapper::node_mapping_inplace(
                 {
                     continue;
                 }
-
-                NodePlacementResult placement = commit_place_after_check(
-                    virtual_node,
-                    candidates[index],
-                    solution,
-                    std::move(last_check),
-                    false);
-                record_place_constraint_violation(
-                    virtual_node, placement.check.offsets, solution);
-                if (!options.reusable)
-                {
-                    candidates.erase(
-                        candidates.begin() +
-                        static_cast<std::ptrdiff_t>(index));
-                }
-                placed = true;
+                commit_candidate(index, std::move(last_check));
                 break;
             }
         }
         else
         {
-            std::vector<CandidateCheckOutcome> outcomes =
-                check_candidates_ordered(
-                    virtual_node, candidates, options.candidate_workers);
-            for (std::size_t index = 0U; index < outcomes.size(); ++index)
+            const std::size_t bounded_workers = std::min(
+                options.candidate_workers,
+                candidates.size());
+            const std::size_t probe_count = std::min(
+                {candidates.size(),
+                 bounded_workers,
+                 maximum_sequential_probe_count});
+
+            // The high-capacity prefix is normally successful.  Preserve
+            // Python's zero-fan-out early return before opening a worker
+            // window; only a difficult search pays parallel dispatch cost.
+            for (std::size_t index = 0U; index < probe_count; ++index)
             {
-                if (outcomes[index].error)
-                {
-                    std::rethrow_exception(outcomes[index].error);
-                }
-                if (!outcomes[index].result.has_value())
-                {
-                    throw std::logic_error(
-                        "candidate check produced no result");
-                }
-                last_check = *outcomes[index].result;
+                last_check =
+                    constraint_checker_.check_node_level_constraints(
+                        virtual_node, candidates[index]);
                 has_last_check = true;
                 if (!last_check.feasible)
                 {
                     continue;
                 }
-
-                NodePlacementResult placement = commit_place_after_check(
-                    virtual_node,
-                    candidates[index],
-                    solution,
-                    std::move(last_check),
-                    false);
-                record_place_constraint_violation(
-                    virtual_node, placement.check.offsets, solution);
-                if (!options.reusable)
-                {
-                    candidates.erase(
-                        candidates.begin() +
-                        static_cast<std::ptrdiff_t>(index));
-                }
-                placed = true;
+                commit_candidate(index, std::move(last_check));
                 break;
+            }
+
+            std::size_t scaled_window = candidates.size();
+            if (bounded_workers <=
+                std::numeric_limits<std::size_t>::max() /
+                    candidate_window_per_worker)
+            {
+                scaled_window =
+                    bounded_workers * candidate_window_per_worker;
+            }
+            const std::size_t window_width = std::max(
+                minimum_candidate_window,
+                scaled_window);
+
+            for (std::size_t window_begin = probe_count;
+                 !placed && window_begin < candidates.size();)
+            {
+                const std::size_t remaining =
+                    candidates.size() - window_begin;
+                const std::size_t window_end = window_begin +
+                    std::min(window_width, remaining);
+                std::vector<CandidateCheckOutcome>& outcomes =
+                    check_candidates_ordered(
+                        virtual_node,
+                        candidates,
+                        window_begin,
+                        window_end,
+                        options.candidate_workers);
+                for (std::size_t local_index = 0U;
+                     local_index < outcomes.size();
+                     ++local_index)
+                {
+                    CandidateCheckOutcome& outcome = outcomes[local_index];
+                    if (outcome.error)
+                    {
+                        std::rethrow_exception(outcome.error);
+                    }
+                    if (!outcome.result.has_value())
+                    {
+                        throw std::logic_error(
+                            "candidate check produced no result");
+                    }
+                    last_check = std::move(*outcome.result);
+                    has_last_check = true;
+                    if (!last_check.feasible)
+                    {
+                        continue;
+                    }
+                    commit_candidate(
+                        window_begin + local_index,
+                        std::move(last_check));
+                    break;
+                }
+                window_begin = window_end;
             }
         }
         if (!placed)

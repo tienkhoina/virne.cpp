@@ -1,7 +1,9 @@
 # Component API: `core.controller.Controller` lifecycle
 
-State: **COMPLETE / FROZEN** on 2026-07-29. Do not edit or rerun the accepted
-production, differential, or benchmark surface.
+State: **COMPLETE / FROZEN LIFECYCLE** on 2026-07-29, with additive
+resource-only transaction and safe fixed-node-slot APIs on 2026-07-30 and
+2026-07-31. Do not rerun or edit the accepted component differential or
+benchmark artifacts.
 
 Python oracle: `../virne/virne/core/controller/controller.py`, commit
 `d1ec1e4a20461fc9bad50612ad5026fd31e693a8`, SHA-256
@@ -26,6 +28,8 @@ This component is the non-solver lifecycle seam required by Environment:
 - undo that placement and its incident routes in Python mutation order;
 - deploy the resource information already stored in a successful Solution;
 - release the resources referenced by a successful Solution;
+- safely evaluate one complete insertion-ordered fixed node assignment by
+  mapping every node first and every virtual link second;
 - preserve the Python `undo_deploy` quirk: release resources but do not reset
   the caller's Solution.
 
@@ -44,8 +48,9 @@ link/path constraints are separate ID vectors because node and link registry
 IDs are local to different registries and equal numeric IDs must never be
 interchanged.
 
-`prepare()` is the only dynamic attribute-name resolution boundary, through
-the completed dependencies. Controller hot loops retain only `Vertex`, typed
+`prepare()` and `prepare_mutation()` are the only dynamic attribute-name
+resolution boundaries, through the completed dependencies. Controller hot
+loops retain only `Vertex`, typed
 endpoint pairs, registry IDs, graph-local direct slots, compact Solution entry
 IDs, byte membership masks, and numeric variants. No fixed field uses a string
 map. No neighbor, route, pool, deploy, release, or worker loop resolves,
@@ -90,6 +95,13 @@ struct PlaceAndRouteResult {
 
 struct ControllerMutationOptions { std::size_t workers = 1; };
 
+struct DeployWithNodeSlotsOptions {
+    ShortestPathMethod shortest_method = ShortestPathMethod::bfs_shortest;
+    std::int64_t k = 10;
+    double max_path_nodes = 1.0e6;
+    ControllerWorkers workers;
+};
+
 class Controller {
 public:
     explicit Controller(ControllerSelection);
@@ -97,10 +109,26 @@ public:
     PreparedController prepare(
         const network::VirtualNetwork&,
         network::PhysicalNetwork&) const;
+    PreparedControllerMutation prepare_mutation(
+        const network::VirtualNetwork&,
+        network::PhysicalNetwork&) const;
+};
+
+class PreparedControllerMutation {
+public:
+    bool deploy(const Solution&, ControllerMutationOptions = {});
+    bool release(const Solution&, ControllerMutationOptions = {});
+    void rollback(const Solution&, ControllerMutationOptions = {});
+    void begin_transaction();
+    void commit_transaction() noexcept;
+    void rollback_transaction();
+    bool transaction_active() const noexcept;
 };
 
 class PreparedController {
 public:
+    bool deploy_with_node_slots(
+        const NodeSlots&, Solution&, DeployWithNodeSlotsOptions = {});
     PlaceAndRouteResult place_and_route(
         Vertex virtual_node, Vertex physical_node, Solution&,
         PlaceAndRouteOptions = {});
@@ -118,6 +146,12 @@ prepared dependency copies, so dynamic names are never rebound during
 lifecycle calls. Network
 mutation may not race with a lifecycle call. Independent prepared controllers
 over independent networks may run concurrently.
+
+`PreparedControllerMutation` prepares only ResourceUpdator plus numeric
+resource/value IDs. Its exact checkpoint stores fixed target enum, node/edge
+ID, `AttrId`, and original `AttrValue`; rollback does not depend on inverse
+arithmetic. The System ownership contract is in
+`transactional_solver_system.md`.
 
 ## Exact lifecycle semantics
 
@@ -150,6 +184,15 @@ over independent networks may run concurrently.
 - `undo_deploy` calls release, constructs the same temporary reset candidate
   needed to retain Python's post-release error point, and leaves the caller's
   Solution unchanged.
+- `deploy_with_node_slots` is the safe-only native counterpart of Python
+  `_safely_deploy_with_node_slots`. Cardinality is checked before the complete
+  value scan for `-1`; either failure changes only `place_result/result` to
+  false. Valid entries retain `NodeSlots` insertion order. NodeMapper runs
+  first with `l2s2`, `reusable=false`, `inplace=true`; only complete placement
+  reaches LinkMapper, which runs `inplace=true` with typed shortest/k/worker
+  options. Placement and route failures retain earlier partial mutations and
+  flags; success sets only `result=true`. The broken unsafe branch remains
+  unsupported.
 
 ## Threading contract
 
@@ -163,11 +206,17 @@ completes before link phase. Place and incident-route commits remain sequential;
 their configured worker widths are forwarded only to completed independent
 topology/candidate checks. There is no host-derived worker policy.
 
+The fixed-node-slot API forwards caller widths to those same completed mapper
+boundaries. Its reusable key/value vectors are direct `Vertex` buffers owned by
+the prepared controller; after capacity is established there is no per-call
+assignment-vector allocation and no string lookup.
+
 The accepted disjoint fast path binds each selected resource to its physical
 graph `AttrId` during preparation. It preflights every numeric update in Python
 order without mutation, retains direct `AttrValue*` targets only after proving
-node/edge-ID disjointness, then commits contiguous target ranges at the caller
-width. Any duplicate target, missing info/value, invalid numeric lane, unsafe
+node/edge-ID disjointness, then commits contiguous target ranges through the
+persistent deterministic executor at the caller width. Any duplicate target,
+missing info/value, invalid numeric lane, unsafe
 arithmetic, or invalid endpoint falls back before mutation to the canonical
 completed ResourceUpdator path. Thus ordinary partial-error semantics remain
 unchanged while successful independent commits avoid per-request AttrMap
@@ -192,4 +241,14 @@ integrity. The permanently frozen 32,768-mutation deploy/release benchmark
 retained deployed/restored checksums `17514356897791579542` /
 `8486823302284311477`. Python took 33.624408 ms; C++ workers `1/2/8` took
 3.892177 / 6.484015 / 11.785875 ms, respectively 8.639x / 5.186x / 2.853x
-faster. See `porting/results/controller_2026-07-29.md`.
+faster. See `../results/controller_2026-07-29.md`.
+
+The additive transaction path and default Main exact-output/runtime signal are
+recorded separately in
+`../results/system_transaction_integration_2026-07-30.md`; the frozen
+Controller benchmark above was not rerun.
+
+The 2026-07-31 fixed-node-slot unit gate covers success, incomplete and `-1`
+assignments, ordered partial placement/route failure, insertion order, and
+exact worker equality at `0/1/2/8`; it passes without reopening the frozen
+benchmark.

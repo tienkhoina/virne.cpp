@@ -1,0 +1,27 @@
+{
+  "boundary": "Python online BaseSystem is the exact oracle; Python TODO modes are validated by native typed unit/integration contracts.",
+  "component": "system.main_config.online.node_rank",
+  "fixture": {
+    "physical_nodes": 12,
+    "virtual_requests": 3
+  },
+  "rows": [
+    {
+      "native_run_time_ns": 1966884,
+      "native_setup_time_ns": 20797530,
+      "python_run_time_ns": 45628294,
+      "python_setup_time_ns": 406215611,
+      "solver": "order_rank",
+      "workers": 1
+    }
+  ],
+  "seed": 7,
+  "shared_case_count": 1,
+  "solvers": [
+    "order_rank"
+  ],
+  "status": "PASS",
+  "workers": [
+    1
+  ]
+}

@@ -158,3 +158,11 @@ The permanently frozen 32,768-request node-batch benchmark retained checksum
 configured workers `1/2/8`. See
 `porting/results/constraint_checker_2026-07-29.md`. Do not rerun or update the
 accepted benchmark.
+
+## Integration worker correction (2026-07-30)
+
+Batch APIs now dispatch contiguous blocks through the persistent deterministic
+executor. The first error is still selected by request index, worker `0/1` is
+canonical sequential, nested dispatch is sequential, and no host width is
+selected. Focused batch/error/concurrent-caller units pass; the frozen benchmark
+was not rerun.

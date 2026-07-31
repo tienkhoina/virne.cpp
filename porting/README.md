@@ -692,13 +692,14 @@ hashes, and timings are in `components/base_solver.md`,
 `results/base_solver_differential_2026-07-29.json`, and
 `results/base_solver_benchmark_2026-07-29.json`.
 
-## OrderRankSolver gate
+## Node-rank solver gate
 
-Read `components/heuristic_node_rank.md` before extending the completed typed
-`BaseNodeRankSolver` engine. The accepted OrderRank differential and benchmark
-are frozen provenance; never rerun or edit their source, drivers, JSON,
-results, or timings. Focused unit, sanitizer, and integration regressions may
-still be run when required by a downstream solver leaf.
+Read `components/heuristic_node_rank.md` before consuming the completed typed
+solver API. Both the original OrderRank artifacts and the later combined
+eight-solver benchmark are frozen provenance; never rerun or edit their
+benchmark source, drivers, JSON, results, or timings. Focused unit,
+differential, sanitizer, and integration regressions may still run when
+required by a downstream solver leaf.
 
 The focused unit/concurrency, strict/sanitizer/CTest/frozen-integrity and
 hot-ID gates passed. The exact AST-isolated differential passed six shared
@@ -718,7 +719,21 @@ this small fixture. API, boundaries, and frozen evidence are in
 `results/heuristic_node_rank_differential_2026-07-29.json`, and
 `results/heuristic_node_rank_benchmark_2026-07-29.json`.
 
-The next leaf is `FFDRankSolver`: reuse `BaseNodeRankSolver` unchanged and use
-the frozen `NodeRank::ffd` path. `RandomRankSolver` remains deferred until an
-explicit caller-owned `NumpyRandomState` is part of its API; never hide RNG
-state in a solver or infer it from the host.
+The combined differential passes ten cases for all eight registered node-rank
+solvers at workers `0/1/2/8`; every workers=1 row in its frozen compact fixture
+beats Python. Its artifacts are the
+`results/heuristic_node_rank_variants_*_2026-07-30.json` files.
+
+## Complete heuristic registry gate
+
+Read `components/heuristic_registry.md` before using or extending heuristic
+solvers. The central registry has 14 direct IDs: all eight classes grouped in
+`node_rank.py`, all three BFS solvers and all three joint place-route solvers.
+The unfinished undecorated `ego_network.py`/`fit.py` prototypes and C++ stubs
+without Python provenance are intentionally not compatibility entries.
+
+The single collective Docker Release CTest is 1/1 PASS. It locks the complete
+catalog, runs every factory, compares exact workers=1/4 output and RNG
+continuation, and covers BFS/joint partial rollback. Its compact native timing
+was 70.8778 ms at workers=1 and 36.7232 ms at workers=4 (1.930x faster). The
+frozen Python/C++ node-rank evidence was not rerun.

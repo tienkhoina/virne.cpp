@@ -168,6 +168,15 @@ public:
         Solution& solution,
         RecorderOptions options = {});
 
+    // Arrival fast path for an Environment that already ran the matching
+    // PreparedCounter in order to apply its admission policy.  The supplied
+    // Solution must therefore already contain its complete cost/revenue
+    // fields.  Leave events do not use this overload.
+    RecorderRecord count_precomputed_arrival(
+        const network::PhysicalNetwork& physical_network,
+        Solution& solution,
+        RecorderOptions options = {});
+
     const RecorderRecord& add_record(RecorderRecord record);
     const RecorderRecord& record_by_event(std::int64_t event_id) const;
     const RecorderRecord& record_by_virtual_network(

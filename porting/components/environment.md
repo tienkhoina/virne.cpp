@@ -1,6 +1,8 @@
 # Component API: `core.environment` (non-RL lifecycle)
 
-State: **COMPLETE / FROZEN (NON-RL)** on 2026-07-29.
+State: **COMPLETE / FROZEN (NON-RL)** on 2026-07-29, with the additive typed
+transaction seam documented below on 2026-07-30. The accepted component
+benchmark remains frozen.
 
 Python oracle: `../virne/virne/core/environment.py`, commit
 `d1ec1e4a20461fc9bad50612ad5026fd31e693a8`, SHA-256
@@ -11,16 +13,16 @@ Python oracle: `../virne/virne/core/environment.py`, commit
 
 This port owns the typed event/reset/admission lifecycle shared by
 `BaseEnvironment` and `SolutionStepEnvironment`: physical-network reset,
-simulator event binding, prepared Controller/Counter reuse, caller-supplied
-Solution admission, deploy/release, Recorder commit, automatic consecutive
-leave processing, and a typed final summary.
+simulator event binding, prepared Counter/lightweight mutation-view reuse,
+caller-supplied Solution admission, deploy/release, Recorder commit, automatic
+consecutive leave processing, and a typed final summary.
 
 It deliberately does not own a solver, candidate search, MCF, observation,
 reward, action mask, feature construction, ranking, Torch, RL, training,
 logging backends, or system orchestration. `JointPRStepEnvironment` remains
-deferred. A solver may inspect the physical and virtual networks through const
-views and submit a completed Solution; it cannot mutate Environment-owned
-physical state behind the lifecycle.
+deferred. A solver normally inspects const views and submits a detached
+Solution. Native mutable solvers receive only an explicit transaction object;
+Environment owns its commit/bit-exact rollback lifecycle.
 
 ## Fixed schema and prepared-ID rule
 
@@ -30,13 +32,14 @@ fields/enums. Request IDs are genuinely dynamic numeric values. Reset resolves
 request ID to request index once and writes one dense request-index slot per
 event. The event loop performs no string or hash lookup.
 
-Controller and Counter prepare once per virtual request after every physical
-clone or simulator renewal. Recorder prepares its physical Counter once during
-reset. Prepared objects never survive a network replacement. Event mutation,
-deploy/release, Recorder count, history append, and first-error order remain
-sequential. Caller worker widths are forwarded only to completed Counter,
-Recorder, Controller, and Simulator leaves; no host-dependent worker policy is
-introduced.
+Counter and `PreparedControllerMutation` prepare once per virtual request after
+every physical clone or simulator renewal. The mutation view prepares only the
+ResourceUpdator and pre-resolved resource IDs; it does not eagerly construct
+mappers or topology analyzers. Recorder prepares its physical Counter once
+during reset. Prepared objects never survive a network replacement. Event
+mutation, deploy/release, Recorder commit, history append, and first-error order
+remain sequential. Caller worker widths are forwarded only to completed
+components; no host-dependent worker policy is introduced.
 
 ## Stable native API
 
@@ -137,9 +140,20 @@ public:
 class SolutionStepEnvironment final : public BaseEnvironment {
 public:
     using BaseEnvironment::BaseEnvironment;
-    EnvironmentStepResult step(Solution& solution);
+    EnvironmentStepResult step(
+        Solution& solution,
+        EnvironmentSolutionState state = EnvironmentSolutionState::detached);
 };
+
+EnvironmentSolverTransaction BaseEnvironment::solver_transaction();
 ```
+
+`EnvironmentSolverTransaction` is a non-owning pair of references to the
+mutable physical network and prepared numeric-ID mutation view. It has no
+RAII destructor; the system explicitly commits or rolls back the mutation at
+the arrival boundary. The current virtual network remains available through
+`current_virtual_network()`. Full API and ownership rules are in
+`transactional_solver_system.md`.
 
 Typed `EnvironmentException` carries `EnvironmentErrorCode`,
 `EnvironmentOperation`, and optional schedule/request IDs. Empty schedules,
@@ -149,19 +163,21 @@ successful mappings fail without string dispatch.
 
 ## Observable lifecycle
 
-Reset first destroys every prepared/current view, move-assigns a clone into the
-stable physical member, resets and binds Recorder's initial physical baseline,
-optionally renews the simulator through the completed `RandomContext`, builds
-the dense event plan, prepares every request, then readies schedule slot zero.
-An empty or invalid schedule fails after the physical/Recorder reset, matching
-the useful Python partial order.
+Reset first destroys every prepared/current view. The first reset reuses the
+owned pristine physical network; later resets move-assign a clone of the
+immutable snapshot into the stable physical member. It then resets and binds
+Recorder's initial physical baseline, optionally renews the simulator through
+the completed `RandomContext`, builds the dense event plan, prepares every
+request, and readies schedule slot zero. An empty or invalid schedule fails
+after the physical/Recorder reset, matching the useful Python partial order.
 
 Arrival preserves Python order: apply hard-violation and admission gates; run
 the prepared virtual Counter once; on success validate complete mappings, set
-`Success`, and deploy; on rejection classify flags in early/place/route/unknown
-priority and set the Python description; Recorder then counts the arrival
-(therefore Counter runs a second time, as in Python), appends it, and transition
-automatically consumes consecutive leaves.
+`Success`, and deploy only a detached Solution; on rejection classify flags in
+early/place/route/unknown priority and set the Python description. Recorder
+consumes the already-counted fixed fields, appends the arrival, and transition
+automatically consumes consecutive leaves. A committed mutable Solution is not
+deployed a second time.
 
 A leave creates a fresh Solution, fetches the stored arrival Solution before
 mutation through a dense request-index-to-history-index slot, releases with it,
@@ -184,13 +200,12 @@ IDs after one cold resolution. Event IDs remain validated as dense schedule
 indexes because frozen Recorder intentionally uses them as ordered history
 indexes; dense shared cases remain identical.
 
-Python replaces the complete physical object on a rejected caller Solution.
-That would invalidate every native prepared view. The typed API instead exposes
-only const physical state and performs no Environment mutation before the
-rejection branch, making rollback a no-op with identical supported output and
-better performance. Interactive algorithms that mutate Environment state belong
-to the deferred JointPR wrapper and will require an explicit checkpoint/rebind
-contract.
+Python replaces the complete physical object on rejection. Native code keeps
+the physical object stable and restores selected resource slots from an exact
+`AttrValue` checkpoint. This covers mapping failure, solver/deploy/Recorder
+exceptions and admission rejection without topology clones or inverse floating
+point arithmetic. Fixed targets are encoded by enum, graph ID and `AttrId`; no
+string lookup enters transaction, rollback or event loops.
 
 Python's wall-clock/local-time summary, mutable default dict leakage, global
 `'p_net'` feature caches, arbitrary DictConfig mutation, debug formatting,
@@ -217,10 +232,12 @@ accepted. It gates 192 ordered records, 72,481 output bytes, full checksum
 process startup and checksum work are outside the timer. The accepted benchmark
 is now frozen and must not be rerun or edited.
 
-Production hashes: `environment.h`
+Frozen pre-transaction baseline hashes: `environment.h`
 `CE821B41DAF17C76496220B5C17FBA8580123F9FE2D42A71E8AB2FD47488E21D`;
 `environment.cpp`
 `2EE1C2D9B29A8AA97E3578B781983FBC1E34BE8686E2E6CE710B5C8883C29FF8`.
 Compact evidence is recorded in
 `../results/environment_2026-07-29.md`; all Environment benchmark and
-differential artifacts are frozen with it.
+differential artifacts are frozen with it. The additive transaction integration
+is verified separately in
+`../results/system_transaction_integration_2026-07-30.md`.

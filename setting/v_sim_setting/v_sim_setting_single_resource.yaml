@@ -22,7 +22,7 @@ arrival_rate:
 lifetime:
   distribution: exponential
   dtype: float
-  scale: 500
+  scale: 1000
 # lifetime:
 #   distribution: uniform
 #   dtype: float
@@ -39,8 +39,8 @@ node_attrs_setting:
     distribution: uniform
     dtype: int
     generative: true
-    low: 0
-    high: 50
+    low: 10
+    high: 40
     owner: node
     type: resource
 link_attrs_setting:
@@ -48,8 +48,8 @@ link_attrs_setting:
     distribution: uniform
     dtype: int
     generative: true
-    low: 0
-    high: 50
+    low: 10
+    high: 40
     owner: link
     type: resource
   # - name: ltc

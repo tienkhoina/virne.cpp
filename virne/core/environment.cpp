@@ -66,18 +66,21 @@ BaseEnvironment::BaseEnvironment(
       recorder_(counter_, config_.recorder) {}
 
 void BaseEnvironment::begin_reset() {
-    network::PhysicalNetwork reset_physical_network =
-        initial_physical_network_.clone();
-
     state_ = EnvironmentState{};
     current_solution_.reset();
     completed_summary_.reset();
     event_request_indices_.clear();
     arrival_record_indices_.clear();
-    prepared_controllers_.clear();
+    prepared_mutations_.clear();
     prepared_counters_.clear();
 
-    physical_network_ = std::move(reset_physical_network);
+    // The owned working network is already pristine before the first episode.
+    // Later resets still restore the immutable snapshot exactly as before.
+    if (physical_network_pristine_) {
+        physical_network_pristine_ = false;
+    } else {
+        physical_network_ = initial_physical_network_.clone();
+    }
     recorder_.reset();
     recorder_.count_initial_physical_network(
         physical_network_,
@@ -180,15 +183,16 @@ void BaseEnvironment::build_event_plan() {
 void BaseEnvironment::prepare_requests() {
     const auto& virtual_networks = simulator_.v_nets();
     prepared_counters_.clear();
-    prepared_controllers_.clear();
+    prepared_mutations_.clear();
     prepared_counters_.reserve(virtual_networks.size());
-    prepared_controllers_.reserve(virtual_networks.size());
+    prepared_mutations_.reserve(virtual_networks.size());
     arrival_record_indices_.assign(virtual_networks.size(), std::nullopt);
 
     for (const auto& virtual_network : virtual_networks) {
         prepared_counters_.push_back(counter_.prepare(virtual_network));
-        prepared_controllers_.push_back(
-            controller_.prepare(virtual_network, physical_network_));
+        prepared_mutations_.push_back(
+            controller_.prepare_mutation(
+                virtual_network, physical_network_));
     }
 }
 
@@ -268,6 +272,22 @@ Solution BaseEnvironment::make_solution() const {
     return Solution::from_v_net(current_virtual_network());
 }
 
+EnvironmentSolverTransaction BaseEnvironment::solver_transaction() {
+    require_active(EnvironmentOperation::access);
+    const auto& event = require_current(EnvironmentOperation::access);
+    if (event.type != network::VirtualEventType::arrival) {
+        throw EnvironmentException(
+            EnvironmentErrorCode::arrival_event_required,
+            EnvironmentOperation::access,
+            "solver transaction requires an arrival event",
+            event.schedule_index,
+            event.request_id);
+    }
+    auto& mutation = prepared_mutations_.at(event.request_index);
+    mutation.begin_transaction();
+    return EnvironmentSolverTransaction{physical_network_, mutation};
+}
+
 const network::PhysicalNetwork&
 BaseEnvironment::physical_network() const noexcept {
     return physical_network_;
@@ -327,7 +347,7 @@ void BaseEnvironment::apply_failure(
     }
 }
 
-RecorderRecord BaseEnvironment::release_current() {
+void BaseEnvironment::release_current() {
     require_active(EnvironmentOperation::release);
     const auto& event = require_current(EnvironmentOperation::release);
     if (event.type != network::VirtualEventType::leave) {
@@ -350,7 +370,7 @@ RecorderRecord BaseEnvironment::release_current() {
             event.request_id);
     }
     const RecorderRecord& arrival = recorder_.memory().at(*arrival_index);
-    (void)prepared_controllers_.at(event.request_index)
+    (void)prepared_mutations_.at(event.request_index)
         .release(
             arrival.solution,
             controller::ControllerMutationOptions{
@@ -363,8 +383,7 @@ RecorderRecord BaseEnvironment::release_current() {
         physical_network_,
         leave_solution,
         RecorderOptions{config_.workers.recorder_workers});
-    (void)recorder_.add_record(record);
-    return record;
+    (void)recorder_.add_record(std::move(record));
 }
 
 EnvironmentDrainResult BaseEnvironment::drain_leaves() {
@@ -380,7 +399,7 @@ EnvironmentDrainResult BaseEnvironment::drain_leaves() {
 
     EnvironmentDrainResult result;
     while (current_event().type == network::VirtualEventType::leave) {
-        (void)release_current();
+        release_current();
         ++result.released_events;
 
         const std::size_t schedule_index = current_event().schedule_index;
@@ -413,10 +432,34 @@ EnvironmentDrainResult BaseEnvironment::transit_after_arrival() {
     return drain_leaves();
 }
 
-EnvironmentStepResult BaseEnvironment::step_solution(Solution& solution) {
+EnvironmentStepResult BaseEnvironment::step_solution(
+    Solution& solution,
+    EnvironmentSolutionState solution_state) {
     require_active(EnvironmentOperation::step);
     const auto& event = require_current(EnvironmentOperation::step);
+    auto& mutation = prepared_mutations_.at(event.request_index);
+    if (solution_state == EnvironmentSolutionState::committed &&
+        !mutation.transaction_active()) {
+        throw EnvironmentException(
+            EnvironmentErrorCode::missing_solver_transaction,
+            EnvironmentOperation::step,
+            "committed Solution has no active physical checkpoint",
+            event.schedule_index,
+            event.request_id);
+    }
+    if (solution_state == EnvironmentSolutionState::detached &&
+        !mutation.transaction_active() && solution.result) {
+        // Direct legacy step callers have no solver_transaction() checkpoint.
+        // Capture immediately before Environment may deploy their journal.
+        mutation.begin_transaction();
+    }
+    const auto rollback_if_required = [&]() {
+        if (mutation.transaction_active()) {
+            mutation.rollback_transaction();
+        }
+    };
     if (event.type != network::VirtualEventType::arrival) {
+        rollback_if_required();
         throw EnvironmentException(
             EnvironmentErrorCode::arrival_event_required,
             EnvironmentOperation::step,
@@ -425,6 +468,7 @@ EnvironmentStepResult BaseEnvironment::step_solution(Solution& solution) {
             event.request_id);
     }
     if (solution.v_net_id != event.request_id) {
+        rollback_if_required();
         throw EnvironmentException(
             EnvironmentErrorCode::solution_request_mismatch,
             EnvironmentOperation::step,
@@ -432,8 +476,9 @@ EnvironmentStepResult BaseEnvironment::step_solution(Solution& solution) {
             event.schedule_index,
             event.request_id);
     }
+    const bool terminal_arrival =
+        event.schedule_index >= simulator_.events().size() - 1U;
 
-    current_solution_ = solution;
     EnvironmentFailureReason reason = EnvironmentFailureReason::none;
     RecorderRecord record = [&]() -> RecorderRecord {
       try {
@@ -475,44 +520,57 @@ EnvironmentStepResult BaseEnvironment::step_solution(Solution& solution) {
                     event.request_id);
             }
             solution.description = "Success";
-            (void)prepared_controllers_.at(event.request_index)
-                .deploy(
-                    solution,
-                    controller::ControllerMutationOptions{
-                        config_.workers.mutation_workers});
+            if (solution_state == EnvironmentSolutionState::detached) {
+                (void)mutation.deploy(
+                        solution,
+                        controller::ControllerMutationOptions{
+                            config_.workers.mutation_workers});
+            }
         } else {
+            rollback_if_required();
             reason = failure_reason(solution);
             apply_failure(solution, reason);
         }
 
-        RecorderRecord arrival_record = recorder_.count_prepared(
-            prepared_counters_.at(event.request_index),
+        RecorderRecord arrival_record = recorder_.count_precomputed_arrival(
             physical_network_,
             solution,
             RecorderOptions{config_.workers.recorder_workers});
         const std::size_t record_index = recorder_.memory().size();
         (void)recorder_.add_record(arrival_record);
         arrival_record_indices_.at(event.request_index) = record_index;
-        current_solution_ = solution;
+        if (mutation.transaction_active()) {
+            mutation.commit_transaction();
+        }
         return arrival_record;
       } catch (...) {
+        rollback_if_required();
         current_solution_ = solution;
         throw;
       }
     }();
 
-    const EnvironmentDrainResult transit = transit_after_arrival();
+    EnvironmentDrainResult transit = transit_after_arrival();
+    // For every non-terminal arrival, transit immediately installs the next
+    // event's blank Solution (and may drain leaves). Copying the just-recorded
+    // mapping first was therefore unobservable and needlessly duplicated all
+    // node/path tables. A terminal arrival has no following ready() call.
+    if (terminal_arrival) {
+        current_solution_ = solution;
+    }
     return EnvironmentStepResult(
         std::move(record),
         transit.done,
         solution.result,
         reason,
         transit.released_events,
-        completed_summary_);
+        std::move(transit.summary));
 }
 
-EnvironmentStepResult SolutionStepEnvironment::step(Solution& solution) {
-    return step_solution(solution);
+EnvironmentStepResult SolutionStepEnvironment::step(
+    Solution& solution,
+    EnvironmentSolutionState solution_state) {
+    return step_solution(solution, solution_state);
 }
 
 } // namespace virne::core

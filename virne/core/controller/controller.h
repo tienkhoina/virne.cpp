@@ -8,6 +8,8 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
+#include <mutex>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -23,6 +25,7 @@ enum class ControllerErrorCode : std::uint8_t
     missing_constraint_offset,
     missing_node_slot_info,
     missing_link_path_info,
+    transaction_already_active,
 };
 
 enum class ControllerOperation : std::uint8_t
@@ -31,9 +34,13 @@ enum class ControllerOperation : std::uint8_t
     place_and_route,
     pool_step_offsets,
     undo_place_and_route,
+    begin_transaction,
+    commit_transaction,
     deploy,
     release,
+    rollback,
     undo_deploy,
+    deploy_with_node_slots,
 };
 
 class ControllerException final : public std::runtime_error
@@ -113,7 +120,19 @@ struct ControllerMutationOptions
     std::size_t workers = 1U;
 };
 
+// Safe whole-request evaluation for a caller-supplied, insertion-ordered
+// virtual-to-physical node assignment. The prepared controller is already
+// bound to its mutable physical network, so both mapping phases are inplace.
+struct DeployWithNodeSlotsOptions
+{
+    ShortestPathMethod shortest_method = ShortestPathMethod::bfs_shortest;
+    std::int64_t k = 10;
+    double max_path_nodes = 1.0e6;
+    ControllerWorkers workers;
+};
+
 class PreparedController;
+class PreparedControllerMutation;
 
 class Controller
 {
@@ -126,16 +145,127 @@ public:
         const network::VirtualNetwork& virtual_network,
         network::PhysicalNetwork& physical_network) const;
 
+    // Binds only numeric resource IDs and the resource updater. Environment
+    // deploy/release and solver rollback do not need constraint checkers,
+    // node/link mappers, or topology analysis.
+    PreparedControllerMutation prepare_mutation(
+        const network::VirtualNetwork& virtual_network,
+        network::PhysicalNetwork& physical_network) const;
+
 private:
     ControllerSelection selection_;
     ResourceUpdator resource_updator_;
     NodeMapper node_mapper_;
     LinkMapper link_mapper_;
+    // Opaque shared pool for exact transaction checkpoint storage. The
+    // concrete type belongs to PreparedControllerMutation below.
+    std::shared_ptr<void> mutation_checkpoint_workspace_;
+};
+
+// Lightweight non-owning resource-mutation view. Dynamic resource names are
+// resolved once by prepare_mutation(); every hot mutation loop uses IDs.
+class PreparedControllerMutation
+{
+public:
+    bool deploy(
+        const Solution& solution,
+        ControllerMutationOptions options = {});
+
+    bool release(
+        const Solution& solution,
+        ControllerMutationOptions options = {});
+
+    // Captures only selected physical resource slots. The checkpoint is exact
+    // (AttrValue copies), not an inverse floating-point arithmetic journal.
+    void begin_transaction();
+    void commit_transaction() noexcept;
+    void rollback_transaction();
+    bool transaction_active() const noexcept;
+
+    // Restores every mutation recorded in a complete or partial Solution,
+    // regardless of Solution::result. It does not alter the Solution journal.
+    void rollback(
+        const Solution& solution,
+        ControllerMutationOptions options = {});
+
+private:
+    PreparedControllerMutation(
+        network::PhysicalNetwork& physical_network,
+        PreparedResourceUpdator resource_updator,
+        std::vector<ResourceId> node_resource_order,
+        std::vector<ResourceId> link_resource_order,
+        std::vector<std::optional<AttrId>> node_physical_value_ids,
+        std::vector<std::optional<AttrId>> link_physical_value_ids,
+        std::shared_ptr<void> checkpoint_workspace);
+
+    std::vector<ResourceAmount> gather_resources(
+        const SolutionAttributeValues& values,
+        const std::vector<ResourceId>& resource_order) const;
+
+    void gather_resources_into(
+        const SolutionAttributeValues& values,
+        const std::vector<ResourceId>& resource_order,
+        std::vector<ResourceAmount>& output) const;
+
+    void apply_recorded_values(
+        const Solution& solution,
+        network::attribute::ResourceUpdateOperation operation,
+        std::size_t workers);
+
+    void apply_mapped_values(
+        const Solution& solution,
+        network::attribute::ResourceUpdateOperation operation,
+        std::size_t workers);
+
+    PreparedResourceUpdator resource_updator_;
+    network::PhysicalNetwork* physical_network_ = nullptr;
+    std::vector<ResourceId> node_resource_order_;
+    std::vector<ResourceId> link_resource_order_;
+    std::vector<std::optional<AttrId>> node_physical_value_ids_;
+    std::vector<std::optional<AttrId>> link_physical_value_ids_;
+    std::vector<ResourceAmount> resource_scratch_;
+
+    enum class CheckpointTarget : std::uint8_t
+    {
+        node,
+        edge,
+    };
+
+    struct CheckpointValue
+    {
+        CheckpointTarget target = CheckpointTarget::node;
+        std::uint32_t target_id = 0U;
+        AttrId attr_id = 0U;
+        AttrValue value = std::int64_t{0};
+    };
+
+    struct CheckpointWorkspace
+    {
+        std::mutex mutex;
+        std::vector<
+            std::unique_ptr<std::vector<CheckpointValue>>> free_buffers;
+    };
+
+    void return_checkpoint_buffer() noexcept;
+
+    std::shared_ptr<CheckpointWorkspace> checkpoint_workspace_;
+    std::unique_ptr<std::vector<CheckpointValue>> checkpoint_values_;
+    bool checkpoint_active_ = false;
+
+    friend class Controller;
 };
 
 class PreparedController
 {
 public:
+    // Safe-only counterpart of Python Controller._safely_deploy_with_node_slots.
+    // Returns false for incomplete/-1 assignments or mapper infeasibility;
+    // dependency exceptions retain the partial state produced before failure.
+    bool deploy_with_node_slots(
+        const NodeSlots& node_slots,
+        Solution& solution,
+        DeployWithNodeSlotsOptions options = {});
+
     PlaceAndRouteResult place_and_route(
         Vertex virtual_node,
         Vertex physical_node,
@@ -189,13 +319,13 @@ private:
         Solution& solution,
         const PlaceAndRouteOptions& options);
 
-    std::vector<ConstraintLink> links_to_route(
+    const std::vector<ConstraintLink>& links_to_route(
         Vertex virtual_node,
-        const Solution& solution) const;
+        const Solution& solution);
 
     void pool_step_offsets(
         const std::vector<ConstraintLink>& attempted_links,
-        Solution& solution) const;
+        Solution& solution);
 
     void calculate_max_single_step_constraint_violation(
         Solution& solution) const;
@@ -254,6 +384,15 @@ private:
     std::vector<std::optional<AttrId>> link_physical_value_ids_;
     SolutionAttributeValues link_step_placeholder_;
     SolutionAttributeValues path_step_placeholder_;
+    // A prepared controller is a mutable transaction bound to one physical
+    // network. Reuse its per-step buffers across virtual nodes instead of
+    // allocating the same small route/offset vectors in every hot call.
+    std::vector<ConstraintLink> links_to_route_scratch_;
+    std::vector<ConstraintLink> attempted_routes_scratch_;
+    std::vector<const SolutionAttributeValues*> link_values_scratch_;
+    std::vector<const SolutionAttributeValues*> path_values_scratch_;
+    std::vector<Vertex> node_slot_virtual_nodes_scratch_;
+    std::vector<Vertex> node_slot_physical_nodes_scratch_;
 
     friend class Controller;
 };

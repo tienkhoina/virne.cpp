@@ -1,24 +1,24 @@
 # Non-ML Python component map
 
-Progress note (2026-07-29): the complete non-solver/non-system non-ML inventory
-through `core.Environment` and the independent non-ML `solver.rank.LinkRank`
-and `solver.rank.NodeRank` leaves plus the non-ML `solver.base_solver`
-foundation and `solver.heuristic.node_rank.OrderRankSolver` are complete/frozen.
-OrderRank established the reusable typed `BaseNodeRankSolver` engine and passed
-its exact unit/differential/output gates. Its frozen conservative
-mixed-dependency timing retained checksum `9328970994111537605`; worker 1 was
-`1.551x` faster than Python, while explicit workers 2/8 were slower and remain
-caller configuration only.
+Progress note (2026-07-30): the complete non-solver foundation through
+`core.Environment`, LinkRank, NodeRank, BaseSolver, all 14 canonical decorated
+classes in `solver.heuristic`, and the native non-ML system/main runtime are
+implemented. Accepted component benchmarks remain frozen. The combined node
+rank solver differential passes ten shared cases at workers `0/1/2/8`; every
+workers=1 row in its frozen compact fixture is faster than Python. The
+collective registry gate creates and solves all 14 names and compares exact
+workers=1/4 output plus both caller-owned RNG continuations.
+The default seed-0 mutable Main integration is exact at 752/248 accepted/
+rejected requests and removes the per-request physical clone/double-deploy
+bottleneck; its one GCC 11 signal is documented separately from frozen
+component benchmarks.
 
-The next independent leaf is `solver.heuristic.node_rank.FFDRankSolver`.
-Reuse the same `BaseNodeRankSolver` engine and frozen `NodeRank::ffd`; do not
-rebuild completed ranking or mapper dependencies. Keep `RandomRankSolver`
-deferred until it can receive an explicit caller-owned `NumpyRandomState`.
-Read only completed component/API documents for dependencies before
-implementation; open dependency code only where an API is genuinely unclear
-or a measured hot-path optimization requires it. Torch-backed seeding, ML/RL,
-MCF, candidate-search-dependent heuristics, and system orchestration remain
-deferred.
+The canonical `solver.heuristic` directory is complete; read
+`components/heuristic_registry.md` rather than reopening its implementation.
+The next independent solver leaf is exact or meta-heuristic. Reuse completed
+dependencies and open their source only where the API document cannot resolve
+parity or a measured hot-path optimization. Torch-backed seeding, ML/RL and
+MCF remain deferred.
 
 Source inventory was taken at original Virne commit
 `d1ec1e4a20461fc9bad50612ad5026fd31e693a8`. The checkout was clean.

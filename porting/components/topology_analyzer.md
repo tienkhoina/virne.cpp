@@ -140,3 +140,13 @@ targeted CTest, and frozen-foundation integrity pass. The permanently frozen
 4,096-query benchmark retained checksum `10025764477037659827`; C++ was
 83.768x, 147.126x, and 177.706x faster at caller workers `1/2/8`. See
 `porting/results/topology_analyzer_2026-07-29.md`.
+
+## Integration worker correction (2026-07-30)
+
+The API and block/error order are unchanged. Mask and batch ranges now use the
+persistent deterministic executor instead of creating threads per call.
+Nested batch requests whose path method also asks for constraint workers run
+that inner range sequentially, preventing pool recursion and oversubscription.
+Widths remain caller configured with no host selection. Focused nested,
+width/error, and concurrent-caller units pass; the frozen benchmark was not
+rerun.

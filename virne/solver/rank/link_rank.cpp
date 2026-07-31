@@ -1,12 +1,12 @@
 #include "link_rank.h"
 #include "python310_timsort.h"
+#include "../../utils/deterministic_executor.h"
 
 #include <algorithm>
 #include <cmath>
 #include <cstring>
 #include <exception>
 #include <sstream>
-#include <thread>
 #include <utility>
 
 namespace virne::solver::rank {
@@ -445,37 +445,11 @@ LinkRanking PreparedLinkRanker::rank_ffd(LinkRankOptions options) const
         }
     };
 
-    const std::size_t requested_workers = options.workers;
-    const std::size_t worker_count =
-        requested_workers <= 1U
-            ? 1U
-            : std::min(requested_workers, column_count);
-    if (worker_count <= 1U) {
-        reduce_range(0U, column_count);
-    } else {
-        std::vector<std::thread> threads;
-        threads.reserve(worker_count - 1U);
-        try {
-            for (std::size_t worker = 1U; worker < worker_count; ++worker) {
-                const std::size_t begin =
-                    (column_count * worker) / worker_count;
-                const std::size_t end =
-                    (column_count * (worker + 1U)) / worker_count;
-                threads.emplace_back(reduce_range, begin, end);
-            }
-            reduce_range(0U, column_count / worker_count);
-        } catch (...) {
-            for (std::thread& thread : threads) {
-                if (thread.joinable()) {
-                    thread.join();
-                }
-            }
-            throw;
-        }
-        for (std::thread& thread : threads) {
-            thread.join();
-        }
-    }
+    virne::utils::deterministic_parallel_blocks(
+        column_count,
+        options.workers,
+        4096U,
+        reduce_range);
 
     if (column_count != links.size()) {
         throw LinkRankException(

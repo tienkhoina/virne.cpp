@@ -164,3 +164,13 @@ faster. Fixture/preparation, subprocess startup, validation, serialization, and
 fingerprinting are excluded. This is an AST-isolated LinkMapper leaf benchmark
 with equivalent fake Python dependencies, not an end-to-end solver result.
 See `porting/results/link_mapper_2026-07-29.md`.
+
+## Integration worker correction (2026-07-30)
+
+The public API is unchanged. Path sets below 64 candidates are checked
+sequentially, covering default `k=10` without wider-worker overhead. Larger sets
+probe up to eight paths sequentially and then use ordered persistent-executor
+windows. Results/errors retain path order, later windows stop after the first
+feasible path, and all-infeasible unsafe routing still retains every check for
+its ordered minimum. Focused safe/unsafe/width/concurrency units pass; the
+frozen benchmark was not rerun.

@@ -1,14 +1,12 @@
 #include "counter.h"
 
+#include "../utils/deterministic_executor.h"
 #include "../../csv/csv.h"
 
 #include <algorithm>
 #include <cmath>
 #include <cstring>
-#include <exception>
 #include <limits>
-#include <memory>
-#include <thread>
 #include <type_traits>
 #include <utility>
 
@@ -258,61 +256,11 @@ void run_counter_tasks(
     std::size_t task_count,
     std::size_t requested_workers,
     Function&& function) {
-    if (task_count <= 1U || requested_workers <= 1U) {
-        function(0U, task_count);
-        return;
-    }
-
-    const std::size_t worker_count =
-        std::min(task_count, requested_workers);
-    std::vector<std::thread> threads;
-    std::vector<std::exception_ptr> errors(worker_count);
-    threads.reserve(worker_count - 1U);
-
-    const auto bounds = [task_count, worker_count](std::size_t worker) {
-        const std::size_t block = task_count / worker_count;
-        const std::size_t remainder = task_count % worker_count;
-        const std::size_t begin =
-            worker * block + std::min(worker, remainder);
-        const std::size_t end =
-            begin + block + (worker < remainder ? 1U : 0U);
-        return std::pair<std::size_t, std::size_t>{begin, end};
-    };
-
-    try {
-        for (std::size_t worker = 1U; worker < worker_count; ++worker) {
-            const auto range = bounds(worker);
-            const std::size_t begin = range.first;
-            const std::size_t end = range.second;
-            threads.emplace_back([&, worker, begin, end]() noexcept {
-                try {
-                    function(begin, end);
-                } catch (...) {
-                    errors[worker] = std::current_exception();
-                }
-            });
-        }
-    } catch (...) {
-        for (std::thread& thread : threads) {
-            thread.join();
-        }
-        throw;
-    }
-
-    const auto [begin, end] = bounds(0U);
-    try {
-        function(begin, end);
-    } catch (...) {
-        errors[0U] = std::current_exception();
-    }
-    for (std::thread& thread : threads) {
-        thread.join();
-    }
-    for (const std::exception_ptr& error : errors) {
-        if (error != nullptr) {
-            std::rethrow_exception(error);
-        }
-    }
+    utils::deterministic_parallel_blocks(
+        task_count,
+        requested_workers,
+        1U,
+        std::forward<Function>(function));
 }
 
 double mean_skip_nan(const std::vector<double>& values) {
@@ -653,11 +601,25 @@ CounterNumber PreparedCounter::calculate_resource_sum(
     const std::size_t worker_count = options.workers <= 1U
         ? 1U
         : std::min(options.workers, width);
-    std::unique_ptr<double[]> flattened{new double[value_count]};
-    std::vector<CounterResourceScan> scans(
-        worker_count * resources.size());
+    // Recorder invokes these reductions for every event. Reuse caller-local
+    // storage so the exact dense NumPy-compatible reduction no longer pays a
+    // large allocation on every node/link scan. A thread-local buffer keeps
+    // independent callers race-free without adding mutable public state.
+    struct ResourceSumScratch {
+        std::vector<double> flattened;
+        std::vector<CounterResourceScan> scans;
+        std::vector<Edge> ordered_edges;
+    };
+    thread_local ResourceSumScratch scratch;
+    auto& flattened = scratch.flattened;
+    auto& scans = scratch.scans;
+    auto& ordered_edges = scratch.ordered_edges;
 
-    std::vector<Edge> ordered_edges;
+    flattened.resize(value_count);
+    scans.assign(
+        worker_count * resources.size(), CounterResourceScan{});
+
+    ordered_edges.clear();
     if (!node) {
         ordered_edges.reserve(width);
         const auto [edge, edge_end] = graph_->edges();
@@ -804,7 +766,7 @@ CounterNumber PreparedCounter::calculate_resource_sum(
     if (!has_double) {
         return signed_bits(integer_bits);
     }
-    return numpy_pairwise_sum(flattened.get(), value_count);
+    return numpy_pairwise_sum(flattened.data(), value_count);
 }
 
 CounterNumber PreparedCounter::calculate_sum_network_resource(

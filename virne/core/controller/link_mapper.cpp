@@ -1,10 +1,10 @@
 #include "link_mapper.h"
 
+#include "../../utils/deterministic_executor.h"
 #include "../../utils/network.h"
 
 #include <algorithm>
 #include <limits>
-#include <thread>
 #include <type_traits>
 #include <utility>
 
@@ -15,6 +15,11 @@ namespace
 
 using AttributeNumber = network::attribute::AttributeNumber;
 using ResourceUpdateOperation = network::attribute::ResourceUpdateOperation;
+
+constexpr std::size_t minimum_parallel_path_count = 64U;
+constexpr std::size_t maximum_sequential_probe_count = 8U;
+constexpr std::size_t minimum_path_window = 32U;
+constexpr std::size_t path_window_per_worker = 128U;
 
 SolutionNodeId solution_node_id(Vertex node) noexcept
 {
@@ -414,7 +419,7 @@ void PreparedLinkMapper::clear_existing_route(
     const auto existing = solution.link_paths.find_id(key);
     if (existing.has_value())
     {
-        const std::vector<SolutionLink> old_path =
+        const std::vector<SolutionLink>& old_path =
             solution.link_paths.at(*existing);
         for (const SolutionLink& physical_link : old_path)
         {
@@ -425,14 +430,15 @@ void PreparedLinkMapper::clear_existing_route(
     solution.link_paths.insert_or_assign(key, {});
 }
 
-std::vector<ResourceAmount> PreparedLinkMapper::gather_link_resources(
+const std::vector<ResourceAmount>& PreparedLinkMapper::gather_link_resources(
     ConstraintLink virtual_link,
-    SolutionAttributeValues* recorded_values) const
+    SolutionAttributeValues* recorded_values)
 {
     const auto edge = virtual_network_->graph().edge(
         virtual_link.source, virtual_link.target);
     const AttrMap& values = virtual_network_->graph().edge_attrs(edge);
-    std::vector<ResourceAmount> result;
+    auto& result = resource_scratch_;
+    result.clear();
     result.reserve(link_resources_.size());
     for (const PreparedLinkResource& prepared : link_resources_)
     {
@@ -506,7 +512,7 @@ LinkRouteResult PreparedLinkMapper::commit_path(
     }
 
     SolutionAttributeValues recorded_values;
-    std::vector<ResourceAmount> resources =
+    const std::vector<ResourceAmount>& resources =
         gather_link_resources(virtual_link, &recorded_values);
     for (const auto& link : links)
     {
@@ -525,67 +531,45 @@ LinkRouteResult PreparedLinkMapper::commit_path(
     return LinkRouteResult{true, std::move(check)};
 }
 
-std::vector<PreparedLinkMapper::PathCheckOutcome>
+std::vector<PreparedLinkMapper::PathCheckOutcome>&
 PreparedLinkMapper::check_paths_ordered(
     ConstraintLink virtual_link,
     const PhysicalPaths& paths,
-    std::size_t workers) const
+    std::size_t begin_index,
+    std::size_t end_index,
+    std::size_t workers)
 {
-    std::vector<PathCheckOutcome> outcomes(paths.size());
+    const std::size_t count = end_index - begin_index;
+    auto& outcomes = path_check_scratch_;
+    outcomes.assign(count, PathCheckOutcome{});
     const auto check_range =
-        [this, virtual_link, &paths, &outcomes](
+        [this, virtual_link, &paths, &outcomes, begin_index](
             std::size_t begin,
             std::size_t end)
         {
-            for (std::size_t index = begin; index < end; ++index)
+            for (std::size_t local_index = begin;
+                 local_index < end;
+                 ++local_index)
             {
+                const std::size_t path_index = begin_index + local_index;
                 try
                 {
-                    outcomes[index].result.emplace(
+                    outcomes[local_index].result.emplace(
                         constraint_checker_.check_path_level_constraints(
-                            virtual_link, paths[index]));
+                            virtual_link, paths[path_index]));
                 }
                 catch (...)
                 {
-                    outcomes[index].error = std::current_exception();
+                    outcomes[local_index].error = std::current_exception();
                 }
             }
         };
 
-    if (workers <= 1U || paths.size() <= 1U)
-    {
-        check_range(0U, paths.size());
-        return outcomes;
-    }
-    const std::size_t active_workers = std::min(workers, paths.size());
-    std::vector<std::thread> threads;
-    threads.reserve(active_workers);
-    try
-    {
-        for (std::size_t worker = 0U; worker < active_workers; ++worker)
-        {
-            const std::size_t begin =
-                (paths.size() * worker) / active_workers;
-            const std::size_t end =
-                (paths.size() * (worker + 1U)) / active_workers;
-            threads.emplace_back(check_range, begin, end);
-        }
-    }
-    catch (...)
-    {
-        for (std::thread& thread : threads)
-        {
-            if (thread.joinable())
-            {
-                thread.join();
-            }
-        }
-        throw;
-    }
-    for (std::thread& thread : threads)
-    {
-        thread.join();
-    }
+    virne::utils::deterministic_parallel_blocks(
+        count,
+        workers,
+        1U,
+        check_range);
     return outcomes;
 }
 
@@ -614,7 +598,10 @@ LinkRouteResult PreparedLinkMapper::safely_route(
         return LinkRouteResult{false, placeholder_check()};
     }
 
-    if (options.candidate_workers <= 1U || paths.size() <= 1U)
+    const bool use_parallel_windows =
+        options.candidate_workers > 1U &&
+        paths.size() >= minimum_parallel_path_count;
+    if (!use_parallel_windows)
     {
         PathConstraintCheckResult last;
         for (const PhysicalPath& path : paths)
@@ -637,20 +624,16 @@ LinkRouteResult PreparedLinkMapper::safely_route(
             false, LinkRouteCheckInfo{false, std::move(last)}};
     }
 
-    std::vector<PathCheckOutcome> outcomes = check_paths_ordered(
-        virtual_link, paths, options.candidate_workers);
     PathConstraintCheckResult last;
-    for (std::size_t index = 0U; index < outcomes.size(); ++index)
+    const std::size_t bounded_workers = std::min(
+        options.candidate_workers,
+        paths.size());
+    const std::size_t probe_count = std::min(
+        {paths.size(), bounded_workers, maximum_sequential_probe_count});
+    for (std::size_t index = 0U; index < probe_count; ++index)
     {
-        if (outcomes[index].error)
-        {
-            std::rethrow_exception(outcomes[index].error);
-        }
-        if (!outcomes[index].result.has_value())
-        {
-            throw std::logic_error("path check produced no result");
-        }
-        last = *outcomes[index].result;
+        last = constraint_checker_.check_path_level_constraints(
+            virtual_link, paths[index]);
         if (last.feasible)
         {
             LinkRouteCheckInfo check{false, std::move(last)};
@@ -662,6 +645,56 @@ LinkRouteResult PreparedLinkMapper::safely_route(
                 true,
                 options.candidate_workers);
         }
+    }
+
+    std::size_t scaled_window = paths.size();
+    if (bounded_workers <=
+        std::numeric_limits<std::size_t>::max() / path_window_per_worker)
+    {
+        scaled_window = bounded_workers * path_window_per_worker;
+    }
+    const std::size_t window_width = std::max(
+        minimum_path_window,
+        scaled_window);
+    for (std::size_t window_begin = probe_count;
+         window_begin < paths.size();)
+    {
+        const std::size_t remaining = paths.size() - window_begin;
+        const std::size_t window_end = window_begin +
+            std::min(window_width, remaining);
+        std::vector<PathCheckOutcome>& outcomes = check_paths_ordered(
+            virtual_link,
+            paths,
+            window_begin,
+            window_end,
+            options.candidate_workers);
+        for (std::size_t local_index = 0U;
+             local_index < outcomes.size();
+             ++local_index)
+        {
+            PathCheckOutcome& outcome = outcomes[local_index];
+            if (outcome.error)
+            {
+                std::rethrow_exception(outcome.error);
+            }
+            if (!outcome.result.has_value())
+            {
+                throw std::logic_error("path check produced no result");
+            }
+            last = std::move(*outcome.result);
+            if (last.feasible)
+            {
+                LinkRouteCheckInfo check{false, std::move(last)};
+                return commit_path(
+                    virtual_link,
+                    paths[window_begin + local_index],
+                    std::move(check),
+                    solution,
+                    true,
+                    options.candidate_workers);
+            }
+        }
+        window_begin = window_end;
     }
     return LinkRouteResult{
         false, LinkRouteCheckInfo{false, std::move(last)}};
@@ -797,7 +830,10 @@ LinkRouteResult PreparedLinkMapper::unsafely_route(
 
     std::vector<PathConstraintCheckResult> checks;
     checks.reserve(paths.size());
-    if (options.candidate_workers <= 1U || paths.size() <= 1U)
+    const bool use_parallel_windows =
+        options.candidate_workers > 1U &&
+        paths.size() >= minimum_parallel_path_count;
+    if (!use_parallel_windows)
     {
         for (const PhysicalPath& path : paths)
         {
@@ -820,20 +856,16 @@ LinkRouteResult PreparedLinkMapper::unsafely_route(
     }
     else
     {
-        std::vector<PathCheckOutcome> outcomes = check_paths_ordered(
-            virtual_link, paths, options.candidate_workers);
-        for (std::size_t index = 0U; index < outcomes.size(); ++index)
+        const std::size_t bounded_workers = std::min(
+            options.candidate_workers,
+            paths.size());
+        const std::size_t probe_count = std::min(
+            {paths.size(), bounded_workers, maximum_sequential_probe_count});
+        for (std::size_t index = 0U; index < probe_count; ++index)
         {
-            if (outcomes[index].error)
-            {
-                std::rethrow_exception(outcomes[index].error);
-            }
-            if (!outcomes[index].result.has_value())
-            {
-                throw std::logic_error("path check produced no result");
-            }
             PathConstraintCheckResult current =
-                std::move(*outcomes[index].result);
+                constraint_checker_.check_path_level_constraints(
+                    virtual_link, paths[index]);
             if (current.feasible)
             {
                 LinkRouteCheckInfo check{false, std::move(current)};
@@ -846,6 +878,60 @@ LinkRouteResult PreparedLinkMapper::unsafely_route(
                     options.candidate_workers);
             }
             checks.push_back(std::move(current));
+        }
+
+        std::size_t scaled_window = paths.size();
+        if (bounded_workers <=
+            std::numeric_limits<std::size_t>::max() /
+                path_window_per_worker)
+        {
+            scaled_window = bounded_workers * path_window_per_worker;
+        }
+        const std::size_t window_width = std::max(
+            minimum_path_window,
+            scaled_window);
+        for (std::size_t window_begin = probe_count;
+             window_begin < paths.size();)
+        {
+            const std::size_t remaining = paths.size() - window_begin;
+            const std::size_t window_end = window_begin +
+                std::min(window_width, remaining);
+            std::vector<PathCheckOutcome>& outcomes = check_paths_ordered(
+                virtual_link,
+                paths,
+                window_begin,
+                window_end,
+                options.candidate_workers);
+            for (std::size_t local_index = 0U;
+                 local_index < outcomes.size();
+                 ++local_index)
+            {
+                PathCheckOutcome& outcome = outcomes[local_index];
+                if (outcome.error)
+                {
+                    std::rethrow_exception(outcome.error);
+                }
+                if (!outcome.result.has_value())
+                {
+                    throw std::logic_error(
+                        "path check produced no result");
+                }
+                PathConstraintCheckResult current =
+                    std::move(*outcome.result);
+                if (current.feasible)
+                {
+                    LinkRouteCheckInfo check{false, std::move(current)};
+                    return commit_path(
+                        virtual_link,
+                        paths[window_begin + local_index],
+                        std::move(check),
+                        solution,
+                        true,
+                        options.candidate_workers);
+                }
+                checks.push_back(std::move(current));
+            }
+            window_begin = window_end;
         }
     }
 
@@ -1041,7 +1127,8 @@ bool PreparedLinkMapper::undo_route(
             "virtual link has no routed path",
             virtual_link);
     }
-    const std::vector<SolutionLink> path = solution.link_paths.at(*route_id);
+    const std::vector<SolutionLink>& path =
+        solution.link_paths.at(*route_id);
     for (const SolutionLink& stored_physical : path)
     {
         const ConstraintLink physical_link = constraint_link(
@@ -1061,7 +1148,8 @@ bool PreparedLinkMapper::undo_route(
         }
         const SolutionAttributeValues& recorded =
             solution.link_paths_info.at(*info_id);
-        std::vector<ResourceAmount> resources;
+        auto& resources = resource_scratch_;
+        resources.clear();
         resources.reserve(link_resources_.size());
         for (const PreparedLinkResource& prepared : link_resources_)
         {

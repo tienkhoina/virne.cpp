@@ -1,9 +1,10 @@
 #include "controller.h"
 
+#include "../../utils/deterministic_executor.h"
+
 #include <algorithm>
 #include <exception>
 #include <limits>
-#include <thread>
 #include <unordered_set>
 #include <utility>
 
@@ -140,6 +141,20 @@ struct DirectMutation
     AttrValue value = std::int64_t{0};
 };
 
+struct DirectMutationWorkspace
+{
+    std::vector<std::uint8_t> seen_nodes;
+    std::vector<std::uint8_t> seen_edges;
+    std::vector<DirectMutation> node_mutations;
+    std::vector<DirectMutation> link_mutations;
+};
+
+DirectMutationWorkspace& direct_mutation_workspace()
+{
+    thread_local DirectMutationWorkspace workspace;
+    return workspace;
+}
+
 bool plan_numeric_mutation(
     AttrValue& current,
     const network::attribute::AttributeNumber& requested,
@@ -196,10 +211,7 @@ void commit_direct_mutations(
     std::vector<DirectMutation>& mutations,
     std::size_t requested_workers)
 {
-    const std::size_t worker_count = std::min(
-        requested_workers,
-        mutations.size());
-    if (worker_count <= 1U)
+    if (requested_workers <= 1U || mutations.size() <= 1U)
     {
         for (auto& mutation : mutations)
         {
@@ -208,39 +220,19 @@ void commit_direct_mutations(
         return;
     }
 
-    std::vector<std::thread> threads;
-    threads.reserve(worker_count);
-    try
-    {
-        for (std::size_t worker = 0U; worker < worker_count; ++worker)
+    virne::utils::deterministic_parallel_blocks(
+        mutations.size(),
+        requested_workers,
+        1U,
+        [&](std::size_t begin, std::size_t end)
         {
-            threads.emplace_back(
-                [&, worker]
-                {
-                    const std::size_t begin =
-                        mutations.size() * worker / worker_count;
-                    const std::size_t end =
-                        mutations.size() * (worker + 1U) / worker_count;
-                    for (std::size_t index = begin; index < end; ++index)
-                    {
-                        *mutations[index].target =
-                            std::move(mutations[index].value);
-                    }
-                });
+            for (std::size_t index = begin; index < end; ++index)
+            {
+                *mutations[index].target =
+                    std::move(mutations[index].value);
+            }
         }
-    }
-    catch (...)
-    {
-        for (std::thread& thread : threads)
-        {
-            thread.join();
-        }
-        throw;
-    }
-    for (std::thread& thread : threads)
-    {
-        thread.join();
-    }
+    );
 }
 
 SolutionLink solution_link(ConstraintLink link) noexcept
@@ -424,7 +416,10 @@ Controller::Controller(ControllerSelection selection)
           selection_.constraints.link_at_path,
           selection_.link_resources,
           selection_.hard_link_constraints,
-          selection_.reusable})
+          selection_.reusable}),
+      mutation_checkpoint_workspace_(
+          std::make_shared<
+              PreparedControllerMutation::CheckpointWorkspace>())
 {
 }
 
@@ -484,6 +479,494 @@ PreparedController Controller::prepare(
         zero_values(selection_.constraints.link_at_path));
 }
 
+PreparedControllerMutation Controller::prepare_mutation(
+    const network::VirtualNetwork& virtual_network,
+    network::PhysicalNetwork& physical_network) const
+{
+    const auto node_resource_order =
+        deduplicate_first(selection_.node_resources);
+    const auto link_resource_order =
+        deduplicate_first(selection_.link_resources);
+    return PreparedControllerMutation(
+        physical_network,
+        resource_updator_.prepare(virtual_network, physical_network),
+        node_resource_order,
+        link_resource_order,
+        bind_node_resource_values(
+            virtual_network, physical_network, node_resource_order),
+        bind_link_resource_values(
+            virtual_network, physical_network, link_resource_order),
+        mutation_checkpoint_workspace_);
+}
+
+PreparedControllerMutation::PreparedControllerMutation(
+    network::PhysicalNetwork& physical_network,
+    PreparedResourceUpdator resource_updator,
+    std::vector<ResourceId> node_resource_order,
+    std::vector<ResourceId> link_resource_order,
+    std::vector<std::optional<AttrId>> node_physical_value_ids,
+    std::vector<std::optional<AttrId>> link_physical_value_ids,
+    std::shared_ptr<void> checkpoint_workspace)
+    : resource_updator_(std::move(resource_updator)),
+      physical_network_(&physical_network),
+      node_resource_order_(std::move(node_resource_order)),
+      link_resource_order_(std::move(link_resource_order)),
+      node_physical_value_ids_(std::move(node_physical_value_ids)),
+      link_physical_value_ids_(std::move(link_physical_value_ids)),
+      checkpoint_workspace_(
+          std::static_pointer_cast<CheckpointWorkspace>(
+              std::move(checkpoint_workspace)))
+{
+}
+
+void PreparedControllerMutation::begin_transaction()
+{
+    if (checkpoint_active_)
+    {
+        throw ControllerException(
+            ControllerErrorCode::transaction_already_active,
+            ControllerOperation::begin_transaction,
+            "controller mutation transaction is already active");
+    }
+
+    std::unique_ptr<std::vector<CheckpointValue>> checkpoint;
+    {
+        const std::lock_guard<std::mutex> lock(
+            checkpoint_workspace_->mutex);
+        if (!checkpoint_workspace_->free_buffers.empty())
+        {
+            checkpoint = std::move(
+                checkpoint_workspace_->free_buffers.back());
+            checkpoint_workspace_->free_buffers.pop_back();
+        }
+    }
+    if (!checkpoint)
+    {
+        checkpoint =
+            std::make_unique<std::vector<CheckpointValue>>();
+    }
+    checkpoint->clear();
+
+    Graph& graph = physical_network_->graph();
+    checkpoint->reserve(
+        graph.num_nodes() * node_resource_order_.size() +
+        graph.num_edges() * link_resource_order_.size());
+    try
+    {
+        for (Vertex node = 0U; node < graph.num_nodes(); ++node)
+        {
+            AttrMap& values = graph.node_attrs(node);
+            for (const ResourceId id : node_resource_order_)
+            {
+                const auto& value_id = node_physical_value_ids_.at(id);
+                if (!value_id.has_value())
+                {
+                    continue;
+                }
+                AttrValue* value = values.find(*value_id);
+                if (value != nullptr)
+                {
+                    checkpoint->push_back(CheckpointValue{
+                        CheckpointTarget::node,
+                        static_cast<std::uint32_t>(node),
+                        *value_id,
+                        *value});
+                }
+            }
+        }
+
+        for (const auto [source, target] : graph.edge_view())
+        {
+            const auto edge = graph.edge(source, target);
+            AttrMap& values = graph.edge_attrs(edge);
+            for (const ResourceId id : link_resource_order_)
+            {
+                const auto& value_id = link_physical_value_ids_.at(id);
+                if (!value_id.has_value())
+                {
+                    continue;
+                }
+                AttrValue* value = values.find(*value_id);
+                if (value != nullptr)
+                {
+                    checkpoint->push_back(CheckpointValue{
+                        CheckpointTarget::edge,
+                        graph.edge_id(edge),
+                        *value_id,
+                        *value});
+                }
+            }
+        }
+    }
+    catch (...)
+    {
+        checkpoint->clear();
+        try
+        {
+            const std::lock_guard<std::mutex> lock(
+                checkpoint_workspace_->mutex);
+            checkpoint_workspace_->free_buffers.push_back(
+                std::move(checkpoint));
+        }
+        catch (...)
+        {
+        }
+        throw;
+    }
+
+    checkpoint_values_ = std::move(checkpoint);
+    checkpoint_active_ = true;
+}
+
+void PreparedControllerMutation::return_checkpoint_buffer() noexcept
+{
+    if (!checkpoint_values_)
+    {
+        return;
+    }
+    checkpoint_values_->clear();
+    try
+    {
+        const std::lock_guard<std::mutex> lock(
+            checkpoint_workspace_->mutex);
+        checkpoint_workspace_->free_buffers.push_back(
+            std::move(checkpoint_values_));
+    }
+    catch (...)
+    {
+        checkpoint_values_.reset();
+    }
+}
+
+void PreparedControllerMutation::commit_transaction() noexcept
+{
+    // All request views share a small pool: capacity follows the active
+    // transaction instead of being retained once for every request slot.
+    return_checkpoint_buffer();
+    checkpoint_active_ = false;
+}
+
+void PreparedControllerMutation::rollback_transaction()
+{
+    if (!checkpoint_active_)
+    {
+        return;
+    }
+    Graph& graph = physical_network_->graph();
+    for (CheckpointValue& checkpoint : *checkpoint_values_)
+    {
+        AttrMap& values = checkpoint.target == CheckpointTarget::node
+            ? graph.node_attrs(static_cast<Vertex>(checkpoint.target_id))
+            : graph.edge_attrs(graph.edge_by_id(checkpoint.target_id));
+        AttrValue* value = values.find(checkpoint.attr_id);
+        if (value == nullptr)
+        {
+            throw ControllerException(
+                checkpoint.target == CheckpointTarget::node
+                    ? ControllerErrorCode::missing_node_slot_info
+                    : ControllerErrorCode::missing_link_path_info,
+                ControllerOperation::rollback,
+                "checkpointed physical resource slot is missing");
+        }
+        *value = checkpoint.value;
+    }
+    commit_transaction();
+}
+
+bool PreparedControllerMutation::transaction_active() const noexcept
+{
+    return checkpoint_active_;
+}
+
+std::vector<ResourceAmount> PreparedControllerMutation::gather_resources(
+    const SolutionAttributeValues& values,
+    const std::vector<ResourceId>& resource_order) const
+{
+    std::vector<ResourceAmount> resources;
+    gather_resources_into(values, resource_order, resources);
+    return resources;
+}
+
+void PreparedControllerMutation::gather_resources_into(
+    const SolutionAttributeValues& values,
+    const std::vector<ResourceId>& resource_order,
+    std::vector<ResourceAmount>& output) const
+{
+    output.clear();
+    output.reserve(resource_order.size());
+    for (const ResourceId id : resource_order)
+    {
+        const auto* value = values.find(id);
+        if (value != nullptr)
+        {
+            output.push_back(ResourceAmount{id, *value});
+        }
+    }
+}
+
+void PreparedControllerMutation::apply_recorded_values(
+    const Solution& solution,
+    network::attribute::ResourceUpdateOperation operation,
+    std::size_t workers)
+{
+    const ControllerOperation context =
+        operation == network::attribute::ResourceUpdateOperation::subtract
+            ? ControllerOperation::deploy
+            : ControllerOperation::rollback;
+
+    if (workers <= 1U)
+    {
+        for (const auto& entry : solution.node_slots_info.entries())
+        {
+            gather_resources_into(
+                entry.value, node_resource_order_, resource_scratch_);
+            resource_updator_.update_node_resources(
+                checked_vertex(entry.key.physical_node, context),
+                resource_scratch_,
+                operation,
+                true);
+        }
+        for (const auto& entry : solution.link_paths_info.entries())
+        {
+            gather_resources_into(
+                entry.value, link_resource_order_, resource_scratch_);
+            resource_updator_.update_link_resources(
+                checked_constraint_link(entry.key.physical_link, context),
+                resource_scratch_,
+                operation,
+                true);
+        }
+        return;
+    }
+
+    std::vector<NodeResourceUpdateRequest> node_requests;
+    node_requests.reserve(solution.node_slots_info.size());
+    for (const auto& entry : solution.node_slots_info.entries())
+    {
+        try
+        {
+            node_requests.push_back(NodeResourceUpdateRequest{
+                checked_vertex(entry.key.physical_node, context),
+                gather_resources(entry.value, node_resource_order_)});
+        }
+        catch (...)
+        {
+            resource_updator_.update_node_resources_batch(
+                node_requests, operation, true, 1U);
+            throw;
+        }
+    }
+    resource_updator_.update_node_resources_batch(
+        node_requests, operation, true, workers);
+
+    std::vector<LinkResourceUpdateRequest> link_requests;
+    link_requests.reserve(solution.link_paths_info.size());
+    for (const auto& entry : solution.link_paths_info.entries())
+    {
+        try
+        {
+            link_requests.push_back(LinkResourceUpdateRequest{
+                checked_constraint_link(entry.key.physical_link, context),
+                gather_resources(entry.value, link_resource_order_)});
+        }
+        catch (...)
+        {
+            resource_updator_.update_link_resources_batch(
+                link_requests, operation, true, 1U);
+            throw;
+        }
+    }
+    resource_updator_.update_link_resources_batch(
+        link_requests, operation, true, workers);
+}
+
+void PreparedControllerMutation::apply_mapped_values(
+    const Solution& solution,
+    network::attribute::ResourceUpdateOperation operation,
+    std::size_t workers)
+{
+    const ControllerOperation context = ControllerOperation::release;
+    if (workers <= 1U)
+    {
+        for (const auto& entry : solution.node_slots.entries())
+        {
+            const NodeSlotInfoKey info_key{entry.key, entry.value};
+            const auto info_id = solution.node_slots_info.find_id(info_key);
+            if (!info_id.has_value())
+            {
+                throw ControllerException(
+                    ControllerErrorCode::missing_node_slot_info,
+                    context,
+                    "placed node has no stored resource information",
+                    checked_vertex(entry.key, context),
+                    checked_vertex(entry.value, context));
+            }
+            const Vertex physical_node =
+                checked_vertex(entry.value, context);
+            gather_resources_into(
+                solution.node_slots_info.at(*info_id),
+                node_resource_order_,
+                resource_scratch_);
+            resource_updator_.update_node_resources(
+                physical_node,
+                resource_scratch_,
+                operation,
+                true);
+        }
+
+        for (const auto& path_entry : solution.link_paths.entries())
+        {
+            for (const SolutionLink physical_link : path_entry.value)
+            {
+                const LinkPathInfoKey info_key{
+                    path_entry.key, physical_link};
+                const auto info_id =
+                    solution.link_paths_info.find_id(info_key);
+                if (!info_id.has_value())
+                {
+                    throw ControllerException(
+                        ControllerErrorCode::missing_link_path_info,
+                        context,
+                        "routed physical link has no stored resource information",
+                        std::nullopt,
+                        std::nullopt,
+                        checked_constraint_link(path_entry.key, context),
+                        checked_constraint_link(physical_link, context));
+                }
+                const ConstraintLink checked_physical_link =
+                    checked_constraint_link(physical_link, context);
+                gather_resources_into(
+                    solution.link_paths_info.at(*info_id),
+                    link_resource_order_,
+                    resource_scratch_);
+                resource_updator_.update_link_resources(
+                    checked_physical_link,
+                    resource_scratch_,
+                    operation,
+                    true);
+            }
+        }
+        return;
+    }
+
+    std::vector<NodeResourceUpdateRequest> node_requests;
+    node_requests.reserve(solution.node_slots.size());
+    for (const auto& entry : solution.node_slots.entries())
+    {
+        try
+        {
+            const NodeSlotInfoKey info_key{entry.key, entry.value};
+            const auto info_id = solution.node_slots_info.find_id(info_key);
+            if (!info_id.has_value())
+            {
+                throw ControllerException(
+                    ControllerErrorCode::missing_node_slot_info,
+                    context,
+                    "placed node has no stored resource information",
+                    checked_vertex(entry.key, context),
+                    checked_vertex(entry.value, context));
+            }
+            node_requests.push_back(NodeResourceUpdateRequest{
+                checked_vertex(entry.value, context),
+                gather_resources(
+                    solution.node_slots_info.at(*info_id),
+                    node_resource_order_)});
+        }
+        catch (...)
+        {
+            resource_updator_.update_node_resources_batch(
+                node_requests, operation, true, 1U);
+            throw;
+        }
+    }
+    resource_updator_.update_node_resources_batch(
+        node_requests, operation, true, workers);
+
+    std::vector<LinkResourceUpdateRequest> link_requests;
+    link_requests.reserve(solution.link_paths_info.size());
+    for (const auto& path_entry : solution.link_paths.entries())
+    {
+        for (const SolutionLink physical_link : path_entry.value)
+        {
+            try
+            {
+                const LinkPathInfoKey info_key{
+                    path_entry.key, physical_link};
+                const auto info_id = solution.link_paths_info.find_id(info_key);
+                if (!info_id.has_value())
+                {
+                    throw ControllerException(
+                        ControllerErrorCode::missing_link_path_info,
+                        context,
+                        "routed physical link has no stored resource information",
+                        std::nullopt,
+                        std::nullopt,
+                        checked_constraint_link(path_entry.key, context),
+                        checked_constraint_link(physical_link, context));
+                }
+                link_requests.push_back(LinkResourceUpdateRequest{
+                    checked_constraint_link(physical_link, context),
+                    gather_resources(
+                        solution.link_paths_info.at(*info_id),
+                        link_resource_order_)});
+            }
+            catch (...)
+            {
+                resource_updator_.update_link_resources_batch(
+                    link_requests, operation, true, 1U);
+                throw;
+            }
+        }
+    }
+    resource_updator_.update_link_resources_batch(
+        link_requests, operation, true, workers);
+}
+
+bool PreparedControllerMutation::deploy(
+    const Solution& solution,
+    ControllerMutationOptions options)
+{
+    if (!solution.result)
+    {
+        return false;
+    }
+    apply_recorded_values(
+        solution,
+        network::attribute::ResourceUpdateOperation::subtract,
+        options.workers);
+    return true;
+}
+
+bool PreparedControllerMutation::release(
+    const Solution& solution,
+    ControllerMutationOptions options)
+{
+    if (!solution.result)
+    {
+        return false;
+    }
+    apply_mapped_values(
+        solution,
+        network::attribute::ResourceUpdateOperation::add,
+        options.workers);
+    return true;
+}
+
+void PreparedControllerMutation::rollback(
+    const Solution& solution,
+    ControllerMutationOptions options)
+{
+    if (checkpoint_active_)
+    {
+        rollback_transaction();
+        return;
+    }
+    apply_recorded_values(
+        solution,
+        network::attribute::ResourceUpdateOperation::add,
+        options.workers);
+}
+
 PreparedController::PreparedController(
     const network::VirtualNetwork& virtual_network,
     network::PhysicalNetwork& physical_network,
@@ -520,6 +1003,83 @@ PreparedController::PreparedController(
 {
 }
 
+bool PreparedController::deploy_with_node_slots(
+    const NodeSlots& node_slots,
+    Solution& solution,
+    DeployWithNodeSlotsOptions options)
+{
+    // Match Python's validation order: cardinality first, then the complete
+    // values view for its -1 sentinel, before either mapper clears state.
+    if (node_slots.size() != virtual_network_->num_nodes())
+    {
+        solution.place_result = false;
+        solution.result = false;
+        return false;
+    }
+    for (const auto& entry : node_slots.entries())
+    {
+        if (entry.value == SolutionNodeId{-1})
+        {
+            solution.place_result = false;
+            solution.result = false;
+            return false;
+        }
+    }
+
+    auto& virtual_nodes = node_slot_virtual_nodes_scratch_;
+    auto& physical_nodes = node_slot_physical_nodes_scratch_;
+    virtual_nodes.clear();
+    physical_nodes.clear();
+    virtual_nodes.reserve(node_slots.size());
+    physical_nodes.reserve(node_slots.size());
+    for (const auto& entry : node_slots.entries())
+    {
+        virtual_nodes.push_back(checked_vertex(
+            entry.key,
+            ControllerOperation::deploy_with_node_slots));
+        physical_nodes.push_back(checked_vertex(
+            entry.value,
+            ControllerOperation::deploy_with_node_slots,
+            virtual_nodes.back()));
+    }
+
+    NodeMappingOptions node_options;
+    node_options.reusable = false;
+    node_options.inplace = true;
+    node_options.method = NodeMatchingMethod::l2s2;
+    node_options.allow_constraint_violation = false;
+    node_options.candidate_workers = options.workers.candidate_workers;
+    if (!node_mapper_.node_mapping(
+            virtual_nodes,
+            physical_nodes,
+            solution,
+            node_options))
+    {
+        solution.place_result = false;
+        solution.result = false;
+        return false;
+    }
+
+    LinkMappingOptions link_options;
+    link_options.shortest_method = options.shortest_method;
+    link_options.k = options.k;
+    link_options.max_path_nodes = options.max_path_nodes;
+    link_options.topology_constraint_workers =
+        options.workers.topology_constraint_workers;
+    link_options.candidate_workers = options.workers.candidate_workers;
+    link_options.inplace = true;
+    link_options.allow_constraint_violation = false;
+    if (!link_mapper_.link_mapping(solution, link_options))
+    {
+        solution.route_result = false;
+        solution.result = false;
+        return false;
+    }
+
+    solution.result = true;
+    return true;
+}
+
 PlaceAndRouteResult PreparedController::place_and_route(
     Vertex virtual_node,
     Vertex physical_node,
@@ -541,11 +1101,12 @@ PlaceAndRouteResult PreparedController::place_and_route(
         options);
 }
 
-std::vector<ConstraintLink> PreparedController::links_to_route(
+const std::vector<ConstraintLink>& PreparedController::links_to_route(
     Vertex virtual_node,
-    const Solution& solution) const
+    const Solution& solution)
 {
-    std::vector<ConstraintLink> result;
+    auto& result = links_to_route_scratch_;
+    result.clear();
     const auto& adjacency =
         virtual_network_->graph().neighbors_fast(virtual_node);
     result.reserve(adjacency.size());
@@ -599,8 +1160,9 @@ PlaceAndRouteResult PreparedController::safely_place_and_route(
         return result;
     }
 
-    const auto to_route = links_to_route(virtual_node, solution);
-    std::vector<ConstraintLink> attempted;
+    const auto& to_route = links_to_route(virtual_node, solution);
+    auto& attempted = attempted_routes_scratch_;
+    attempted.clear();
     attempted.reserve(to_route.size());
     for (const ConstraintLink virtual_link : to_route)
     {
@@ -675,8 +1237,9 @@ PlaceAndRouteResult PreparedController::unsafely_place_and_route(
     solution.v_net_single_step_constraint_offset.link_level.clear();
     solution.v_net_single_step_constraint_offset.path_level.clear();
 
-    const auto to_route = links_to_route(virtual_node, solution);
-    std::vector<ConstraintLink> attempted;
+    const auto& to_route = links_to_route(virtual_node, solution);
+    auto& attempted = attempted_routes_scratch_;
+    attempted.clear();
     attempted.reserve(to_route.size());
     for (const ConstraintLink virtual_link : to_route)
     {
@@ -724,10 +1287,12 @@ PlaceAndRouteResult PreparedController::unsafely_place_and_route(
 
 void PreparedController::pool_step_offsets(
     const std::vector<ConstraintLink>& attempted_links,
-    Solution& solution) const
+    Solution& solution)
 {
-    std::vector<const SolutionAttributeValues*> link_values;
-    std::vector<const SolutionAttributeValues*> path_values;
+    auto& link_values = link_values_scratch_;
+    auto& path_values = path_values_scratch_;
+    link_values.clear();
+    path_values.clear();
     link_values.reserve(attempted_links.size());
     path_values.reserve(attempted_links.size());
 
@@ -1047,14 +1612,15 @@ bool PreparedController::try_deploy_parallel(
     std::size_t workers)
 {
     Graph& graph = physical_network_->graph();
-    std::vector<std::uint8_t> seen_nodes(
-        graph.num_nodes(),
-        std::uint8_t{0U});
-    std::vector<std::uint8_t> seen_edges(
-        graph.edge_id_capacity(),
-        std::uint8_t{0U});
-    std::vector<DirectMutation> node_mutations;
-    std::vector<DirectMutation> link_mutations;
+    DirectMutationWorkspace& workspace = direct_mutation_workspace();
+    auto& seen_nodes = workspace.seen_nodes;
+    auto& seen_edges = workspace.seen_edges;
+    auto& node_mutations = workspace.node_mutations;
+    auto& link_mutations = workspace.link_mutations;
+    seen_nodes.assign(graph.num_nodes(), std::uint8_t{0U});
+    seen_edges.assign(graph.edge_id_capacity(), std::uint8_t{0U});
+    node_mutations.clear();
+    link_mutations.clear();
     node_mutations.reserve(
         solution.node_slots_info.size() * node_resource_order_.size());
     link_mutations.reserve(
@@ -1173,14 +1739,15 @@ bool PreparedController::try_release_parallel(
     std::size_t workers)
 {
     Graph& graph = physical_network_->graph();
-    std::vector<std::uint8_t> seen_nodes(
-        graph.num_nodes(),
-        std::uint8_t{0U});
-    std::vector<std::uint8_t> seen_edges(
-        graph.edge_id_capacity(),
-        std::uint8_t{0U});
-    std::vector<DirectMutation> node_mutations;
-    std::vector<DirectMutation> link_mutations;
+    DirectMutationWorkspace& workspace = direct_mutation_workspace();
+    auto& seen_nodes = workspace.seen_nodes;
+    auto& seen_edges = workspace.seen_edges;
+    auto& node_mutations = workspace.node_mutations;
+    auto& link_mutations = workspace.link_mutations;
+    seen_nodes.assign(graph.num_nodes(), std::uint8_t{0U});
+    seen_edges.assign(graph.edge_id_capacity(), std::uint8_t{0U});
+    node_mutations.clear();
+    link_mutations.clear();
     node_mutations.reserve(
         solution.node_slots.size() * node_resource_order_.size());
     link_mutations.reserve(

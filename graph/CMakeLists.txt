@@ -167,3 +167,19 @@ add_test(
     NAME graph_sparse_compat
     COMMAND graph_sparse_compat_test
 )
+
+add_executable(
+    graph_k_shortest_workspace_test
+    tests/k_shortest_workspace_test.cpp
+)
+
+target_link_libraries(
+    graph_k_shortest_workspace_test
+    PRIVATE
+        graph_lib
+)
+
+add_test(
+    NAME graph_k_shortest_workspace
+    COMMAND graph_k_shortest_workspace_test
+)

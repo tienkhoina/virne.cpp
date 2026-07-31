@@ -142,3 +142,12 @@ The permanently frozen 32,768-update benchmark retained checksum
 5.542x, and 5.435x faster than Python. Worker count remains an explicit input;
 the accepted case favors worker 1 and no automatic host policy is introduced.
 See `porting/results/resource_updator_2026-07-29.md`.
+
+## Integration worker correction (2026-07-30)
+
+Disjoint batch preflight and commit blocks now use the persistent deterministic
+executor. Duplicate-target fallback, no-mutation preflight failure, lowest
+request error, and direct-ID mutation order are unchanged. Worker `0/1` remains
+sequential, nested dispatch is sequential, and no host width is selected.
+Focused batch/concurrent-independent-network units pass; the frozen benchmark
+was not rerun.

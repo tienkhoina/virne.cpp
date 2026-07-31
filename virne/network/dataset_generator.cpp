@@ -437,6 +437,22 @@ VirtualNetworkSimulationConfig changeable_stage_config(
 
 }  // namespace
 
+PhysicalDatasetSetting physical_dataset_setting_from_setting(
+    const SettingDocument& setting) {
+    return physical_path_setting(setting);
+}
+
+VirtualDatasetSetting virtual_dataset_setting_from_setting(
+    const SettingDocument& setting) {
+    return virtual_path_setting(
+        virtual_network_simulation_config_from_setting(setting));
+}
+
+VirtualDatasetSetting virtual_dataset_setting_from_config(
+    const VirtualNetworkSimulationConfig& config) {
+    return virtual_path_setting(config);
+}
+
 GeneratedDataset Generator::generate_dataset(
     const Config& config,
     RandomContext& random,

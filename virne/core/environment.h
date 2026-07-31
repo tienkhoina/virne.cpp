@@ -31,6 +31,13 @@ enum class EnvironmentFailureReason : std::uint8_t {
     unknown,
 };
 
+// Describes whether a submitted Solution is a detached journal or has already
+// committed its recorded resource mutations to this Environment's p-net.
+enum class EnvironmentSolutionState : std::uint8_t {
+    detached,
+    committed,
+};
+
 struct EnvironmentWorkers {
     std::size_t counter_workers = 1U;
     std::size_t recorder_workers = 1U;
@@ -87,6 +94,7 @@ enum class EnvironmentErrorCode : std::uint8_t {
     incomplete_node_mapping,
     incomplete_link_mapping,
     missing_arrival_record,
+    missing_solver_transaction,
 };
 
 enum class EnvironmentOperation : std::uint8_t {
@@ -146,6 +154,11 @@ struct EnvironmentStepResult {
     std::optional<CounterSummary> summary;
 };
 
+struct EnvironmentSolverTransaction {
+    network::PhysicalNetwork& physical_network;
+    controller::PreparedControllerMutation& mutation;
+};
+
 class BaseEnvironment {
 public:
     BaseEnvironment(
@@ -171,13 +184,16 @@ public:
     const network::VirtualNetwork& current_virtual_network() const;
     const Solution& current_solution() const;
     Solution make_solution() const;
+    EnvironmentSolverTransaction solver_transaction();
     const network::PhysicalNetwork& physical_network() const noexcept;
     const network::VirtualNetworkRequestSimulator& simulator() const noexcept;
     const Recorder& recorder() const noexcept;
     CounterSummary summary() const;
 
 protected:
-    EnvironmentStepResult step_solution(Solution& solution);
+    EnvironmentStepResult step_solution(
+        Solution& solution,
+        EnvironmentSolutionState solution_state);
 
 private:
     void begin_reset();
@@ -185,7 +201,7 @@ private:
     void build_event_plan();
     void prepare_requests();
     void ready(std::size_t schedule_index);
-    RecorderRecord release_current();
+    void release_current();
     EnvironmentDrainResult transit_after_arrival();
     EnvironmentFailureReason failure_reason(const Solution& solution) const
         noexcept;
@@ -198,6 +214,7 @@ private:
 
     network::PhysicalNetwork initial_physical_network_;
     network::PhysicalNetwork physical_network_;
+    bool physical_network_pristine_ = true;
     network::VirtualNetworkRequestSimulator simulator_;
     EnvironmentConfig config_;
     controller::Controller controller_;
@@ -207,7 +224,7 @@ private:
     // Both vectors are non-owning prepared views. They are destroyed before
     // either owned network is replaced and indexed directly in event loops.
     std::vector<PreparedCounter> prepared_counters_;
-    std::vector<controller::PreparedController> prepared_controllers_;
+    std::vector<controller::PreparedControllerMutation> prepared_mutations_;
     std::vector<std::size_t> event_request_indices_;
     std::vector<std::optional<std::size_t>> arrival_record_indices_;
 
@@ -220,7 +237,10 @@ class SolutionStepEnvironment final : public BaseEnvironment {
 public:
     using BaseEnvironment::BaseEnvironment;
 
-    EnvironmentStepResult step(Solution& solution);
+    EnvironmentStepResult step(
+        Solution& solution,
+        EnvironmentSolutionState solution_state =
+            EnvironmentSolutionState::detached);
 };
 
 } // namespace virne::core

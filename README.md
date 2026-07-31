@@ -264,6 +264,37 @@ solver.solver_name=my_solver \
 experiment.seed=123
 ```
 
+Runtime output defaults to one rate-limited Python-style progress bar per epoch
+plus a compact JSON summary. A redirected stderr receives only the final line
+of each epoch; use Docker `exec -t`/`-it` for live in-place updates. Use
+`++native.output.report=full` only for differential or debugging,
+`++native.output.report=none` to suppress stdout, and
+`++native.progress.enabled=false` to disable progress. Config-group files are
+selected without the `.yaml` suffix. Native and Python-compatible spellings
+are both accepted, for example `p_net_setting=p_net_setting_multi_resource`
+or `+p_net_setting=p_net_setting_multi_resource` together with the matching
+`v_sim_setting` group. The Python-compatible `+group=option` spelling merges
+the option over the existing default group; the native `group=option` spelling
+replaces it. Each live progress frame is one buffered write plus one explicit
+flush. Its bar and labels automatically compact to `TTY columns - 1`, so a
+Docker/PowerShell terminal updates one physical row without auto-wrap;
+redirected output contains only the final newline-terminated frame.
+
+Before setup, INFO logging emits `Use <solver> ...` and the full composed,
+interpolation-resolved config through the configured Logger backends, matching
+Python's `Config:` startup log. `logger.backends=[]` or a level above INFO
+suppresses it and skips the unused serialization. The config is serialized
+once at the cold boundary; request loops continue to use typed fields and
+numeric IDs only. If `experiment.run_id=auto`, the emitted and saved config
+contains the concrete generated run ID.
+
+The cold adapter also materializes the same `simulation.*` and
+`rl.feature_constructor.*` derived fields as Python. The `Config:` block and
+saved `config.yaml` exclude Hydra internals and the C++-only `native` subtree,
+so their application tree is directly comparable with Python. Native workers,
+progress and output controls are logged as `Native config` and saved separately
+as `native_config.yaml`.
+
 Tương đương:
 
 ```yaml

@@ -25,6 +25,8 @@ struct NodeRankSolverWorkers {
 class BaseNodeRankSolver : public Solver {
 public:
     core::Solution solve(const SolverInstance& instance) override;
+    MutableSolverResult solve_mutable(
+        const MutableSolverInstance& instance) override;
 
     rank::NodeRankMethod node_rank_method() const noexcept;
     const NodeRankSolverWorkers& workers() const noexcept;

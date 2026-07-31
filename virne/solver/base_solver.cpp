@@ -138,6 +138,15 @@ core::Solution Solver::solve(const SolverInstance& instance) {
         "solver implementation is not available");
 }
 
+MutableSolverResult Solver::solve_mutable(
+    const MutableSolverInstance& instance) {
+    return MutableSolverResult{
+        solve(SolverInstance{
+            instance.virtual_network,
+            instance.physical_network}),
+        SolverMutationState::detached};
+}
+
 const SolverConfig& Solver::config() const noexcept {
     return config_;
 }

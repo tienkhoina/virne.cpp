@@ -2,6 +2,7 @@
 
 #include "../core/controller/node_mapper.h"
 #include "../core/controller/topology_analyzer.h"
+#include "../core/solution.h"
 #include "../utils/utils_config.h"
 #include "rank/link_rank.h"
 #include "rank/node_rank.h"
@@ -22,10 +23,9 @@ namespace virne::core {
 class Counter;
 class Logger;
 class Recorder;
-class Solution;
-
 namespace controller {
 class Controller;
+class PreparedControllerMutation;
 }
 
 }  // namespace virne::core
@@ -81,6 +81,25 @@ struct SolverDependencies {
 struct SolverInstance {
     const network::VirtualNetwork& virtual_network;
     const network::PhysicalNetwork& physical_network;
+};
+
+// Explicit mutable system seam. The Environment owns both mutable objects and
+// guarantees their lifetime for the synchronous call. Old SolverInstance
+// remains const and unchanged for leaf/differential callers.
+struct MutableSolverInstance {
+    const network::VirtualNetwork& virtual_network;
+    network::PhysicalNetwork& physical_network;
+    core::controller::PreparedControllerMutation& mutation;
+};
+
+enum class SolverMutationState : std::uint8_t {
+    detached,
+    committed,
+};
+
+struct MutableSolverResult {
+    core::Solution solution;
+    SolverMutationState mutation_state = SolverMutationState::detached;
 };
 
 struct SolverId {
@@ -167,6 +186,8 @@ public:
 
     virtual void ready();
     virtual core::Solution solve(const SolverInstance& instance);
+    virtual MutableSolverResult solve_mutable(
+        const MutableSolverInstance& instance);
 
     const SolverConfig& config() const noexcept;
     const core::controller::Controller& controller() const noexcept;

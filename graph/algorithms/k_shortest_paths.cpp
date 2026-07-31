@@ -76,7 +76,10 @@ static std::vector<Vertex> path_prefix(
 {
     return std::vector<Vertex>(
         path.begin(),
-        path.begin() + end_exclusive);
+        path.begin() +
+            static_cast<
+                std::vector<Vertex>::difference_type>(
+                    end_exclusive));
 }
 
 template <typename GraphType>
@@ -156,64 +159,332 @@ EdgeKey blocked_edge_key(
     return {u, v};
 }
 
-template <typename GraphType>
-static SearchMask combined_search_mask(
-    const GraphType& g,
-    const SearchMask* base_mask,
-    const VertexSet& banned_vertices,
-    const EdgeSet& banned_edges)
+const RawNeighborList&
+yen_reverse_neighbors_fast(
+    const Graph& g,
+    Vertex v)
 {
-    SearchMask combined(
-        g.num_nodes(),
-        g.edge_id_capacity(),
-        true);
-
-    for (Vertex v = 0;
-         v < g.num_nodes();
-         ++v)
-    {
-        if ((base_mask != nullptr &&
-             !base_mask->allows_node(v)) ||
-            banned_vertices.find(v) !=
-                banned_vertices.end())
-        {
-            combined.set_node(v, false);
-        }
-    }
-
-    const auto [edge_begin, edge_end] =
-        g.edges();
-
-    for (auto it = edge_begin;
-         it != edge_end;
-         ++it)
-    {
-        const auto edge = *it;
-        const Vertex u = g.source(edge);
-        const Vertex v = g.target(edge);
-        const uint32_t edge_id =
-            g.edge_id(edge);
-
-        bool allowed =
-            base_mask == nullptr ||
-            base_mask->allows(u, v, edge_id);
-
-        if (allowed && !banned_edges.empty())
-        {
-            allowed =
-                banned_edges.find(
-                    blocked_edge_key(g, u, v)) ==
-                banned_edges.end();
-        }
-
-        if (!allowed)
-        {
-            combined.set_edge(edge_id, false);
-        }
-    }
-
-    return combined;
+    return g.neighbors_fast(v);
 }
+
+const DiRawInNeighborList&
+yen_reverse_neighbors_fast(
+    const DiGraph& g,
+    Vertex v)
+{
+    return g.raw().m_vertices[v].m_in_edges;
+}
+
+// One enumerator owns one workspace. Generation stamps make every spur reset
+// proportional to its root/blocked-edge set instead of to the whole graph.
+// The traversal itself uses only dense vertices and stable edge IDs.
+class YenSearchWorkspace
+{
+public:
+    YenSearchWorkspace(
+        size_t node_count,
+        size_t edge_id_capacity)
+        :
+        seen_forward_(node_count, 0),
+        seen_reverse_(node_count, 0),
+        banned_nodes_(node_count, 0),
+        banned_edges_(edge_id_capacity, 0),
+        parent_forward_(node_count),
+        parent_reverse_(node_count)
+    {
+        forward_fringe_.reserve(node_count);
+        reverse_fringe_.reserve(node_count);
+        next_fringe_.reserve(node_count);
+    }
+
+    template <typename GraphType>
+    BidirectionalPathResult shortest_path(
+        const GraphType& g,
+        Vertex source,
+        Vertex target,
+        const SearchMask* base_mask,
+        const VertexSet& banned_vertices,
+        const EdgeSet& banned_edges)
+    {
+        BidirectionalPathResult out;
+        const size_t node_count = g.num_nodes();
+
+        if (source >= node_count || target >= node_count)
+        {
+            return out;
+        }
+
+        ensure_capacity(
+            node_count,
+            g.edge_id_capacity());
+
+        const uint32_t generation = begin_search();
+
+        for (const Vertex vertex : banned_vertices)
+        {
+            if (vertex < banned_nodes_.size())
+            {
+                banned_nodes_[vertex] = generation;
+            }
+        }
+
+        for (const EdgeKey& endpoints : banned_edges)
+        {
+            const auto edge =
+                g.edge(endpoints.first, endpoints.second);
+            const uint32_t edge_id = g.edge_id(edge);
+            banned_edges_[edge_id] = generation;
+        }
+
+        if ((base_mask != nullptr &&
+             (!base_mask->allows_node(source) ||
+              !base_mask->allows_node(target))) ||
+            banned_nodes_[source] == generation ||
+            banned_nodes_[target] == generation)
+        {
+            return out;
+        }
+
+        if (source == target)
+        {
+            out.found = true;
+            out.cost = 0.0;
+            out.path = {source};
+            return out;
+        }
+
+        seen_forward_[source] = generation;
+        seen_reverse_[target] = generation;
+        parent_forward_[source] = source;
+        parent_reverse_[target] = target;
+
+        forward_fringe_.clear();
+        reverse_fringe_.clear();
+        next_fringe_.clear();
+        forward_fringe_.push_back(source);
+        reverse_fringe_.push_back(target);
+
+        Vertex meet = source;
+        bool found = false;
+
+        while (!forward_fringe_.empty() &&
+               !reverse_fringe_.empty() &&
+               !found)
+        {
+            if (forward_fringe_.size() <=
+                reverse_fringe_.size())
+            {
+                next_fringe_.clear();
+
+                for (const Vertex u : forward_fringe_)
+                {
+                    for (const auto& edge :
+                         g.neighbors_fast(u))
+                    {
+                        const Vertex v = edge.get_target();
+                        const uint32_t edge_id =
+                            edge.get_property().edge_id;
+
+                        if (!allows(
+                                base_mask,
+                                generation,
+                                u,
+                                v,
+                                edge_id))
+                        {
+                            continue;
+                        }
+
+                        if (seen_forward_[v] != generation)
+                        {
+                            seen_forward_[v] = generation;
+                            parent_forward_[v] = u;
+                            next_fringe_.push_back(v);
+                        }
+
+                        if (seen_reverse_[v] == generation)
+                        {
+                            meet = v;
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (found)
+                    {
+                        break;
+                    }
+                }
+
+                forward_fringe_.swap(next_fringe_);
+            }
+            else
+            {
+                next_fringe_.clear();
+
+                for (const Vertex u : reverse_fringe_)
+                {
+                    const auto& in_edges =
+                        yen_reverse_neighbors_fast(g, u);
+
+                    for (const auto& edge : in_edges)
+                    {
+                        const Vertex v = edge.get_target();
+                        const uint32_t edge_id =
+                            edge.get_property().edge_id;
+
+                        if (!allows(
+                                base_mask,
+                                generation,
+                                v,
+                                u,
+                                edge_id))
+                        {
+                            continue;
+                        }
+
+                        if (seen_reverse_[v] != generation)
+                        {
+                            seen_reverse_[v] = generation;
+                            parent_reverse_[v] = u;
+                            next_fringe_.push_back(v);
+                        }
+
+                        if (seen_forward_[v] == generation)
+                        {
+                            meet = v;
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (found)
+                    {
+                        break;
+                    }
+                }
+
+                reverse_fringe_.swap(next_fringe_);
+            }
+        }
+
+        if (!found)
+        {
+            return out;
+        }
+
+        for (Vertex vertex = meet;;)
+        {
+            out.path.push_back(vertex);
+
+            if (vertex == source)
+            {
+                break;
+            }
+
+            vertex = parent_forward_[vertex];
+        }
+
+        std::reverse(out.path.begin(), out.path.end());
+
+        for (Vertex vertex = meet;
+             vertex != target;)
+        {
+            vertex = parent_reverse_[vertex];
+            out.path.push_back(vertex);
+        }
+
+        out.found = true;
+        out.cost = static_cast<double>(
+            out.path.size() - 1);
+        return out;
+    }
+
+private:
+    void ensure_capacity(
+        size_t node_count,
+        size_t edge_id_capacity)
+    {
+        if (seen_forward_.size() < node_count)
+        {
+            seen_forward_.resize(node_count, 0);
+            seen_reverse_.resize(node_count, 0);
+            banned_nodes_.resize(node_count, 0);
+            parent_forward_.resize(node_count);
+            parent_reverse_.resize(node_count);
+            forward_fringe_.reserve(node_count);
+            reverse_fringe_.reserve(node_count);
+            next_fringe_.reserve(node_count);
+        }
+
+        if (banned_edges_.size() < edge_id_capacity)
+        {
+            banned_edges_.resize(
+                edge_id_capacity,
+                uint32_t{0});
+        }
+    }
+
+    uint32_t begin_search()
+    {
+        if (generation_ ==
+            std::numeric_limits<uint32_t>::max())
+        {
+            std::fill(
+                seen_forward_.begin(),
+                seen_forward_.end(),
+                uint32_t{0});
+            std::fill(
+                seen_reverse_.begin(),
+                seen_reverse_.end(),
+                uint32_t{0});
+            std::fill(
+                banned_nodes_.begin(),
+                banned_nodes_.end(),
+                uint32_t{0});
+            std::fill(
+                banned_edges_.begin(),
+                banned_edges_.end(),
+                uint32_t{0});
+            generation_ = 1;
+        }
+        else
+        {
+            ++generation_;
+        }
+
+        return generation_;
+    }
+
+    bool allows(
+        const SearchMask* base_mask,
+        uint32_t generation,
+        Vertex u,
+        Vertex v,
+        uint32_t edge_id) const noexcept
+    {
+        if (banned_nodes_[u] == generation ||
+            banned_nodes_[v] == generation ||
+            banned_edges_[edge_id] == generation)
+        {
+            return false;
+        }
+
+        return base_mask == nullptr ||
+               base_mask->allows(u, v, edge_id);
+    }
+
+    std::vector<uint32_t> seen_forward_;
+    std::vector<uint32_t> seen_reverse_;
+    std::vector<uint32_t> banned_nodes_;
+    std::vector<uint32_t> banned_edges_;
+    std::vector<Vertex> parent_forward_;
+    std::vector<Vertex> parent_reverse_;
+    std::vector<Vertex> forward_fringe_;
+    std::vector<Vertex> reverse_fringe_;
+    std::vector<Vertex> next_fringe_;
+    uint32_t generation_ = 0;
+};
 
 template <typename GraphType>
 static BidirectionalPathResult shortest_path_with_bans(
@@ -224,7 +495,8 @@ static BidirectionalPathResult shortest_path_with_bans(
     const VertexSet& banned_vertices,
     const EdgeSet& banned_edges,
     AttrId weight_attr_id,
-    bool weighted)
+    bool weighted,
+    YenSearchWorkspace* workspace)
 {
     if (weighted)
     {
@@ -238,27 +510,19 @@ static BidirectionalPathResult shortest_path_with_bans(
             weight_attr_id);
     }
 
-    const SearchMask combined =
-        combined_search_mask(
-            g,
-            mask,
-            banned_vertices,
-            banned_edges);
+    if (workspace == nullptr)
+    {
+        throw std::logic_error(
+            "unweighted Yen search requires a workspace");
+    }
 
-    const BidirectionalBFSResult bfs =
-        bidirectional_bfs(
-            g,
-            source,
-            target,
-            combined);
-
-    BidirectionalPathResult out;
-    out.found = bfs.found;
-    out.cost = bfs.found
-        ? static_cast<double>(bfs.distance)
-        : std::numeric_limits<double>::infinity();
-    out.path = bfs.path;
-    return out;
+    return workspace->shortest_path(
+        g,
+        source,
+        target,
+        mask,
+        banned_vertices,
+        banned_edges);
 }
 
 template <typename GraphType>
@@ -270,7 +534,8 @@ build_candidates_from_base_path(
     const std::vector<Vertex>& base_path,
     Vertex target,
     AttrId weight_attr_id,
-    bool weighted)
+    bool weighted,
+    YenSearchWorkspace* workspace)
 {
     std::vector<PathResult> candidates;
 
@@ -341,7 +606,8 @@ build_candidates_from_base_path(
                 banned_vertices,
                 banned_edges,
                 weight_attr_id,
-                weighted);
+                weighted,
+                workspace);
 
         if (!spur_result.found)
         {
@@ -393,6 +659,14 @@ std::vector<PathResult> generate_candidates_impl(
             ? AttrId{0}
             : g.attr_id(weight_attr);
 
+    std::optional<YenSearchWorkspace> workspace;
+    if (!weighted)
+    {
+        workspace.emplace(
+            g.num_nodes(),
+            g.edge_id_capacity());
+    }
+
     return build_candidates_from_base_path(
         g,
         nullptr,
@@ -400,7 +674,10 @@ std::vector<PathResult> generate_candidates_impl(
         shortest.path,
         target,
         weight_attr_id,
-        weighted);
+        weighted,
+        workspace.has_value()
+            ? &*workspace
+            : nullptr);
 }
 
 template <typename GraphType>
@@ -426,6 +703,19 @@ std::vector<PathResult> yen_k_shortest_paths_impl(
             ? AttrId{0}
             : g.attr_id(weight_attr);
 
+    std::optional<YenSearchWorkspace> workspace;
+    if (!weighted)
+    {
+        workspace.emplace(
+            g.num_nodes(),
+            g.edge_id_capacity());
+    }
+
+    YenSearchWorkspace* workspace_ptr =
+        workspace.has_value()
+            ? &*workspace
+            : nullptr;
+
     const BidirectionalPathResult first_result =
         shortest_path_with_bans(
             g,
@@ -435,7 +725,8 @@ std::vector<PathResult> yen_k_shortest_paths_impl(
             VertexSet{},
             EdgeSet{},
             weight_attr_id,
-            weighted);
+            weighted,
+            workspace_ptr);
 
     if (!first_result.found)
     {
@@ -471,7 +762,8 @@ std::vector<PathResult> yen_k_shortest_paths_impl(
                 previous.path,
                 target,
                 weight_attr_id,
-                weighted);
+                weighted,
+                workspace_ptr);
 
         for (auto& candidate : candidates)
         {
@@ -512,8 +804,10 @@ struct ShortestSimplePathGenerator::Impl
     Vertex source;
     Vertex target;
     ShortestSimplePathOptions options;
+    bool weighted;
     AttrId weight_attr_id;
     std::optional<SearchMask> mask;
+    std::optional<YenSearchWorkspace> workspace;
 
     std::vector<PathResult> accepted;
 
@@ -539,13 +833,20 @@ struct ShortestSimplePathGenerator::Impl
         source(source_value),
         target(target_value),
         options(std::move(options_value)),
+        weighted(!options.weight_attr.empty()),
         weight_attr_id(
-            options.weight_attr.empty()
-                ? AttrId{0}
-                : graph_value->attr_id(
-                      options.weight_attr)),
+            weighted
+                ? graph_value->attr_id(
+                      options.weight_attr)
+                : AttrId{0}),
         mask(std::move(mask_value))
     {
+        if (!weighted)
+        {
+            workspace.emplace(
+                graph_value->num_nodes(),
+                graph_value->edge_id_capacity());
+        }
     }
 
     Impl(
@@ -559,13 +860,20 @@ struct ShortestSimplePathGenerator::Impl
         source(source_value),
         target(target_value),
         options(std::move(options_value)),
+        weighted(!options.weight_attr.empty()),
         weight_attr_id(
-            options.weight_attr.empty()
-                ? AttrId{0}
-                : graph_value->attr_id(
-                      options.weight_attr)),
+            weighted
+                ? graph_value->attr_id(
+                      options.weight_attr)
+                : AttrId{0}),
         mask(std::move(mask_value))
     {
+        if (!weighted)
+        {
+            workspace.emplace(
+                graph_value->num_nodes(),
+                graph_value->edge_id_capacity());
+        }
     }
 
     template <typename GraphType>
@@ -583,8 +891,10 @@ struct ShortestSimplePathGenerator::Impl
             mask.has_value()
                 ? &*mask
                 : nullptr;
-        const bool weighted =
-            !options.weight_attr.empty();
+        YenSearchWorkspace* workspace_ptr =
+            workspace.has_value()
+                ? &*workspace
+                : nullptr;
 
         while (true)
         {
@@ -601,7 +911,8 @@ struct ShortestSimplePathGenerator::Impl
                         VertexSet{},
                         EdgeSet{},
                         weight_attr_id,
-                        weighted);
+                        weighted,
+                        workspace_ptr);
 
                 if (!first.found)
                 {
@@ -626,7 +937,8 @@ struct ShortestSimplePathGenerator::Impl
                         accepted.back().path,
                         target,
                         weight_attr_id,
-                        weighted);
+                        weighted,
+                        workspace_ptr);
 
                 for (auto& candidate : generated)
                 {

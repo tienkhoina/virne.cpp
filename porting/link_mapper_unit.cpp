@@ -1248,6 +1248,31 @@ void test_workers_and_later_error_suppression()
         expect(require_route(solution, first_virtual_link) == first_path(),
                "later-error suppression changed first-feasible order");
     }
+
+    Fixture window_fixture;
+    window_fixture.set_physical(
+        {0U, 3U}, window_fixture.p_soft, std::string{"later-error"});
+    PreparedLinkMapper window_mapper = window_fixture.prepare();
+    core::Solution window_solution = make_solution();
+    LinkPathRanker expand_paths = [](PhysicalPaths& paths)
+    {
+        paths.assign(64U, std::vector<Vertex>{0U, 1U, 5U});
+        paths[16U] = {0U, 2U, 5U};
+        paths[17U] = {0U, 3U, 4U, 5U};
+    };
+    LinkRouteOptions window_options = safe_k_options();
+    window_options.candidate_workers = 8U;
+    window_options.ranker = &expand_paths;
+    expect(
+        window_mapper.route(
+            first_virtual_link,
+            {0U, 5U},
+            window_solution,
+            window_options).routed,
+        "ordered path window routing failed");
+    expect(
+        require_route(window_solution, first_virtual_link) == second_path(),
+        "ordered path window changed first-feasible/error order");
 }
 
 void test_concurrent_independent_callers()

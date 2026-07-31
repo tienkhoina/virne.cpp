@@ -2,6 +2,7 @@
 
 #include "python310_generic_timsort.h"
 #include "../../../graph/nx/shortest_paths.h"
+#include "../../utils/deterministic_executor.h"
 
 #include <algorithm>
 #include <cmath>
@@ -10,7 +11,6 @@
 #include <limits>
 #include <numeric>
 #include <sstream>
-#include <thread>
 #include <utility>
 
 namespace virne::solver::rank {
@@ -46,45 +46,26 @@ template <typename Function>
 void parallel_blocks(
     std::size_t count,
     std::size_t requested_workers,
-    Function&& function)
+    Function&& function,
+    std::size_t minimum_items_per_worker = 4096U)
 {
-    if (count == 0U) {
-        return;
-    }
+    virne::utils::deterministic_parallel_blocks(
+        count,
+        requested_workers,
+        minimum_items_per_worker,
+        std::forward<Function>(function));
+}
 
-    const std::size_t worker_count =
-        requested_workers <= 1U
-            ? 1U
-            : std::min(requested_workers, count);
-    if (worker_count <= 1U) {
-        function(0U, count);
-        return;
-    }
-
-    std::vector<std::thread> threads;
-    threads.reserve(worker_count - 1U);
-    try {
-        for (std::size_t worker = 1U; worker < worker_count; ++worker) {
-            const std::size_t begin = (count * worker) / worker_count;
-            const std::size_t end =
-                (count * (worker + 1U)) / worker_count;
-            threads.emplace_back([&function, begin, end]() {
-                function(begin, end);
-            });
-        }
-        function(0U, count / worker_count);
-    } catch (...) {
-        for (std::thread& thread : threads) {
-            if (thread.joinable()) {
-                thread.join();
-            }
-        }
-        throw;
-    }
-
-    for (std::thread& thread : threads) {
-        thread.join();
-    }
+std::size_t quadratic_block_grain(std::size_t extent) noexcept
+{
+    // Roughly 32K ordered scalar operations per worker keeps persistent-pool
+    // synchronization out of small solver graphs while still exposing the
+    // caller's configured width on genuinely quadratic rank work.
+    constexpr std::size_t minimum_operations_per_worker = 32768U;
+    return std::max<std::size_t>(
+        1U,
+        minimum_operations_per_worker /
+            std::max<std::size_t>(1U, extent));
 }
 
 template <typename ResourceBindings>
@@ -238,6 +219,35 @@ NodeRanking make_scalar_ranking(
     return result;
 }
 
+NodeRanking make_scalar_ranking(
+    const network::BaseNetwork& network,
+    const NodeResourceSums& sums)
+{
+    validate_scalar_ranking_length(network, sums.size());
+    NodeRanking result;
+    result.reserve(sums.size());
+    for (std::size_t index = 0U; index < sums.size(); ++index) {
+        result.push_back(NodeRankEntry{
+            static_cast<Vertex>(index),
+            NodeRankValueKind::scalar,
+            sums.as_double(index),
+            0.0});
+    }
+    return result;
+}
+
+void finalize_scalar_ranking(
+    const network::BaseNetwork& network,
+    NodeRanking& result)
+{
+    validate_scalar_ranking_length(network, result.size());
+    for (std::size_t index = 0U; index < result.size(); ++index) {
+        result[index].node_id = static_cast<Vertex>(index);
+        result[index].kind = NodeRankValueKind::scalar;
+        result[index].distance = 0.0;
+    }
+}
+
 void python_scalar_descending_sort(NodeRanking& ranking)
 {
     const bool contains_nan = std::any_of(
@@ -259,15 +269,6 @@ void python_scalar_descending_sort(NodeRanking& ranking)
         [](const NodeRankEntry& lhs, const NodeRankEntry& rhs) {
             return lhs.value < rhs.value;
         });
-}
-
-std::vector<double> node_sums_as_double(const NodeResourceSums& sums)
-{
-    std::vector<double> values(sums.size(), 0.0);
-    for (std::size_t index = 0U; index < sums.size(); ++index) {
-        values[index] = sums.as_double(index);
-    }
-    return values;
 }
 
 double sequential_sum(const std::vector<double>& values) noexcept
@@ -781,11 +782,16 @@ NodeRanking PreparedNodeRanker::rank_random(
     std::iota(shuffled.begin(), shuffled.end(), Vertex{0U});
     random.shuffle(shuffled);
 
-    std::vector<double> values(node_count, 0.0);
+    validate_scalar_ranking_length(network, shuffled.size());
+    NodeRanking result;
+    result.reserve(node_count);
     for (std::size_t index = 0U; index < node_count; ++index) {
-        values[index] = static_cast<double>(shuffled[index]);
+        result.push_back(NodeRankEntry{
+            static_cast<Vertex>(index),
+            NodeRankValueKind::scalar,
+            static_cast<double>(shuffled[index]),
+            0.0});
     }
-    NodeRanking result = make_scalar_ranking(network, values);
     if (options.sort) {
         python_scalar_descending_sort(result);
     }
@@ -797,8 +803,7 @@ NodeRanking PreparedNodeRanker::rank_ffd(NodeRankOptions options) const
     const network::BaseNetwork& network = checked_network();
     const NodeResourceSums sums = gather_node_resource_sums(
         network.graph(), node_resources_, options.workers);
-    NodeRanking result =
-        make_scalar_ranking(network, node_sums_as_double(sums));
+    NodeRanking result = make_scalar_ranking(network, sums);
     if (options.sort) {
         python_scalar_descending_sort(result);
     }
@@ -831,14 +836,15 @@ NodeRanking PreparedNodeRanker::rank_nrm(NodeRankOptions options) const
             "Node resource columns do not cover every live node");
     }
 
-    std::vector<double> values(node_count, 0.0);
+    NodeRanking result(node_count);
     const auto multiply = [&](std::size_t begin, std::size_t end) {
         for (std::size_t index = begin; index < end; ++index) {
-            values[index] = node_sums.as_double(index) * link_sums[index];
+            result[index].value =
+                node_sums.as_double(index) * link_sums[index];
         }
     };
     parallel_blocks(node_count, options.workers, multiply);
-    NodeRanking result = make_scalar_ranking(network, values);
+    finalize_scalar_ranking(network, result);
     if (options.sort) {
         python_scalar_descending_sort(result);
     }
@@ -859,24 +865,24 @@ NodeRanking PreparedNodeRanker::rank_nea(NodeRankOptions options) const
             "Node resource columns do not cover every live node");
     }
 
-    std::vector<double> values(node_count, 0.0);
+    NodeRanking result(node_count);
     const auto multiply = [&](std::size_t begin, std::size_t end) {
         for (std::size_t index = begin; index < end; ++index) {
             const std::uint64_t degree = static_cast<std::uint64_t>(
                 graph.degree(static_cast<Vertex>(index)));
             if (sums.double_lane) {
-                values[index] = sums.doubles[index] *
+                result[index].value = sums.doubles[index] *
                     static_cast<double>(degree);
             } else {
                 const std::uint64_t product =
                     static_cast<std::uint64_t>(sums.integers[index]) * degree;
-                values[index] = static_cast<double>(
+                result[index].value = static_cast<double>(
                     uint64_bits_as_int64(product));
             }
         }
     };
     parallel_blocks(node_count, options.workers, multiply);
-    NodeRanking result = make_scalar_ranking(network, values);
+    finalize_scalar_ranking(network, result);
     if (options.sort) {
         python_scalar_descending_sort(result);
     }
@@ -955,7 +961,11 @@ NodeRanking PreparedNodeRanker::rank_grc(NodeRankOptions options) const
                 next[destination] = teleport[destination] + propagated;
             }
         };
-        parallel_blocks(node_count, options.workers, multiply);
+        parallel_blocks(
+            node_count,
+            options.workers,
+            multiply,
+            quadratic_block_grain(node_count));
         delta = l2_delta(next, current);
         current.swap(next);
         ++iterations;
@@ -1009,7 +1019,11 @@ NodeRanking PreparedNodeRanker::rank_rw(NodeRankOptions options) const
             bandwidth[column] = sum;
         }
     };
-    parallel_blocks(node_count, options.workers, reduce_columns);
+    parallel_blocks(
+        node_count,
+        options.workers,
+        reduce_columns,
+        quadratic_block_grain(node_count));
 
     std::vector<double> capacity(node_count, 0.0);
     const auto build_capacity = [&](std::size_t begin, std::size_t end) {
@@ -1119,7 +1133,11 @@ NodeRanking PreparedNodeRanker::rank_rw(NodeRankOptions options) const
             }
         }
     };
-    parallel_blocks(node_count, options.workers, build_transition);
+    parallel_blocks(
+        node_count,
+        options.workers,
+        build_transition,
+        quadratic_block_grain(node_count));
 
     std::vector<double> current = base;
     std::vector<double> next(node_count, 0.0);
@@ -1149,7 +1167,11 @@ NodeRanking PreparedNodeRanker::rank_rw(NodeRankOptions options) const
                 next[destination] = dot;
             }
         };
-        parallel_blocks(node_count, options.workers, multiply);
+        parallel_blocks(
+            node_count,
+            options.workers,
+            multiply,
+            quadratic_block_grain(node_count));
         delta = l2_delta(next, current);
         current.swap(next);
         ++iterations;

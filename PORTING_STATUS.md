@@ -1,6 +1,6 @@
 # Virne Python to C++ port status
 
-Last verified: 2026-07-29 (Asia/Saigon).
+Last verified: 2026-07-31 (Asia/Saigon).
 
 This file is the entry point for continuing the port. Read it and the linked
 component note before opening the original Python implementation.
@@ -20,6 +20,11 @@ component note before opening the original Python implementation.
 The original package is not installed in the oracle image. Leaf source files
 are loaded directly from the read-only sibling checkout so eager imports cannot
 pull Torch, PyG, learning solvers, or a different copy of Virne.
+
+The frozen Linux/Python reference and the controlled same-compiler old/final
+native A/B are published in
+`porting/results/hot_path_old_vs_new_2026-07-31.md`. All exact output gates
+match; cross-platform medians remain separate from the native A/B ratios.
 
 ## Completion rule
 
@@ -80,9 +85,10 @@ A component is `COMPLETE` only when all of the following exist and pass:
 | Non-ML solver | `solver.rank.LinkRank` | **COMPLETE / FROZEN** | `porting/components/link_rank.md`, `porting/results/link_rank_2026-07-29.md` |
 | Non-ML solver | `solver.rank.NodeRank` | **COMPLETE / FROZEN** | `porting/components/node_rank.md`, `porting/results/node_rank_2026-07-29.md` |
 | Non-ML solver | `solver.base_solver` | **COMPLETE / FROZEN** | `porting/components/base_solver.md`, `porting/results/base_solver_2026-07-29.md` |
-| Non-ML solver | `solver.heuristic.node_rank.OrderRankSolver` | **COMPLETE / FROZEN** | `porting/components/heuristic_node_rank.md`, `porting/results/heuristic_node_rank_differential_2026-07-29.json`, `porting/results/heuristic_node_rank_benchmark_2026-07-29.json` |
-| Non-ML solver | remaining heuristic, exact, meta-heuristic | NOT STARTED | next leaf: `FFDRankSolver`; exact layer additionally needs OR-Tools |
-| System | online/offline/changeable/time-window | NOT STARTED | Python base has an eager `RLSolver` dependency to cut |
+| Non-ML solver | all eight classes in `solver.heuristic.node_rank` | **COMPLETE / FROZEN** | `porting/components/heuristic_node_rank.md`, order-only and combined-variant artifacts under `porting/results/` |
+| Non-ML solver | BFS, joint place-route and complete 14-solver heuristic registry | **COMPLETE / COLLECTIVE GATE PASS** | `porting/components/heuristic_registry.md`, `vne_heuristic_all_unit` |
+| Non-ML solver | exact and meta-heuristic | NOT STARTED | exact layer additionally needs OR-Tools; ML/RL remains deferred |
+| System | online/offline/changeable/time-window + main config runtime | **IMPLEMENTED / EXACT ONLINE GATE PASS** | `porting/components/system.md`, `porting/results/system_main_e2e_differential_2026-07-30.json`, `porting/results/system_transaction_integration_2026-07-30.md` |
 | Learning/ML | `solver/learning/**` | OUT OF SCOPE | explicitly deferred |
 
 ## Completed behavior
@@ -650,36 +656,69 @@ bytes and checksum `13751587758314786690`; C++ was 11.174x, 9.906x, and
 10.401x faster at workers `1/2/8`. See
 `porting/results/base_solver_2026-07-29.md`.
 
-The first non-ML concrete node-ranking solver leaf is complete and frozen.
-`OrderRankSolver` registers `order_rank` explicitly and reuses one typed
-`BaseNodeRankSolver` engine with cached Controller selection IDs, direct config
-enums, private physical-network cloning, and the frozen `NodeRank::order`,
-NodeMapper, and LinkMapper APIs. Fixed state never enters a string map; the
-dynamic solver name is confined to the cold registry boundary. Caller worker
-widths `0/1/2/8` retain exact result, partial-state, flag, link-order, and
-unchanged-input behavior.
+All eight non-ML solvers in `solver.heuristic.node_rank` are complete and
+frozen: order, random, GRC, FFD, NRM, PL, NEA and random-walk. Standard variants
+reuse the typed `BaseNodeRankSolver`; random rank borrows an explicit
+caller-owned NumPy-compatible stream; PL/NEA use prepared numeric constraint
+IDs and exact CPython integer-set traversal. Fixed state never enters a string
+map and every dynamic solver name is confined to cold registration.
 
-The focused unit/concurrency, strict/sanitizer/CTest/frozen-integrity and
-hot-ID gates passed. The exact AST-isolated differential passed six shared
-cases (five Solution cases plus empty-virtual rank precedence) at native
-workers `0/1/2/8`. The frozen conservative mixed-dependency microbenchmark
-retained 64 outputs, 87,752 bytes, and checksum `9328970994111537605`.
-Sequential Python measured 87,527.734 ns/solve; C++ worker 1 measured
-56,442.344 ns/solve, or `1.551x` faster. Explicit workers 2 and 8 measured
-1,957,763.281 and 6,946,745.063 ns/solve and are slower on this small case;
-worker width remains caller configuration and no automatic host policy is
-embedded. See `porting/components/heuristic_node_rank.md` and the two
-`porting/results/heuristic_node_rank_*_2026-07-29.json` artifacts. Do not rerun
-or update the accepted benchmark.
+The combined exact AST-isolated differential passes ten cases at workers
+`0/1/2/8`, including sparse-ID candidate ties and RNG continuation. On the
+single frozen combined fixture every workers=1 solver beats Python by
+`1.174x` to `75.990x`; wider workers remain caller choices because the small
+fixture exposes fan-out overhead. The earlier order-only gate remains frozen
+separately. See `porting/components/heuristic_node_rank.md`; do not rerun or
+edit either accepted benchmark.
+
+The remaining canonical `solver/heuristic` registry is complete. Three BFS
+solvers reuse the prepared Controller and NodeRank APIs; three joint
+place-route solvers use CPython-compatible candidate order, caller-owned
+`PyRandom` where required, live FFD reranking and `k=1` routing. The public
+central registrar returns 14 direct `SolverId` fields, including every class
+grouped inside Python's `node_rank.py`. Dynamic names resolve only once.
+
+The one-shot Docker GCC Release gate is 1/1 PASS. It creates and solves all 14
+factories, compares exact workers=1/4 output and both RNG continuations, and
+checks BFS/joint partial rollback. Its compact native catalog signal was
+70.8778 ms at workers=1 and 36.7232 ms at workers=4 (1.930x faster). Existing
+frozen Python/C++ node-rank benchmarks were not rerun. See
+`porting/components/heuristic_registry.md`.
+
+The non-ML system/main runtime now composes the completed generator,
+environment, registry and node-rank solvers from Hydra-style overrides. Online
+is exact against pinned Python; offline/changeable/time-window define typed
+semantics for incomplete Python TODO paths. Default output is a compact JSON
+summary plus a rate-limited Python-style progress bar. Progress receives direct
+Recorder fields, uses global epoch labels for changeable stages, and does no
+string lookup in request loops. Host strict and Docker GCC 11 units pass; the
+representative `order_rank` end-to-end differential is exact and records both
+Python/native time. The later default seed-0 `ffd_rank` verification, with no
+explicit node/request-count override, is also exact at 100 nodes, 528 links,
+1,000 requests, 752 accepted and 248 rejected; its single GCC 11 runtime signal
+is 51.994x faster than Python. See `porting/components/system.md` and
+`porting/results/system_transaction_integration_2026-07-30.md`.
+
+Main now also supports the shipped multi-resource CPU/GPU/RAM groups. Virtual
+controller IDs bind once to independent physical IDs, while Counter selects
+typed resource IDs independently per registry, avoiding the former collision
+with interleaved `max_cpu/max_gpu/max_ram` extrema. The seed-0 20-node/8-request
+`ffd_rank` full report is exact against Python (5 accepted, 3 rejected), and a
+CTest locks the Python-compatible `+p_net_setting` / `+v_sim_setting` CLI.
+Progress frames now use one buffered write and one explicit flush, detect the
+TTY width and compact to one non-wrapping physical row; main disables C/C++
+stdio synchronization and detaches stream ties before any I/O.
+Main also materializes Python's derived simulation/feature fields and snapshots
+the resolved application config once into a fixed cold field. Hydra internals
+and native worker/output controls are split from the Python-compatible
+`Config:` view; saved `config.yaml` therefore has the same application schema,
+while `native_config.yaml` retains the C++ extension. Both are resolved only at
+the cold boundary, and no YAML traversal reaches a hot loop.
 
 ## Next component
 
-Continue with the non-ML
-`solver.heuristic.node_rank.FFDRankSolver` leaf. Reuse the completed
-`BaseNodeRankSolver` engine unchanged and select the frozen `NodeRank::ffd`
-method; do not rebuild ranking or mapper dependencies. Ranking and mapping hot
-loops continue to retain compact node/edge/attribute IDs and direct fields.
-Keep `RandomRankSolver` deferred until its API carries an explicit
-caller-owned `NumpyRandomState`; do not introduce hidden or host-derived RNG
-state. ML/RL, Torch/CUDA, system orchestration, MCF, and
-candidate-search-dependent heuristics remain deferred.
+The canonical non-ML `solver/heuristic` directory is complete. The next solver
+leaf must be selected from `solver/exact` or `solver/meta_heuristic`; exact MCF
+paths require the deferred OR-Tools dependency. Reuse the completed 14-solver
+registry and all frozen graph/controller/random/config APIs. ML/RL and
+Torch/CUDA remain deferred.

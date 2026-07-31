@@ -202,9 +202,9 @@ private:
     void clear_existing_route(
         ConstraintLink virtual_link,
         Solution& solution) const;
-    std::vector<ResourceAmount> gather_link_resources(
+    const std::vector<ResourceAmount>& gather_link_resources(
         ConstraintLink virtual_link,
-        SolutionAttributeValues* recorded_values) const;
+        SolutionAttributeValues* recorded_values);
     LinkRouteResult commit_path(
         ConstraintLink virtual_link,
         const PhysicalPath& path,
@@ -222,10 +222,12 @@ private:
         ConstraintLink physical_pair,
         Solution& solution,
         const LinkRouteOptions& options);
-    std::vector<PathCheckOutcome> check_paths_ordered(
+    std::vector<PathCheckOutcome>& check_paths_ordered(
         ConstraintLink virtual_link,
         const PhysicalPaths& paths,
-        std::size_t workers) const;
+        std::size_t begin_index,
+        std::size_t end_index,
+        std::size_t workers);
     PooledConstraintValues pool_constraints(
         const LinkRouteCheckInfo& check) const;
     long double violation_score(
@@ -251,6 +253,8 @@ private:
     std::vector<ConstraintId> path_constraint_order_;
     std::vector<ConstraintId> combined_constraint_order_;
     std::vector<std::uint8_t> hard_constraint_mask_;
+    std::vector<ResourceAmount> resource_scratch_;
+    std::vector<PathCheckOutcome> path_check_scratch_;
 
     friend class LinkMapper;
 };

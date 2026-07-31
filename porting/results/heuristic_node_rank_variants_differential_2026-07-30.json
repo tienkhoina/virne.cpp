@@ -1,0 +1,27 @@
+{
+  "boundaries": {
+    "dependencies": "Frozen mapper/rank dependency gates own their full numeric case matrices; this differential locks concrete wiring, mapping order, custom candidate policy and RNG continuation.",
+    "python_isolation": "Only the pinned solver/ranker class AST executes; Virne package initialization and learning imports are excluded."
+  },
+  "component": "solver.heuristic.node_rank.variants",
+  "native_workers": [
+    0,
+    1,
+    2,
+    8
+  ],
+  "rank_source_sha256": "428F0DEB188E685A9F3EB6177A70DF533519F62C560284063FC4CF6EC7624FFF",
+  "shared_case_count": 10,
+  "solver_source_sha256": "44A6F63F1A1798935453C057C6981A692F5DC4F03BDE6A6535607AECBDC61389",
+  "solvers": [
+    "order_rank",
+    "random_rank",
+    "grc_rank",
+    "ffd_rank",
+    "nrm_rank",
+    "pl_rank",
+    "nea_rank",
+    "rw_rank"
+  ],
+  "status": "PASS"
+}

@@ -1458,3 +1458,170 @@ target_link_libraries(
         vne_virtual_network
         Threads::Threads
 )
+
+add_executable(
+    vne_heuristic_node_rank_variants_unit
+    heuristic_node_rank_variants_unit.cpp
+)
+
+target_link_libraries(
+    vne_heuristic_node_rank_variants_unit
+    PRIVATE
+        vne_heuristic_ffd_rank
+        vne_heuristic_standard_rank_variants
+        vne_heuristic_random_rank
+        vne_heuristic_custom_rank_variants
+        vne_controller
+        vne_counter
+        vne_recorder
+        vne_logger
+        vne_physical_network
+        vne_virtual_network
+        Threads::Threads
+)
+
+add_test(
+    NAME vne_heuristic_node_rank_variants_unit
+    COMMAND vne_heuristic_node_rank_variants_unit
+)
+
+add_executable(
+    vne_heuristic_all_unit
+    heuristic_all_unit.cpp
+)
+
+target_link_libraries(
+    vne_heuristic_all_unit
+    PRIVATE
+        vne_solver
+        vne_controller
+        vne_counter
+        vne_recorder
+        vne_logger
+        vne_physical_network
+        vne_virtual_network
+        random_lib
+        Threads::Threads
+)
+
+add_test(
+    NAME vne_heuristic_all_unit
+    COMMAND vne_heuristic_all_unit
+)
+
+add_executable(
+    vne_system_unit
+    system_unit.cpp
+)
+
+target_link_libraries(
+    vne_system_unit
+    PRIVATE
+        vne_system
+        vne_controller
+        vne_counter
+        vne_recorder
+        vne_logger
+        vne_physical_network
+        vne_virtual_network_request_simulator
+        random_lib
+        Threads::Threads
+)
+
+add_test(
+    NAME vne_system_unit
+    COMMAND vne_system_unit
+)
+
+add_executable(
+    vne_transactional_system_unit
+    transactional_system_unit.cpp
+)
+
+target_link_libraries(
+    vne_transactional_system_unit
+    PRIVATE
+        vne_system
+        vne_controller
+        vne_counter
+        vne_recorder
+        vne_logger
+        vne_physical_network
+        vne_virtual_network_request_simulator
+        vne_heuristic_node_rank
+        vne_heuristic_random_rank
+        vne_heuristic_custom_rank_variants
+        random_lib
+        Threads::Threads
+)
+
+add_test(
+    NAME vne_transactional_system_unit
+    COMMAND vne_transactional_system_unit
+)
+
+add_executable(
+    vne_system_main_config_unit
+    system_main_config_unit.cpp
+)
+
+target_link_libraries(
+    vne_system_main_config_unit
+    PRIVATE
+        vne_system
+        config_lib
+        random_lib
+        Threads::Threads
+)
+
+target_compile_definitions(
+    vne_system_main_config_unit
+    PRIVATE
+        VIRNE_SOURCE_DIR="${PROJECT_SOURCE_DIR}"
+)
+
+add_test(
+    NAME vne_system_main_config_unit
+    COMMAND vne_system_main_config_unit
+)
+
+add_executable(
+    vne_heuristic_ffd_rank_harness
+    heuristic_ffd_rank_harness.cpp
+)
+
+target_link_libraries(
+    vne_heuristic_ffd_rank_harness
+    PRIVATE
+        vne_heuristic_ffd_rank
+        vne_controller
+        vne_counter
+        vne_recorder
+        vne_logger
+        vne_physical_network
+        vne_virtual_network
+        Threads::Threads
+)
+
+add_executable(
+    vne_heuristic_node_rank_variants_harness
+    heuristic_node_rank_variants_harness.cpp
+)
+
+target_link_libraries(
+    vne_heuristic_node_rank_variants_harness
+    PRIVATE
+        vne_heuristic_node_rank
+        vne_heuristic_ffd_rank
+        vne_heuristic_standard_rank_variants
+        vne_heuristic_random_rank
+        vne_heuristic_custom_rank_variants
+        vne_controller
+        vne_counter
+        vne_recorder
+        vne_logger
+        vne_physical_network
+        vne_virtual_network
+        random_lib
+        Threads::Threads
+)

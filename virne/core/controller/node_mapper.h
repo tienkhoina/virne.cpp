@@ -165,9 +165,9 @@ private:
         std::vector<ConstraintId> constraint_order,
         std::vector<std::uint8_t> hard_constraint_mask);
 
-    std::vector<ResourceAmount> gather_node_resources(
+    const std::vector<ResourceAmount>& gather_node_resources(
         Vertex virtual_node,
-        SolutionAttributeValues* recorded_values) const;
+        SolutionAttributeValues* recorded_values);
 
     NodePlacementResult commit_place_after_check(
         Vertex virtual_node,
@@ -176,10 +176,12 @@ private:
         ConstraintCheckResult check,
         bool allow_constraint_violation);
 
-    std::vector<CandidateCheckOutcome> check_candidates_ordered(
+    std::vector<CandidateCheckOutcome>& check_candidates_ordered(
         Vertex virtual_node,
         const std::vector<Vertex>& physical_nodes,
-        std::size_t workers) const;
+        std::size_t begin_index,
+        std::size_t end_index,
+        std::size_t workers);
 
     bool node_mapping_inplace(
         const std::vector<Vertex>& virtual_nodes,
@@ -196,6 +198,8 @@ private:
     std::vector<PreparedNodeResource> node_resources_;
     std::vector<ConstraintId> constraint_order_;
     std::vector<std::uint8_t> hard_constraint_mask_;
+    std::vector<ResourceAmount> resource_scratch_;
+    std::vector<CandidateCheckOutcome> candidate_check_scratch_;
 
     friend class NodeMapper;
 };

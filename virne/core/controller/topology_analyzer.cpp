@@ -1,5 +1,6 @@
 #include "topology_analyzer.h"
 
+#include "../../utils/deterministic_executor.h"
 #include "algorithms/bfs.h"
 #include "nx/shortest_paths.h"
 
@@ -8,7 +9,6 @@
 #include <exception>
 #include <limits>
 #include <memory>
-#include <thread>
 #include <utility>
 #include <variant>
 
@@ -29,10 +29,7 @@ void parallel_indexed(
     std::size_t requested_workers,
     Function&& function)
 {
-    const std::size_t worker_count = requested_workers <= 1U
-        ? 1U
-        : std::min(requested_workers, count);
-    if (worker_count <= 1U)
+    if (requested_workers <= 1U || count <= 1U)
     {
         for (std::size_t index = 0U; index < count; ++index)
         {
@@ -41,66 +38,33 @@ void parallel_indexed(
         return;
     }
 
-    struct Failure
-    {
-        std::size_t index = std::numeric_limits<std::size_t>::max();
-        std::exception_ptr error;
-    };
-
-    std::vector<Failure> failures(worker_count);
-    std::vector<std::thread> threads;
-    threads.reserve(worker_count);
-    try
-    {
-        for (std::size_t worker = 0U; worker < worker_count; ++worker)
+    std::vector<std::exception_ptr> failures(count);
+    virne::utils::deterministic_parallel_blocks(
+        count,
+        requested_workers,
+        1U,
+        [&](std::size_t begin, std::size_t end)
         {
-            threads.emplace_back(
-                [&, worker]
+            for (std::size_t index = begin; index < end; ++index)
+            {
+                try
                 {
-                    const std::size_t begin = count * worker / worker_count;
-                    const std::size_t end =
-                        count * (worker + 1U) / worker_count;
-                    for (std::size_t index = begin; index < end; ++index)
-                    {
-                        try
-                        {
-                            function(index);
-                        }
-                        catch (...)
-                        {
-                            failures[worker] =
-                                {index, std::current_exception()};
-                            break;
-                        }
-                    }
-                });
-        }
-    }
-    catch (...)
-    {
-        for (std::thread& thread : threads)
-        {
-            thread.join();
-        }
-        throw;
-    }
+                    function(index);
+                }
+                catch (...)
+                {
+                    failures[index] = std::current_exception();
+                    break;
+                }
+            }
+        });
 
-    for (std::thread& thread : threads)
+    for (const std::exception_ptr& failure : failures)
     {
-        thread.join();
-    }
-
-    const Failure* first = nullptr;
-    for (const Failure& failure : failures)
-    {
-        if (failure.error && (first == nullptr || failure.index < first->index))
+        if (failure)
         {
-            first = &failure;
+            std::rethrow_exception(failure);
         }
-    }
-    if (first != nullptr)
-    {
-        std::rethrow_exception(first->error);
     }
 }
 

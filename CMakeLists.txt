@@ -166,6 +166,79 @@ virne_executable(
     main.cpp
 )
 
+target_link_libraries(
+    main
+    PRIVATE
+        vne_system
+)
+
+target_compile_definitions(
+    main
+    PRIVATE
+        VIRNE_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+add_test(
+    NAME vne_main_multi_resource_smoke
+    COMMAND main
+        --config ${CMAKE_CURRENT_SOURCE_DIR}/setting/main.yaml
+        solver.solver_name=ffd_rank
+        +p_net_setting=p_net_setting_multi_resource
+        +v_sim_setting=v_sim_setting_multi_resource
+        p_net_setting.topology.num_nodes=20
+        v_sim_setting.num_v_nets=8
+        v_sim_setting.v_net_size.low=2
+        v_sim_setting.v_net_size.high=4
+        experiment.seed=0
+        experiment.run_id=multi-resource-smoke
+        experiment.if_save_config=false
+        experiment.if_save_p_net=false
+        experiment.if_save_v_nets=false
+        recorder.if_save_records=false
+        recorder.if_temp_save_records=false
+        logger.backends=[]
+        ++native.capture_solutions=false
+        ++native.output.report=summary
+        ++native.progress.enabled=false
+)
+
+set_tests_properties(
+    vne_main_multi_resource_smoke
+    PROPERTIES
+        PASS_REGULAR_EXPRESSION "\"accepted\":4,\"rejected\":4"
+)
+
+add_test(
+    NAME vne_main_config_log_smoke
+    COMMAND main
+        --config ${CMAKE_CURRENT_SOURCE_DIR}/setting/main.yaml
+        solver.solver_name=order_rank
+        +p_net_setting=p_net_setting_multi_resource
+        +v_sim_setting=v_sim_setting_multi_resource
+        p_net_setting.topology.num_nodes=8
+        v_sim_setting.num_v_nets=1
+        v_sim_setting.v_net_size.low=2
+        v_sim_setting.v_net_size.high=2
+        experiment.seed=0
+        experiment.run_id=config-log-smoke
+        experiment.if_save_config=false
+        experiment.if_save_p_net=false
+        experiment.if_save_v_nets=false
+        recorder.if_save_records=false
+        recorder.if_temp_save_records=false
+        logger.level=INFO
+        logger.backends=[console]
+        ++native.output.report=none
+        ++native.progress.enabled=false
+)
+
+set_tests_properties(
+    vne_main_config_log_smoke
+    PROPERTIES
+        PASS_REGULAR_EXPRESSION
+            "reciprocal: true;simulation:;Native config:"
+)
+
 virne_executable(
     graph_test
     graph_test.cpp

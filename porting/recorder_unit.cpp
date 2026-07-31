@@ -421,6 +421,57 @@ void test_arrival_leave_membership_and_history()
            "history append order mismatch");
 }
 
+void test_precomputed_arrival_fast_path()
+{
+    ScopedDirectory directory("precomputed-arrival");
+    auto physical_network = make_physical_network();
+    auto virtual_network = make_virtual_network();
+    const Counter counter{};
+
+    Recorder regular(
+        counter, recorder_config(directory.path, "precomputed-regular"));
+    Recorder precomputed(
+        counter, recorder_config(directory.path, "precomputed-fast"));
+    regular.count_initial_physical_network(physical_network, {2U});
+    precomputed.count_initial_physical_network(physical_network, {2U});
+    regular.set_event({0, network::VirtualEventType::arrival});
+    precomputed.set_event({0, network::VirtualEventType::arrival});
+
+    Solution regular_solution =
+        make_success_solution(virtual_network, 40, 0, 2);
+    Solution precomputed_solution = regular_solution;
+    const core::PreparedCounter prepared = counter.prepare(virtual_network);
+    prepared.count_solution(precomputed_solution, {2U});
+
+    const RecorderRecord regular_record = regular.count(
+        virtual_network, physical_network, regular_solution, {2U});
+    const RecorderRecord precomputed_record =
+        precomputed.count_precomputed_arrival(
+            physical_network, precomputed_solution, {2U});
+
+    expect(same_state(regular_record.state, precomputed_record.state),
+           "precomputed arrival recorder state mismatch");
+    expect(regular_record.solution.v_net_demand ==
+                   precomputed_record.solution.v_net_demand &&
+               regular_record.solution.v_net_revenue ==
+                   precomputed_record.solution.v_net_revenue &&
+               regular_record.solution.v_net_cost ==
+                   precomputed_record.solution.v_net_cost &&
+               regular_record.solution.v_net_r2c_ratio ==
+                   precomputed_record.solution.v_net_r2c_ratio,
+           "precomputed arrival solution metrics mismatch");
+
+    precomputed.set_event({1, network::VirtualEventType::leave});
+    expect_recorder_error(
+        [&]
+        {
+            static_cast<void>(precomputed.count_precomputed_arrival(
+                physical_network, precomputed_solution, {1U}));
+        },
+        RecorderErrorCode::invalid_event_type,
+        RecorderOperation::count);
+}
+
 struct WorkerFingerprint
 {
     RecorderInitialPhysicalState initial;
@@ -867,6 +918,7 @@ int main()
 
         run("arrival/leave/history",
             test_arrival_leave_membership_and_history);
+        run("precomputed arrival", test_precomputed_arrival_fast_path);
         run("workers/reset", test_workers_and_reset_baseline);
         run("partial errors", test_partial_error_order);
         run("CSV/paths/summary extension",

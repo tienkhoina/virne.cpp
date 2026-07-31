@@ -162,6 +162,88 @@ core::Solution BaseNodeRankSolver::solve(const SolverInstance& instance) {
     return solution;
 }
 
+MutableSolverResult BaseNodeRankSolver::solve_mutable(
+    const MutableSolverInstance& instance) {
+    const auto& virtual_network = instance.virtual_network;
+    auto& physical_network = instance.physical_network;
+    core::Solution solution = core::Solution::from_v_net(virtual_network);
+
+    rank::NodeRankOptions rank_options;
+    rank_options.sort = true;
+    rank_options.workers = workers_.rank_workers;
+    rank_options.max_iterations = std::nullopt;
+
+    // Keep the frozen const solve failure/RNG order: both rankings and both
+    // ordered ID vectors are complete before the first physical mutation.
+    const auto virtual_ranking =
+        node_ranker_.prepare(virtual_network).rank(
+            node_rank_method_, rank_options);
+    const auto physical_ranking =
+        node_ranker_.prepare(physical_network).rank(
+            node_rank_method_, rank_options);
+    const auto virtual_nodes = ordered_node_ids(virtual_ranking);
+    const auto physical_nodes = ordered_node_ids(physical_ranking);
+
+    bool rollback_started = false;
+    const auto rollback = [&]() {
+        rollback_started = true;
+        instance.mutation.rollback(solution);
+    };
+    try {
+        auto prepared_node_mapper =
+            node_mapper_.prepare(virtual_network, physical_network);
+        core::controller::NodeMappingOptions node_options;
+        node_options.reusable = false;
+        node_options.inplace = true;
+        node_options.method = config().matching_method;
+        node_options.allow_constraint_violation = false;
+        node_options.candidate_workers = workers_.node_candidate_workers;
+
+        if (!prepared_node_mapper.node_mapping(
+                virtual_nodes, physical_nodes, solution, node_options)) {
+            solution.place_result = false;
+            solution.result = false;
+            rollback();
+            return MutableSolverResult{
+                std::move(solution), SolverMutationState::detached};
+        }
+
+        const auto virtual_links = ordered_virtual_links(virtual_network);
+        auto prepared_link_mapper =
+            link_mapper_.prepare(virtual_network, physical_network);
+        core::controller::LinkMappingOptions link_options;
+        link_options.shortest_method = config().shortest_method;
+        link_options.k = config().k_shortest;
+        link_options.max_path_nodes = 1.0e6;
+        link_options.topology_constraint_workers =
+            workers_.link_topology_constraint_workers;
+        link_options.candidate_workers = workers_.link_candidate_workers;
+        link_options.inplace = true;
+        link_options.allow_constraint_violation = false;
+
+        if (!prepared_link_mapper.link_mapping(
+                virtual_links, solution, link_options)) {
+            solution.route_result = false;
+            solution.result = false;
+            rollback();
+            return MutableSolverResult{
+                std::move(solution), SolverMutationState::detached};
+        }
+    } catch (...) {
+        // Mapping commits are journaled directly into fixed Solution tables.
+        // Restore only recorded mutations; the caller still observes the
+        // original dependency exception after a successful rollback.
+        if (!rollback_started) {
+            rollback();
+        }
+        throw;
+    }
+
+    solution.result = true;
+    return MutableSolverResult{
+        std::move(solution), SolverMutationState::committed};
+}
+
 OrderRankSolver::OrderRankSolver(
     SolverDependencies dependencies,
     SolverConfig config,

@@ -253,3 +253,24 @@ or `1.277x`, `1.279x`, and `1.312x` faster. Every route produced 131,072
 entries, 2,097,152 bytes, and checksum `11449996351475094403`. Full
 provenance and hashes are in `../results/node_rank_2026-07-29.md`; both
 machine-readable JSON files beside it are frozen.
+
+## Integration worker correction (2026-07-30)
+
+The API is unchanged. Numeric blocks now use the persistent deterministic
+executor documented in `deterministic_executor.md`. Cheap linear reductions
+remain sequential below a fixed 4,096-item grain; quadratic matrix work uses a
+fixed operation grain. Caller width `8` therefore does not create threads for
+ordinary 100/500-node solver ranking calls, while large work still uses the
+requested width. Nested dispatch is sequential and no host width is selected.
+Focused unit/concurrent-caller gates pass; the frozen benchmark was not rerun.
+
+## Allocation audit (2026-07-31)
+
+The API, numeric lanes, RNG schedule and ordering are unchanged. Random ranking
+now writes shuffled scores directly into the final `NodeRanking`; FFD writes
+the already-reduced integral/double resource sums directly; and NRM/NEA write
+their independent products into pre-sized final entries before attaching fixed
+node metadata. The former intermediate full-size `double` vectors were pure
+copies and are no longer allocated. Validation remains after RNG/reduction in
+the same observable stage, and the frozen differential/benchmark artifacts
+were not rerun or modified.

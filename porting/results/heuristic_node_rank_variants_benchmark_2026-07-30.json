@@ -1,0 +1,343 @@
+{
+  "component": "solver.heuristic.node_rank.variants",
+  "fixture": {
+    "physical_nodes": 48,
+    "virtual_nodes": 8
+  },
+  "gate": "exact verification payload matched before timing rows",
+  "iterations_per_sample": 2,
+  "repetitions": 3,
+  "seed": 77,
+  "solvers": [
+    "order_rank",
+    "random_rank",
+    "grc_rank",
+    "ffd_rank",
+    "nrm_rank",
+    "pl_rank",
+    "nea_rank",
+    "rw_rank"
+  ],
+  "status": "PASS",
+  "warmups": 1,
+  "workers": {
+    "1": [
+      {
+        "native_median_ns_per_solve": 47101.0,
+        "native_p95_ns_per_solve": 53087.5,
+        "native_samples_ns": [
+          106175,
+          82047,
+          94202
+        ],
+        "python_median_ns_per_solve": 55312.5,
+        "python_p95_ns_per_solve": 63773.0,
+        "solver": "order_rank",
+        "speedup_median": 1.1743381244559563
+      },
+      {
+        "native_median_ns_per_solve": 78252.0,
+        "native_p95_ns_per_solve": 102628.0,
+        "native_samples_ns": [
+          205256,
+          156504,
+          137591
+        ],
+        "python_median_ns_per_solve": 243171.0,
+        "python_p95_ns_per_solve": 291015.0,
+        "solver": "random_rank",
+        "speedup_median": 3.1075371875479223
+      },
+      {
+        "native_median_ns_per_solve": 215722.0,
+        "native_p95_ns_per_solve": 235170.5,
+        "native_samples_ns": [
+          470341,
+          431049,
+          431444
+        ],
+        "python_median_ns_per_solve": 1879134.0,
+        "python_p95_ns_per_solve": 6339847.0,
+        "solver": "grc_rank",
+        "speedup_median": 8.710905702709969
+      },
+      {
+        "native_median_ns_per_solve": 65813.5,
+        "native_p95_ns_per_solve": 93019.0,
+        "native_samples_ns": [
+          127559,
+          186038,
+          131627
+        ],
+        "python_median_ns_per_solve": 288744.0,
+        "python_p95_ns_per_solve": 385676.5,
+        "solver": "ffd_rank",
+        "speedup_median": 4.387306555645878
+      },
+      {
+        "native_median_ns_per_solve": 73191.5,
+        "native_p95_ns_per_solve": 75812.5,
+        "native_samples_ns": [
+          151625,
+          146383,
+          144475
+        ],
+        "python_median_ns_per_solve": 351069.5,
+        "python_p95_ns_per_solve": 370652.5,
+        "solver": "nrm_rank",
+        "speedup_median": 4.796588401658663
+      },
+      {
+        "native_median_ns_per_solve": 161381.0,
+        "native_p95_ns_per_solve": 162906.5,
+        "native_samples_ns": [
+          325813,
+          322762,
+          321199
+        ],
+        "python_median_ns_per_solve": 12263386.5,
+        "python_p95_ns_per_solve": 12529736.5,
+        "solver": "pl_rank",
+        "speedup_median": 75.99027456763807
+      },
+      {
+        "native_median_ns_per_solve": 417698.0,
+        "native_p95_ns_per_solve": 424989.0,
+        "native_samples_ns": [
+          849978,
+          835396,
+          822355
+        ],
+        "python_median_ns_per_solve": 31399448.0,
+        "python_p95_ns_per_solve": 35799514.0,
+        "solver": "nea_rank",
+        "speedup_median": 75.1726079607755
+      },
+      {
+        "native_median_ns_per_solve": 232449.0,
+        "native_p95_ns_per_solve": 281141.5,
+        "native_samples_ns": [
+          464898,
+          391705,
+          562283
+        ],
+        "python_median_ns_per_solve": 1265944.0,
+        "python_p95_ns_per_solve": 1461644.0,
+        "solver": "rw_rank",
+        "speedup_median": 5.446115061798502
+      }
+    ],
+    "2": [
+      {
+        "native_median_ns_per_solve": 3309706.5,
+        "native_p95_ns_per_solve": 5687897.0,
+        "native_samples_ns": [
+          11375794,
+          5800286,
+          6619413
+        ],
+        "python_median_ns_per_solve": 55312.5,
+        "python_p95_ns_per_solve": 63773.0,
+        "solver": "order_rank",
+        "speedup_median": 0.016712206958532427
+      },
+      {
+        "native_median_ns_per_solve": 1587141.5,
+        "native_p95_ns_per_solve": 3027599.5,
+        "native_samples_ns": [
+          2929033,
+          3174283,
+          6055199
+        ],
+        "python_median_ns_per_solve": 243171.0,
+        "python_p95_ns_per_solve": 291015.0,
+        "solver": "random_rank",
+        "speedup_median": 0.15321318231550243
+      },
+      {
+        "native_median_ns_per_solve": 22856448.0,
+        "native_p95_ns_per_solve": 24767035.5,
+        "native_samples_ns": [
+          49534071,
+          37564364,
+          45712896
+        ],
+        "python_median_ns_per_solve": 1879134.0,
+        "python_p95_ns_per_solve": 6339847.0,
+        "solver": "grc_rank",
+        "speedup_median": 0.08221461182419945
+      },
+      {
+        "native_median_ns_per_solve": 1288079.0,
+        "native_p95_ns_per_solve": 2616055.5,
+        "native_samples_ns": [
+          2576158,
+          2158049,
+          5232111
+        ],
+        "python_median_ns_per_solve": 288744.0,
+        "python_p95_ns_per_solve": 385676.5,
+        "solver": "ffd_rank",
+        "speedup_median": 0.22416637488849675
+      },
+      {
+        "native_median_ns_per_solve": 2442352.0,
+        "native_p95_ns_per_solve": 2825384.5,
+        "native_samples_ns": [
+          4884704,
+          5650769,
+          3715853
+        ],
+        "python_median_ns_per_solve": 351069.5,
+        "python_p95_ns_per_solve": 370652.5,
+        "solver": "nrm_rank",
+        "speedup_median": 0.14374238439012885
+      },
+      {
+        "native_median_ns_per_solve": 6156777.5,
+        "native_p95_ns_per_solve": 7697231.0,
+        "native_samples_ns": [
+          11876278,
+          15394462,
+          12313555
+        ],
+        "python_median_ns_per_solve": 12263386.5,
+        "python_p95_ns_per_solve": 12529736.5,
+        "solver": "pl_rank",
+        "speedup_median": 1.991851500236934
+      },
+      {
+        "native_median_ns_per_solve": 2546948.0,
+        "native_p95_ns_per_solve": 3084943.5,
+        "native_samples_ns": [
+          6169887,
+          5093896,
+          4867388
+        ],
+        "python_median_ns_per_solve": 31399448.0,
+        "python_p95_ns_per_solve": 35799514.0,
+        "solver": "nea_rank",
+        "speedup_median": 12.328264259812135
+      },
+      {
+        "native_median_ns_per_solve": 9606684.0,
+        "native_p95_ns_per_solve": 11386738.0,
+        "native_samples_ns": [
+          22773476,
+          15201848,
+          19213368
+        ],
+        "python_median_ns_per_solve": 1265944.0,
+        "python_p95_ns_per_solve": 1461644.0,
+        "solver": "rw_rank",
+        "speedup_median": 0.13177741664033082
+      }
+    ],
+    "8": [
+      {
+        "native_median_ns_per_solve": 3301012.5,
+        "native_p95_ns_per_solve": 5451727.5,
+        "native_samples_ns": [
+          6501917,
+          6602025,
+          10903455
+        ],
+        "python_median_ns_per_solve": 55312.5,
+        "python_p95_ns_per_solve": 63773.0,
+        "solver": "order_rank",
+        "speedup_median": 0.0167562225226351
+      },
+      {
+        "native_median_ns_per_solve": 5909083.5,
+        "native_p95_ns_per_solve": 7422851.5,
+        "native_samples_ns": [
+          14845703,
+          11818167,
+          10203741
+        ],
+        "python_median_ns_per_solve": 243171.0,
+        "python_p95_ns_per_solve": 291015.0,
+        "solver": "random_rank",
+        "speedup_median": 0.04115206698297629
+      },
+      {
+        "native_median_ns_per_solve": 43610958.0,
+        "native_p95_ns_per_solve": 48263116.5,
+        "native_samples_ns": [
+          96526233,
+          87221916,
+          85747553
+        ],
+        "python_median_ns_per_solve": 1879134.0,
+        "python_p95_ns_per_solve": 6339847.0,
+        "solver": "grc_rank",
+        "speedup_median": 0.04308857420651021
+      },
+      {
+        "native_median_ns_per_solve": 4492947.0,
+        "native_p95_ns_per_solve": 5436579.5,
+        "native_samples_ns": [
+          10873159,
+          7453446,
+          8985894
+        ],
+        "python_median_ns_per_solve": 288744.0,
+        "python_p95_ns_per_solve": 385676.5,
+        "solver": "ffd_rank",
+        "speedup_median": 0.06426605967085745
+      },
+      {
+        "native_median_ns_per_solve": 5985038.0,
+        "native_p95_ns_per_solve": 6028505.5,
+        "native_samples_ns": [
+          11970076,
+          12057011,
+          10860283
+        ],
+        "python_median_ns_per_solve": 351069.5,
+        "python_p95_ns_per_solve": 370652.5,
+        "solver": "nrm_rank",
+        "speedup_median": 0.058657856474762564
+      },
+      {
+        "native_median_ns_per_solve": 16815236.0,
+        "native_p95_ns_per_solve": 16815540.0,
+        "native_samples_ns": [
+          33631080,
+          33630472,
+          32270839
+        ],
+        "python_median_ns_per_solve": 12263386.5,
+        "python_p95_ns_per_solve": 12529736.5,
+        "solver": "pl_rank",
+        "speedup_median": 0.7293020746185186
+      },
+      {
+        "native_median_ns_per_solve": 7582871.0,
+        "native_p95_ns_per_solve": 8234671.5,
+        "native_samples_ns": [
+          15155179,
+          15165742,
+          16469343
+        ],
+        "python_median_ns_per_solve": 31399448.0,
+        "python_p95_ns_per_solve": 35799514.0,
+        "solver": "nea_rank",
+        "speedup_median": 4.140839004118625
+      },
+      {
+        "native_median_ns_per_solve": 33280497.5,
+        "native_p95_ns_per_solve": 38193794.5,
+        "native_samples_ns": [
+          62152666,
+          66560995,
+          76387589
+        ],
+        "python_median_ns_per_solve": 1265944.0,
+        "python_p95_ns_per_solve": 1461644.0,
+        "solver": "rw_rank",
+        "speedup_median": 0.03803861405617509
+      }
+    ]
+  }
+}

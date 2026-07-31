@@ -35,6 +35,7 @@ using controller::ControllerFailurePhase;
 using controller::ControllerMutationOptions;
 using controller::ControllerOperation;
 using controller::ControllerSelection;
+using controller::DeployWithNodeSlotsOptions;
 using controller::LinkMapperErrorCode;
 using controller::LinkMapperException;
 using controller::LinkMapperOperation;
@@ -761,6 +762,200 @@ bool relevant_solution_equal(
         left.description == right.description;
 }
 
+core::NodeSlots complete_node_slots()
+{
+    core::NodeSlots result;
+    // Deliberately differs from vertex order. Python forwards dict insertion
+    // order to l2s2, and the native API must retain the same output order.
+    result.insert_or_assign(2, 2);
+    result.insert_or_assign(0, 0);
+    result.insert_or_assign(1, 4);
+    return result;
+}
+
+DeployWithNodeSlotsOptions node_slot_options(std::size_t workers)
+{
+    DeployWithNodeSlotsOptions result;
+    result.shortest_method = ShortestPathMethod::bfs_shortest;
+    result.k = 1;
+    result.workers.topology_constraint_workers = workers;
+    result.workers.candidate_workers = workers;
+    return result;
+}
+
+bool mapped_solution_equal(
+    const core::Solution& left,
+    const core::Solution& right)
+{
+    return relevant_solution_equal(left, right) &&
+        left.v_net_constraint_offsets.node_level ==
+            right.v_net_constraint_offsets.node_level &&
+        left.v_net_constraint_offsets.link_level ==
+            right.v_net_constraint_offsets.link_level &&
+        left.v_net_constraint_offsets.path_level ==
+            right.v_net_constraint_offsets.path_level &&
+        left.v_net_constraint_violations.node_level ==
+            right.v_net_constraint_violations.node_level &&
+        left.v_net_constraint_violations.link_level ==
+            right.v_net_constraint_violations.link_level &&
+        left.v_net_constraint_violations.path_level ==
+            right.v_net_constraint_violations.path_level &&
+        left.v_net_total_hard_constraint_violation ==
+            right.v_net_total_hard_constraint_violation;
+}
+
+struct NodeSlotDeploymentSnapshot
+{
+    bool deployed = false;
+    core::Solution solution;
+    PhysicalSnapshot physical;
+
+    friend bool operator==(
+        const NodeSlotDeploymentSnapshot& left,
+        const NodeSlotDeploymentSnapshot& right)
+    {
+        return left.deployed == right.deployed &&
+            mapped_solution_equal(left.solution, right.solution) &&
+            left.physical == right.physical;
+    }
+};
+
+NodeSlotDeploymentSnapshot run_node_slot_deployment(
+    std::size_t workers,
+    bool fail_second_route)
+{
+    PhysicalValues values;
+    if (fail_second_route)
+    {
+        values.second_bw = 3;
+    }
+    Fixture fixture(values);
+    core::Solution solution = make_solution(false);
+    const core::NodeSlots slots = complete_node_slots();
+    const bool deployed = fixture.prepared.deploy_with_node_slots(
+        slots, solution, node_slot_options(workers));
+    return NodeSlotDeploymentSnapshot{
+        deployed, std::move(solution), physical_snapshot(fixture)};
+}
+
+void test_node_slot_deployment_success_and_workers()
+{
+    const NodeSlotDeploymentSnapshot baseline =
+        run_node_slot_deployment(0U, false);
+    expect(baseline.deployed && baseline.solution.result &&
+               baseline.solution.place_result &&
+               baseline.solution.route_result,
+           "node-slot deployment did not succeed");
+    const auto& slots = baseline.solution.node_slots.entries();
+    expect(slots.size() == 3U &&
+               slots[0U].key == 2 && slots[0U].value == 2 &&
+               slots[1U].key == 0 && slots[1U].value == 0 &&
+               slots[2U].key == 1 && slots[2U].value == 4,
+           "node-slot deployment changed insertion order");
+    const auto& paths = baseline.solution.link_paths.entries();
+    expect(paths.size() == 2U &&
+               paths[0U].key == core::SolutionLink{0, 2} &&
+               paths[1U].key == core::SolutionLink{1, 2},
+           "node-slot deployment link output order mismatch");
+    expect(baseline.physical == PhysicalSnapshot{
+               {{8, 10, 6, 10, 7}}, {{7, 6}}},
+           "node-slot deployment physical resources mismatch");
+
+    for (const std::size_t workers : {1U, 2U, 8U})
+    {
+        expect(run_node_slot_deployment(workers, false) == baseline,
+               "node-slot deployment workers changed success output");
+    }
+}
+
+void test_node_slot_deployment_rejects_incomplete_and_minus_one()
+{
+    {
+        Fixture fixture;
+        core::Solution solution = make_solution();
+        solution.node_slots.insert_or_assign(9, 9);
+        core::NodeSlots incomplete;
+        incomplete.insert_or_assign(0, 0);
+        incomplete.insert_or_assign(1, 4);
+        expect(!fixture.prepared.deploy_with_node_slots(
+                   incomplete, solution, node_slot_options(8U)) &&
+                   !solution.place_result && !solution.result &&
+                   solution.route_result && solution.node_slots.size() == 1U &&
+                   slot_equals(solution, 9, 9) &&
+                   physical_snapshot(fixture) == PhysicalSnapshot{
+                       {{10, 10, 10, 10, 10}}, {{10, 10}}},
+               "incomplete node slots mutated state or flags out of order");
+    }
+
+    {
+        Fixture fixture;
+        core::Solution solution = make_solution();
+        solution.node_slots.insert_or_assign(9, 9);
+        core::NodeSlots invalid;
+        invalid.insert_or_assign(0, 0);
+        invalid.insert_or_assign(1, -1);
+        invalid.insert_or_assign(2, 2);
+        expect(!fixture.prepared.deploy_with_node_slots(
+                   invalid, solution, node_slot_options(8U)) &&
+                   !solution.place_result && !solution.result &&
+                   solution.route_result && solution.node_slots.size() == 1U &&
+                   slot_equals(solution, 9, 9) &&
+                   physical_snapshot(fixture) == PhysicalSnapshot{
+                       {{10, 10, 10, 10, 10}}, {{10, 10}}},
+               "-1 node slot mutated state or flags out of order");
+    }
+}
+
+void test_node_slot_deployment_placement_failure_order()
+{
+    PhysicalValues values;
+    values.cpu[4U] = 2;
+    Fixture fixture(values);
+    core::NodeSlots slots;
+    slots.insert_or_assign(0, 0);
+    slots.insert_or_assign(1, 4);
+    slots.insert_or_assign(2, 2);
+    core::Solution solution = make_solution();
+    expect(!fixture.prepared.deploy_with_node_slots(
+               slots, solution, node_slot_options(8U)) &&
+               !solution.place_result && !solution.result &&
+               solution.route_result && solution.node_slots.size() == 1U &&
+               slot_equals(solution, 0, 0) && solution.link_paths.empty() &&
+               physical_snapshot(fixture) == PhysicalSnapshot{
+                   {{8, 10, 10, 10, 2}}, {{10, 10}}},
+           "node-slot placement failure lost ordered partial state");
+}
+
+void test_node_slot_deployment_route_failure_order_and_workers()
+{
+    const NodeSlotDeploymentSnapshot baseline =
+        run_node_slot_deployment(0U, true);
+    expect(!baseline.deployed && !baseline.solution.result &&
+               baseline.solution.place_result &&
+               !baseline.solution.route_result,
+           "node-slot route failure flags mismatch");
+    const auto& slots = baseline.solution.node_slots.entries();
+    const auto& paths = baseline.solution.link_paths.entries();
+    expect(slots.size() == 3U &&
+               slots[0U].key == 2 && slots[1U].key == 0 &&
+               slots[2U].key == 1 && paths.size() == 2U &&
+               paths[0U].key == core::SolutionLink{0, 2} &&
+               paths[0U].value ==
+                   std::vector<core::SolutionLink>{{0, 2}} &&
+               paths[1U].key == core::SolutionLink{1, 2} &&
+               paths[1U].value.empty() &&
+               baseline.solution.link_paths_info.size() == 1U &&
+               baseline.physical == PhysicalSnapshot{
+                   {{8, 10, 6, 10, 7}}, {{7, 3}}},
+           "node-slot route failure lost Python output/mutation order");
+
+    for (const std::size_t workers : {1U, 2U, 8U})
+    {
+        expect(run_node_slot_deployment(workers, true) == baseline,
+               "node-slot deployment workers changed failure output");
+    }
+}
+
 void expect_deployed_disjoint(
     const Fixture& fixture,
     std::string_view message)
@@ -1001,6 +1196,14 @@ int main()
         run("middle-route partial",
             test_middle_route_failure_preserves_partial_state);
         run("undo", test_undo_success_missing_and_partial);
+        run("node slots success/workers",
+            test_node_slot_deployment_success_and_workers);
+        run("node slots validation",
+            test_node_slot_deployment_rejects_incomplete_and_minus_one);
+        run("node slots placement partial",
+            test_node_slot_deployment_placement_failure_order);
+        run("node slots route partial/workers",
+            test_node_slot_deployment_route_failure_order_and_workers);
         run("deploy/release/undo/workers",
             test_deploy_release_undo_deploy_and_workers);
         run("duplicate/replay",

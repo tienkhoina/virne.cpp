@@ -175,3 +175,11 @@ one warm-up and three samples. Python measured `106.517902 ms`; C++ measured
 3,145,728 bytes, and checksum `10478239091350211214`. Full provenance and
 hashes are in `../results/link_rank_2026-07-29.md`; the machine-readable
 differential and benchmark JSON files beside it are frozen.
+
+## Integration worker correction (2026-07-30)
+
+The API is unchanged. FFD reduction now uses the persistent deterministic
+executor with a fixed 4,096-edge grain. Small solver link sets stay on the exact
+sequential path even when the caller configures a wider maximum; large sets use
+that caller width without per-call thread creation or host-derived selection.
+Focused width/concurrency units pass and the frozen benchmark was not rerun.

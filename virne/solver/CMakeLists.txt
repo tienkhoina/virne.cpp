@@ -77,6 +77,72 @@ target_link_libraries(
     Threads::Threads
 )
 
+add_library(vne_heuristic_ffd_rank
+    heuristic/ffd_rank.cpp
+)
+
+target_include_directories(
+    vne_heuristic_ffd_rank
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_link_libraries(
+    vne_heuristic_ffd_rank
+    PUBLIC
+    vne_heuristic_node_rank
+)
+
+add_library(vne_heuristic_standard_rank_variants
+    heuristic/standard_rank_variants.cpp
+)
+
+target_include_directories(
+    vne_heuristic_standard_rank_variants
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_link_libraries(
+    vne_heuristic_standard_rank_variants
+    PUBLIC
+    vne_heuristic_node_rank
+)
+
+add_library(vne_heuristic_random_rank
+    heuristic/random_rank.cpp
+)
+
+target_include_directories(
+    vne_heuristic_random_rank
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_link_libraries(
+    vne_heuristic_random_rank
+    PUBLIC
+    vne_heuristic_node_rank
+)
+
+add_library(vne_heuristic_custom_rank_variants
+    heuristic/custom_rank_variants.cpp
+    heuristic/python_int_set_order.cpp
+)
+
+target_include_directories(
+    vne_heuristic_custom_rank_variants
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_link_libraries(
+    vne_heuristic_custom_rank_variants
+    PUBLIC
+    vne_heuristic_node_rank
+    vne_constraint_checker
+)
+
 add_library(vne_solver)
 
 target_sources(vne_solver PRIVATE
@@ -87,6 +153,7 @@ target_sources(vne_solver PRIVATE
     heuristic/ego_network.cpp
     heuristic/fit.cpp
     heuristic/joint_pr.cpp
+    heuristic/registry.cpp
 
     heuristic/nea_bc.cpp
     heuristic/nea_par.cpp
@@ -107,7 +174,11 @@ target_link_libraries(
     PUBLIC
     vne_network
     vne_base_solver
+    vne_heuristic_custom_rank_variants
+    vne_heuristic_ffd_rank
     vne_heuristic_node_rank
+    vne_heuristic_random_rank
+    vne_heuristic_standard_rank_variants
     vne_link_rank
     vne_node_rank
 )

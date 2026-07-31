@@ -13,3 +13,5 @@
 /.venv/
 __pycache__/
 *.py[cod]
+# Main CLI experiment output; accepted port evidence lives in porting/results.
+/results/

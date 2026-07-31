@@ -7,6 +7,7 @@
 #include <any>
 #include <charconv>
 #include <cmath>
+#include <cstring>
 #include <exception>
 #include <limits>
 #include <system_error>
@@ -24,6 +25,23 @@ double counter_number_as_double(const CounterNumber& value) noexcept {
             return static_cast<double>(number);
         },
         value);
+}
+
+double counter_number_sum_as_double(
+    const CounterNumber& left,
+    const CounterNumber& right) noexcept {
+    const auto* left_integer = std::get_if<std::int64_t>(&left);
+    const auto* right_integer = std::get_if<std::int64_t>(&right);
+    if (left_integer != nullptr && right_integer != nullptr) {
+        const std::uint64_t bits =
+            static_cast<std::uint64_t>(*left_integer) +
+            static_cast<std::uint64_t>(*right_integer);
+        std::int64_t wrapped = 0;
+        static_assert(sizeof(wrapped) == sizeof(bits));
+        std::memcpy(&wrapped, &bits, sizeof(wrapped));
+        return static_cast<double>(wrapped);
+    }
+    return counter_number_as_double(left) + counter_number_as_double(right);
 }
 
 std::string format_integer(const std::int64_t value) {
@@ -808,15 +826,18 @@ void Recorder::count_initial_physical_network(
     initial_physical_state_.emplace();
 
     const CounterOptions counter_options{options.workers};
-    initial_physical_state_->available_resource = counter_number_as_double(
-        prepared_physical_counter_->calculate_sum_network_resource(
-            true, true, counter_options));
-    initial_physical_state_->node_available_resource = counter_number_as_double(
-        prepared_physical_counter_->calculate_sum_network_resource(
-            true, false, counter_options));
-    initial_physical_state_->link_available_resource = counter_number_as_double(
-        prepared_physical_counter_->calculate_sum_network_resource(
-            false, true, counter_options));
+    const CounterNumber node_available =
+        prepared_physical_counter_->calculate_sum_node_resource(
+            counter_options);
+    const CounterNumber link_available =
+        prepared_physical_counter_->calculate_sum_link_resource(
+            counter_options);
+    initial_physical_state_->available_resource =
+        counter_number_sum_as_double(node_available, link_available);
+    initial_physical_state_->node_available_resource =
+        counter_number_as_double(node_available);
+    initial_physical_state_->link_available_resource =
+        counter_number_as_double(link_available);
 
     physical_node_capacity_ = physical_network.num_nodes();
     physical_node_memberships_.resize(physical_node_capacity_);
@@ -864,6 +885,23 @@ RecorderRecord Recorder::count_prepared(
         &virtual_counter, physical_network, solution, options);
 }
 
+RecorderRecord Recorder::count_precomputed_arrival(
+    const network::PhysicalNetwork& physical_network,
+    Solution& solution,
+    const RecorderOptions options) {
+    check_event_for_count();
+    if (state_.event->type != network::VirtualEventType::arrival) {
+        throw RecorderException(
+            RecorderErrorCode::invalid_event_type,
+            RecorderOperation::count,
+            "precomputed solution counting requires an arrival event",
+            state_.event->event_id,
+            solution.v_net_id);
+    }
+    update_count_state(physical_network, solution, options);
+    return RecorderRecord(state_, solution);
+}
+
 RecorderRecord Recorder::count_impl(
     const PreparedCounter* const virtual_counter,
     const network::PhysicalNetwork& physical_network,
@@ -901,15 +939,20 @@ void Recorder::update_count_state(
     }
 
     const CounterOptions counter_options{options.workers};
-    state_.physical_available_resource = counter_number_as_double(
-        physical_counter->calculate_sum_network_resource(
-            true, true, counter_options));
-    state_.physical_node_available_resource = counter_number_as_double(
-        physical_counter->calculate_sum_network_resource(
-            true, false, counter_options));
-    state_.physical_link_available_resource = counter_number_as_double(
-        physical_counter->calculate_sum_network_resource(
-            false, true, counter_options));
+    // The aggregate call used to scan node and link resources once, followed
+    // by two identical scans for the split fields. Preserve Counter's exact
+    // integer wrapping / floating addition while reducing the hot path from
+    // four full graph reductions to two.
+    const CounterNumber node_available =
+        physical_counter->calculate_sum_node_resource(counter_options);
+    const CounterNumber link_available =
+        physical_counter->calculate_sum_link_resource(counter_options);
+    state_.physical_available_resource =
+        counter_number_sum_as_double(node_available, link_available);
+    state_.physical_node_available_resource =
+        counter_number_as_double(node_available);
+    state_.physical_link_available_resource =
+        counter_number_as_double(link_available);
 
     if (!initial_physical_state_.has_value()) {
         throw RecorderException(
@@ -1038,7 +1081,10 @@ void Recorder::remove_membership(const Solution& solution) {
                 solution.v_net_id,
                 physical_node);
         }
-        memberships.erase(found);
+        // Membership order is private and only emptiness is observable.
+        // Swap-pop avoids shifting every later in-service request on leave.
+        *found = memberships.back();
+        memberships.pop_back();
         if (memberships.empty()) {
             --live_membership_node_count_;
         }
@@ -1050,7 +1096,9 @@ const RecorderRecord& Recorder::add_record(RecorderRecord record) {
     // ClassDict intentionally exposes shared recursive container types. The
     // recorder is a value-snapshot boundary, so force its documented deep
     // snapshot representation before publishing the history entry.
-    record.extra = utils::ClassDict::from_dict(record.extra.to_dict());
+    if (!record.extra.empty()) {
+        record.extra = utils::ClassDict::from_dict(record.extra.to_dict());
+    }
     memory_.push_back(std::move(record));
     if (config_.temporary_records) {
         temporary_save_record(memory_.back());

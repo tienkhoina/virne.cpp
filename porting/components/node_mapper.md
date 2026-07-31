@@ -144,3 +144,13 @@ configured candidate workers `1/2/8` took `3.289713 / 16.008148 / 19.886030
 ms`, respectively `18.628x / 3.828x / 3.082x` faster. The case favors worker
 1; worker width remains caller configuration and no host-derived policy is
 embedded. See `porting/results/node_mapper_2026-07-29.md`.
+
+## Integration worker correction (2026-07-30)
+
+The public API is unchanged. Candidate checks no longer create threads per
+virtual node. Lists below 128 entries are canonical sequential. A larger search
+probes up to eight leading candidates sequentially, then checks ordered windows
+through the persistent executor. Each window is consumed in input order, so the
+first feasible candidate/error remains exact and later windows stop after
+success. Width `0/1` remains sequential and no host width is selected. Focused
+equality/error/concurrent-caller units pass; the frozen benchmark was not rerun.

@@ -3,6 +3,9 @@
 #include "physical_network.h"
 #include "virtual_network_request_simulator.h"
 
+#include "../utils/dataset.h"
+#include "../utils/setting.h"
+
 #include <cstddef>
 #include <cstdint>
 #include <optional>
@@ -78,5 +81,17 @@ public:
         GeneratorSeedMode seed_mode =
             GeneratorSeedMode::compatibility_root_seed);
 };
+
+// Cold config adapters shared by the main Hydra-compatible resolver and the
+// dataset generator.  The dynamic YAML names are decoded once here; callers
+// retain the typed settings for all subsequent work.
+virne::utils::PhysicalDatasetSetting physical_dataset_setting_from_setting(
+    const virne::utils::SettingDocument& setting);
+
+virne::utils::VirtualDatasetSetting virtual_dataset_setting_from_setting(
+    const virne::utils::SettingDocument& setting);
+
+virne::utils::VirtualDatasetSetting virtual_dataset_setting_from_config(
+    const VirtualNetworkSimulationConfig& config);
 
 }  // namespace virne::network

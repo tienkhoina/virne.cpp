@@ -1,5 +1,6 @@
 #include "node_mapper.h"
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -753,6 +754,29 @@ void test_worker_equality_and_later_error_suppression()
             mapped_node(solution, 1) == 1 &&
             mapped_node(solution, 2) == 1,
         "later-error suppression changed first-feasible order");
+
+    Fixture window_fixture;
+    PreparedNodeMapper window_mapper = window_fixture.prepare();
+    core::Solution window_solution = make_solution();
+    std::vector<Vertex> window_candidates(128U, 2U);
+    std::fill_n(window_candidates.begin(), 16U, Vertex{1U});
+    window_candidates[16U] = 0U;
+    window_candidates[17U] = 99U;
+    NodeMappingOptions window_options;
+    window_options.reusable = true;
+    window_options.candidate_workers = 8U;
+    expect(
+        window_mapper.node_mapping(
+            {0U, 1U, 2U},
+            window_candidates,
+            window_solution,
+            window_options),
+        "ordered candidate window mapping failed");
+    expect(
+        mapped_node(window_solution, 0) == 0 &&
+            mapped_node(window_solution, 1) == 1 &&
+            mapped_node(window_solution, 2) == 1,
+        "ordered candidate window changed first-feasible/error order");
 }
 
 void test_concurrent_independent_callers()
