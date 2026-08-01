@@ -1510,6 +1510,45 @@ add_test(
 )
 
 add_executable(
+    vne_exact_solver_unit
+    exact_solver_unit.cpp
+)
+
+target_link_libraries(
+    vne_exact_solver_unit
+    PRIVATE
+        vne_exact_solver
+        vne_controller
+        vne_counter
+        vne_recorder
+        vne_logger
+        vne_physical_network
+        vne_virtual_network
+        Threads::Threads
+)
+
+if(WIN32)
+    add_custom_command(
+        TARGET vne_exact_solver_unit
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${VIRNE_ORTOOLS_ROOT}/bin"
+            "$<TARGET_FILE_DIR:vne_exact_solver_unit>"
+        VERBATIM
+    )
+else()
+    set_property(
+        TARGET vne_exact_solver_unit
+        APPEND PROPERTY BUILD_RPATH "${VIRNE_ORTOOLS_ROOT}/lib"
+    )
+endif()
+
+add_test(
+    NAME vne_exact_solver_unit
+    COMMAND vne_exact_solver_unit
+)
+
+add_executable(
     vne_system_unit
     system_unit.cpp
 )

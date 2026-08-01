@@ -57,6 +57,37 @@ target_link_libraries(
     Threads::Threads
 )
 
+add_library(vne_exact_solver
+    exact/exact_solver.cpp
+    exact/exact_with_risk.cpp
+)
+
+target_include_directories(
+    vne_exact_solver
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_link_libraries(
+    vne_exact_solver
+    PUBLIC
+    vne_base_solver
+    vne_controller
+    vne_physical_network
+    virne_ortools
+    random_lib
+    Threads::Threads
+)
+
+# The official target uses C++20 for MSVC and C++17 for GCC/Clang. Keep that
+# conditional contract local to this leaf; no language-level change reaches
+# the frozen modules or their consumers.
+if(MSVC)
+    target_compile_features(vne_exact_solver PRIVATE cxx_std_20)
+else()
+    target_compile_features(vne_exact_solver PRIVATE cxx_std_17)
+endif()
+
 add_library(vne_heuristic_node_rank
     heuristic/node_rank.cpp
 )
@@ -172,9 +203,10 @@ target_include_directories(
 target_link_libraries(
     vne_solver
     PUBLIC
-    vne_network
-    vne_base_solver
-    vne_heuristic_custom_rank_variants
+        vne_network
+        vne_base_solver
+        vne_exact_solver
+        vne_heuristic_custom_rank_variants
     vne_heuristic_ffd_rank
     vne_heuristic_node_rank
     vne_heuristic_random_rank

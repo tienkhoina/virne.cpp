@@ -11,13 +11,16 @@ tracked by Git.
 | Boost | 1.85.0 (`BOOST_VERSION=108500`) | `libs/boost` | headers/interface target `virne_boost` |
 | yaml-cpp | 0.8.0 | `libs/yaml-cpp` | local static target `yaml-cpp` |
 | tabulate | 1.4.0 | `libs/tabulate` | headers/interface target `virne_tabulate` |
+| OR-Tools reference source | 9.15 | `libs/ortools-src` | audit/reference only; not linked |
+| OR-Tools C++ (Linux) | 9.15.6755 | `libs/ortools` | imported shared target `virne_ortools` |
+| OR-Tools C++ (Windows) | 9.15.6755 | `libs/ortools-win` | imported DLL/import-library target `virne_ortools` |
 
 The production CMake files deliberately do not call `find_package` for these
 libraries.  Add future C++ dependencies under `libs/`, pin their version here,
 and expose an explicit local target; do not install them into the environment.
 
 `/libs/` is intentionally a workspace-local payload and is ignored by Git.
-The prepared workspace already contains all three source trees. A fresh clone
+The prepared workspace already contains all listed local payloads. A fresh clone
 must populate the exact paths above from the following archives and verify the
 SHA-256; it must not fall back to OS/Conda packages. The same hashes are stored
 in the repository-owned, machine-readable `DEPENDENCIES.sha256` manifest.
@@ -27,6 +30,9 @@ in the repository-owned, machine-readable `DEPENDENCIES.sha256` manifest.
 | Boost 1.85.0 | `https://archives.boost.io/release/1.85.0/source/boost_1_85_0.tar.gz` | `be0d91732d5b0cc6fbb275c7939974457e79b54d6f07ce2e3dfdd68bef883b0b` |
 | yaml-cpp 0.8.0 | `https://github.com/jbeder/yaml-cpp/archive/refs/tags/0.8.0.tar.gz` | `fbe74bbdcee21d656715688706da3c8becfd946d92cd44705cc6098bb23b3a16` |
 | tabulate 1.4.0 | `https://github.com/p-ranav/tabulate/archive/refs/tags/v1.4.tar.gz` | `c20cdc3175526a069e932136a7cbdf6f27b137bdb4fc5f574eb5a497228c8e11` |
+| OR-Tools source 9.15 | `https://github.com/google/or-tools/releases/download/v9.15/or-tools-9.15.tar.gz` | `599c870319bb127441d92c452d8f79bca46ca6fd295c1deb8031ed303a361311` |
+| OR-Tools Ubuntu 22.04 C++ 9.15.6755 | `https://github.com/google/or-tools/releases/download/v9.15/or-tools_amd64_ubuntu-22.04_cpp_v9.15.6755.tar.gz` | `0b30114d7c05f0596286bf3ef8d02adcf5f45be3b39273490e6bb74a2a9bd1ea` |
+| OR-Tools Visual Studio 2022 C++ 9.15.6755 | `https://github.com/google/or-tools/releases/download/v9.15/or-tools_x64_VisualStudio2022_cpp_v9.15.6755.zip` | `43429c741641c8b495ee77e44ea00f0f4524519495fd2edaf929003aa2b2ea30` |
 
 The complete reconstruction procedure from the repository root is:
 
@@ -38,6 +44,12 @@ curl -fL https://github.com/jbeder/yaml-cpp/archive/refs/tags/0.8.0.tar.gz \
   -o .deps-cache/yaml-cpp-0.8.0.tar.gz
 curl -fL https://github.com/p-ranav/tabulate/archive/refs/tags/v1.4.tar.gz \
   -o .deps-cache/tabulate-1.4.tar.gz
+curl -fL https://github.com/google/or-tools/releases/download/v9.15/or-tools-9.15.tar.gz \
+  -o .deps-cache/or-tools-9.15.tar.gz
+curl -fL https://github.com/google/or-tools/releases/download/v9.15/or-tools_amd64_ubuntu-22.04_cpp_v9.15.6755.tar.gz \
+  -o .deps-cache/or-tools_amd64_ubuntu-22.04_cpp_v9.15.6755.tar.gz
+curl -fL https://github.com/google/or-tools/releases/download/v9.15/or-tools_x64_VisualStudio2022_cpp_v9.15.6755.zip \
+  -o .deps-cache/or-tools_x64_VisualStudio2022_cpp_v9.15.6755.zip
 (cd .deps-cache && sha256sum -c ../DEPENDENCIES.sha256)
 
 tar -xzf .deps-cache/boost_1_85_0.tar.gz -C libs
@@ -46,11 +58,18 @@ tar -xzf .deps-cache/tabulate-1.4.tar.gz -C libs
 mv libs/boost_1_85_0 libs/boost
 mv libs/yaml-cpp-0.8.0 libs/yaml-cpp
 mv libs/tabulate-1.4 libs/tabulate
+tar -xzf .deps-cache/or-tools-9.15.tar.gz -C libs
+mv libs/or-tools-9.15 libs/ortools-src
+tar -xzf .deps-cache/or-tools_amd64_ubuntu-22.04_cpp_v9.15.6755.tar.gz -C libs
+mv libs/or-tools_x86_64_Ubuntu-22.04_cpp_v9.15.6755 libs/ortools
+unzip -q .deps-cache/or-tools_x64_VisualStudio2022_cpp_v9.15.6755.zip -d libs
+mv libs/or-tools_x64_VisualStudio2022_cpp_v9.15.6755 libs/ortools-win
 ```
 
-These commands are for a fresh clone where the three destination directories
-do not yet exist. They download and unpack source only into repository-local
-paths; they do not invoke a package manager or install into any environment.
+These commands are for a fresh clone where the destination directories
+do not yet exist. They download and unpack only the pinned source/binary
+payloads into repository-local paths; they do not invoke a package manager or
+install into any environment.
 
 The repository-local `.venv` is a test-only exception requested for the
 NetworkX oracle. The oracle baseline is CPython 3.10, NetworkX 3.4.2, NumPy

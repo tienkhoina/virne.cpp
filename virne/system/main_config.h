@@ -5,6 +5,8 @@
 #include "../core/logger.h"
 #include "../network/physical_network.h"
 #include "../solver/heuristic/bfs_trials.h"
+#include "../solver/exact/exact_solver.h"
+#include "../solver/exact/exact_with_risk.h"
 #include "../utils/setting.h"
 #include "config/config.h"
 #include "py_random.h"
@@ -76,6 +78,8 @@ struct MainConfig {
     std::string solver_name;
     solver::SolverConfig solver_config;
     solver::heuristic::BfsSolverParameters bfs_solver_parameters;
+    solver::exact::ExactSolverParameters exact_solver_parameters;
+    solver::exact::ExactRiskParameters exact_risk_parameters;
     core::RecorderConfig recorder_config;
     std::string records_file_name = "records.csv";
     std::string summary_file_name = "summary.csv";

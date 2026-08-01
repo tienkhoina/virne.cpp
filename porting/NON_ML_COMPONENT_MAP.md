@@ -1,6 +1,6 @@
 # Non-ML Python component map
 
-Progress note (2026-07-30): the complete non-solver foundation through
+Progress note (2026-08-01): the complete non-solver foundation through
 `core.Environment`, LinkRank, NodeRank, BaseSolver, all 14 canonical decorated
 classes in `solver.heuristic`, and the native non-ML system/main runtime are
 implemented. Accepted component benchmarks remain frozen. The combined node
@@ -13,12 +13,33 @@ rejected requests and removes the per-request physical clone/double-deploy
 bottleneck; its one GCC 11 signal is documented separately from frozen
 component benchmarks.
 
+The exact registry, split-capable integral MIP and compact meta-flow GLOP paths are now
+implemented at `solver/exact`: `mip`, `d_round` and `r_round` are direct
+registry fields, and the native capacity formulation supports every selected
+node/link resource instead of Python's single `cpu`/`bw` lanes. The focused
+multi-resource unit passes all three names, including forced split flow,
+aggregate capacity, typed integer journals and fail-closed numeric/topology
+guards. Backend parallelism is exposed as the fixed
+`native.workers.exact` field. A small
+one-resource MIP smoke structurally matches Python and measures a 1.955914x
+median speedup; native Main smokes pass all three names. Different OR-Tools
+releases, symmetric mapping choices and cross-language Main/rounding
+differentials keep that signal non-canonical; this
+note therefore does not mark the leaf complete.
+
+The separate `exact_with_risk` registry entry copies the integral exact model
+and changes only its objective. A bounded residual-fragmentation surrogate
+breaks equal-flow-length ties without allowing risk to select a longer route;
+floating-only flow uses a two-phase primary-objective lock. Its API and focused
+proof are in `components/exact_with_risk.md`.
+
 The canonical `solver.heuristic` directory is complete; read
 `components/heuristic_registry.md` rather than reopening its implementation.
-The next independent solver leaf is exact or meta-heuristic. Reuse completed
-dependencies and open their source only where the API document cannot resolve
-parity or a measured hot-path optimization. Torch-backed seeding, ML/RL and
-MCF remain deferred.
+For exact work, read `components/exact_solvers.md`; finish its listed
+validation before moving to meta-heuristics. Reuse completed dependencies and
+open their source only where the API document cannot resolve parity or a
+measured hot-path optimization. Torch-backed seeding, ML/RL and specialized
+Controller MCF remain deferred.
 
 Source inventory was taken at original Virne commit
 `d1ec1e4a20461fc9bad50612ad5026fd31e693a8`. The checkout was clean.
@@ -46,9 +67,11 @@ The whole `virne/solver/learning/**` tree is excluded for this phase.
 - Existing C++ tree originally contained 48 `.cpp` and 48 `.h` stubs, all zero
   bytes, plus five module CMake files.
 - 43 C++ stub paths map directly to Python modules.
-- Python modules without a C++ scaffold include exact solvers
-  (`d_rounding`, `mip`, `r_rounding`), eleven meta-heuristic modules, and
-  `changeable_system`/`time_window_system`.
+- At the initial inventory, Python modules without a C++ scaffold included the
+  exact solvers (`d_rounding`, `mip`, `r_rounding`), eleven meta-heuristic
+  modules, and `changeable_system`/`time_window_system`. Exact now has the
+  native aggregate `solver/exact/exact_solver.{h,cpp}`; the inventory fact is
+  retained only as baseline provenance.
 - C++ orphan stubs without a Python source counterpart are `solver/debug_obs`
   and heuristic `nea_bc`, `nea_par`, `nrm_bc_env`, `nrm_par_solver`; do not
   implement them without first locating their provenance.

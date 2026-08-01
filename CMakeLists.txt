@@ -24,6 +24,13 @@ set(
     CMAKE_EXPORT_COMPILE_COMMANDS ON
 )
 
+# Windows SDK headers expose min/max macros unless NOMINMAX is set. They
+# corrupt standard-library calls in otherwise portable frozen leaves when the
+# native OR-Tools ABI is built with clang-cl/MSVC.
+if(WIN32)
+    add_compile_definitions(NOMINMAX BOOST_ALL_NO_LIB)
+endif()
+
 #
 # Third-party libraries
 #
@@ -32,6 +39,51 @@ set(
     VIRNE_LIB_DIR
     ${CMAKE_CURRENT_SOURCE_DIR}/libs
 )
+
+# OR-Tools is consumed through the official prebuilt C++ distribution pinned
+# in DEPENDENCIES.md. Keep Linux (Docker/GCC) and Windows (MSVC-compatible
+# clang-cl) payloads inside the workspace; no system/Conda solver is accepted.
+if(WIN32)
+    set(VIRNE_ORTOOLS_ROOT ${VIRNE_LIB_DIR}/ortools-win)
+    set(VIRNE_ORTOOLS_IMPLIB ${VIRNE_ORTOOLS_ROOT}/lib/ortools.lib)
+    set(VIRNE_ORTOOLS_RUNTIME ${VIRNE_ORTOOLS_ROOT}/bin/ortools.dll)
+    if(NOT EXISTS ${VIRNE_ORTOOLS_IMPLIB})
+        message(FATAL_ERROR
+            "Missing vendored OR-Tools Windows C++ payload: ${VIRNE_ORTOOLS_IMPLIB}")
+    endif()
+    add_library(virne_ortools SHARED IMPORTED GLOBAL)
+    set_target_properties(virne_ortools PROPERTIES
+        IMPORTED_IMPLIB "${VIRNE_ORTOOLS_IMPLIB}"
+        IMPORTED_LOCATION "${VIRNE_ORTOOLS_RUNTIME}"
+        INTERFACE_INCLUDE_DIRECTORIES "${VIRNE_ORTOOLS_ROOT}/include"
+        INTERFACE_COMPILE_DEFINITIONS
+            "OR_BUILD_DLL;OR_PROTO_DLL=__declspec(dllimport);USE_MATH_OPT;USE_BOP;USE_CBC;USE_CLP;USE_GLOP;USE_HIGHS;USE_PDLP;USE_SCIP;__WIN32__;PROTOBUF_USE_DLLS;ABSL_CONSUME_DLL")
+    file(GLOB VIRNE_ORTOOLS_WINDOWS_LIBS
+        "${VIRNE_ORTOOLS_ROOT}/lib/*.lib")
+    list(REMOVE_ITEM VIRNE_ORTOOLS_WINDOWS_LIBS "${VIRNE_ORTOOLS_IMPLIB}")
+    target_link_libraries(virne_ortools INTERFACE ${VIRNE_ORTOOLS_WINDOWS_LIBS})
+else()
+    set(VIRNE_ORTOOLS_ROOT ${VIRNE_LIB_DIR}/ortools)
+    set(VIRNE_ORTOOLS_LIBRARY
+        ${VIRNE_ORTOOLS_ROOT}/lib/libortools.so.9.15.6755)
+    if(NOT EXISTS ${VIRNE_ORTOOLS_LIBRARY})
+        message(FATAL_ERROR
+            "Missing vendored OR-Tools Linux C++ payload: ${VIRNE_ORTOOLS_LIBRARY}")
+    endif()
+    add_library(virne_ortools SHARED IMPORTED GLOBAL)
+    set_target_properties(virne_ortools PROPERTIES
+        IMPORTED_LOCATION "${VIRNE_ORTOOLS_LIBRARY}"
+        INTERFACE_INCLUDE_DIRECTORIES "${VIRNE_ORTOOLS_ROOT}/include"
+        INTERFACE_COMPILE_DEFINITIONS
+            "OR_PROTO_DLL=;USE_MATH_OPT;USE_BOP;USE_CBC;USE_CLP;USE_GLOP;USE_HIGHS;USE_PDLP;USE_SCIP"
+        INTERFACE_LINK_DIRECTORIES "${VIRNE_ORTOOLS_ROOT}/lib"
+        BUILD_RPATH "${VIRNE_ORTOOLS_ROOT}/lib"
+        INSTALL_RPATH "${VIRNE_ORTOOLS_ROOT}/lib")
+    file(GLOB VIRNE_ORTOOLS_LINUX_LIBS
+        "${VIRNE_ORTOOLS_ROOT}/lib/*.so.*")
+    list(REMOVE_ITEM VIRNE_ORTOOLS_LINUX_LIBS "${VIRNE_ORTOOLS_LIBRARY}")
+    target_link_libraries(virne_ortools INTERFACE ${VIRNE_ORTOOLS_LINUX_LIBS})
+endif()
 
 # All third-party dependencies are deliberately resolved from this repository.
 # Do not use find_package() here: a clean machine must be able to configure and
@@ -178,6 +230,22 @@ target_compile_definitions(
         VIRNE_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
+if(WIN32)
+    add_custom_command(
+        TARGET main
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${VIRNE_ORTOOLS_ROOT}/bin"
+            "$<TARGET_FILE_DIR:main>"
+        VERBATIM
+    )
+else()
+    set_property(
+        TARGET main
+        APPEND PROPERTY BUILD_RPATH "${VIRNE_ORTOOLS_ROOT}/lib"
+    )
+endif()
+
 add_test(
     NAME vne_main_multi_resource_smoke
     COMMAND main
@@ -206,6 +274,44 @@ set_tests_properties(
     vne_main_multi_resource_smoke
     PROPERTIES
         PASS_REGULAR_EXPRESSION "\"accepted\":4,\"rejected\":4"
+)
+
+add_test(
+    NAME vne_main_exact_with_risk_multi_resource_smoke
+    COMMAND main
+        --config ${CMAKE_CURRENT_SOURCE_DIR}/setting/main.yaml
+        solver.solver_name=exact_with_risk
+        +p_net_setting=p_net_setting_multi_resource
+        +v_sim_setting=v_sim_setting_multi_resource
+        p_net_setting.topology.num_nodes=12
+        v_sim_setting.num_v_nets=3
+        v_sim_setting.v_net_size.low=2
+        v_sim_setting.v_net_size.high=3
+        experiment.seed=0
+        experiment.run_id=exact-risk-multi-resource-smoke
+        experiment.if_save_config=false
+        experiment.if_save_p_net=false
+        experiment.if_save_v_nets=false
+        recorder.if_save_records=false
+        recorder.if_temp_save_records=false
+        logger.backends=[]
+        ++native.capture_solutions=false
+        ++native.output.report=summary
+        ++native.progress.enabled=false
+        ++native.exact.time_limit_ms=5000
+        ++native.exact.search_node_limit=100000
+        ++native.workers.exact=2
+        ++native.exact_risk.scarcity_weight=1
+        ++native.exact_risk.balance_weight=1
+        ++native.exact_risk.criticality_weight=1
+)
+
+set_tests_properties(
+    vne_main_exact_with_risk_multi_resource_smoke
+    PROPERTIES
+        PASS_REGULAR_EXPRESSION
+            "\"solver\":\"exact_with_risk\".*\"processed_requests\":3.*\"accepted\":3"
+        TIMEOUT 30
 )
 
 add_test(

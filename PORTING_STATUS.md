@@ -87,7 +87,9 @@ A component is `COMPLETE` only when all of the following exist and pass:
 | Non-ML solver | `solver.base_solver` | **COMPLETE / FROZEN** | `porting/components/base_solver.md`, `porting/results/base_solver_2026-07-29.md` |
 | Non-ML solver | all eight classes in `solver.heuristic.node_rank` | **COMPLETE / FROZEN** | `porting/components/heuristic_node_rank.md`, order-only and combined-variant artifacts under `porting/results/` |
 | Non-ML solver | BFS, joint place-route and complete 14-solver heuristic registry | **COMPLETE / COLLECTIVE GATE PASS** | `porting/components/heuristic_registry.md`, `vne_heuristic_all_unit` |
-| Non-ML solver | exact and meta-heuristic | NOT STARTED | exact layer additionally needs OR-Tools; ML/RL remains deferred |
+| Non-ML solver | exact (`mip`, `d_round`, `r_round`) | **IMPLEMENTED / FOCUSED GATES PASS** | `porting/components/exact_solvers.md`, `porting/results/exact_solvers_2026-07-31.md`; 1/1 Docker GCC 11 unit; focused MIP structural match + 1.955914x median; all three native Main smokes pass; full parity remains open |
+| Non-ML solver | `exact_with_risk` | **IMPLEMENTED / FOCUSED OBJECTIVE GATE PASS** | `porting/components/exact_with_risk.md`; copied exact MIP feasibility rows with normalized scarcity/balance/bridge tie-breaker; equal-hop and shorter-route dominance tests pass |
+| Non-ML solver | meta-heuristic | NOT STARTED | explicitly deferred while exact validation is completed; ML/RL remains deferred |
 | System | online/offline/changeable/time-window + main config runtime | **IMPLEMENTED / EXACT ONLINE GATE PASS** | `porting/components/system.md`, `porting/results/system_main_e2e_differential_2026-07-30.json`, `porting/results/system_transaction_integration_2026-07-30.md` |
 | Learning/ML | `solver/learning/**` | OUT OF SCOPE | explicitly deferred |
 
@@ -685,6 +687,29 @@ checks BFS/joint partial rollback. Its compact native catalog signal was
 frozen Python/C++ node-rank benchmarks were not rerun. See
 `porting/components/heuristic_registry.md`.
 
+The native `solver.exact` leaf now imports workspace-local OR-Tools 9.15.6755
+through the explicit `virne_ortools` target and registers `mip`, `d_round` and
+`r_round` behind direct `ExactSolverIds` fields. Its split-capable integer-flow
+formulation and compact meta-flow GLOP paths extend Python's hard-coded `cpu`/`bw` model
+to every selected node and link resource: one placement/flow is shared while
+every resource receives an independent capacity row. Dynamic names bind once
+across independent graph registries; model and extraction loops retain only
+graph-local IDs and dense
+numeric buffers. A focused two-node/two-link-resource unit target covers
+registry order, second-lane rejection, forced split flow, reusable aggregate
+capacity, exact-integer/path guards, immutable solve and mutable deploy/release.
+OR-Tools thread count is a direct `native.workers.exact` field resolved once
+before the request loop. Floating-only link lanes use continuous path flow;
+integral lanes retain exact GCD-scaled journals.
+It passes 1/1 Docker GCC 11 CTest, including typed split journals and explicit
+self-loop/tiny-positive-demand guards. A separate one-resource MIP smoke matches the
+accepted/node-slot/path-edge structure and measures Python 16.8899 ms versus
+native 8.6353 ms median (1.955914x). Native multi-resource Main smokes pass for
+all three names. This is not canonical or full parity: the packages use
+different OR-Tools versions, concrete symmetric mappings are not compared,
+and cross-language Main/rounding differentials remain open. See
+`porting/components/exact_solvers.md` and the linked focused result.
+
 The non-ML system/main runtime now composes the completed generator,
 environment, registry and node-rank solvers from Hydra-style overrides. Online
 is exact against pinned Python; offline/changeable/time-window define typed
@@ -715,10 +740,23 @@ and native worker/output controls are split from the Python-compatible
 while `native_config.yaml` retains the C++ extension. Both are resolved only at
 the cold boundary, and no YAML traversal reaches a hot loop.
 
+The experimental `exact_with_risk` leaf is now registered as a fourth exact
+solver. It copies the exact MIP feasibility formulation and changes only the
+objective: a normalized marginal fragmentation surrogate combines residual
+resource scarcity, multi-resource residual skew and a cold bridge-criticality
+flag. The route-flow term is kept at coefficient one while the complete risk
+domain is normalized below one, so shortest route length remains strictly
+dominant for integral flow. Floating-only flow uses a two-phase route lock;
+only proven-optimal results are accepted. Its focused unit confirms an
+equal-hop lower-risk choice and rejects a longer low-risk alternative. See
+`porting/components/exact_with_risk.md`.
+
 ## Next component
 
-The canonical non-ML `solver/heuristic` directory is complete. The next solver
-leaf must be selected from `solver/exact` or `solver/meta_heuristic`; exact MCF
-paths require the deferred OR-Tools dependency. Reuse the completed 14-solver
-registry and all frozen graph/controller/random/config APIs. ML/RL and
+Finish the concrete compatibility review and distinct Python
+LP-rounding/RNG differentials before changing the
+exact state to `COMPLETE`; the focused structural timing is not a substitute.
+After that, the next independent solver leaf is `solver/meta_heuristic`;
+specialized Controller MCF paths remain separate scope. Reuse the completed
+registries and all frozen graph/controller/random/config APIs. ML/RL and
 Torch/CUDA remain deferred.

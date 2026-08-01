@@ -525,6 +525,19 @@ MainConfig main_config_from_hydra(
             "native.bfs.shortest_method", "bfs_shortest"));
     result.bfs_solver_parameters.k_shortest =
         config.get<std::int64_t>("native.bfs.k_shortest", 10);
+    result.exact_solver_parameters.time_limit_ms =
+        config.get<std::uint64_t>("native.exact.time_limit_ms", 10'000U);
+    result.exact_solver_parameters.search_node_limit =
+        config.get<std::uint64_t>(
+            "native.exact.search_node_limit", 5'000'000U);
+    result.exact_solver_parameters.workers =
+        config.get<std::size_t>("native.workers.exact", 1U);
+    result.exact_risk_parameters.scarcity_weight =
+        config.get<double>("native.exact_risk.scarcity_weight", 1.0);
+    result.exact_risk_parameters.balance_weight =
+        config.get<double>("native.exact_risk.balance_weight", 1.0);
+    result.exact_risk_parameters.criticality_weight =
+        config.get<double>("native.exact_risk.criticality_weight", 1.0);
 
     result.recorder_config.save_root_dir = save_root;
     result.recorder_config.solver_name = result.solver_name;

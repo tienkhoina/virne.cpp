@@ -4,6 +4,7 @@
 #include "online_system.h"
 
 #include "../solver/heuristic/registry.h"
+#include "../solver/exact/exact_solver.h"
 #include "../../random/random_context.h"
 
 #include <algorithm>
@@ -872,6 +873,15 @@ MainRunReport run_main_config(const MainConfig& config) {
         random.numpy(),
         random.python(),
         registry_options);
+    solver::exact::register_exact_solvers(
+        registry,
+        random.python(),
+        config.exact_solver_parameters);
+    solver::exact::register_exact_with_risk_solver(
+        registry,
+        random.python(),
+        config.exact_solver_parameters,
+        config.exact_risk_parameters);
     registry.freeze();
     const solver::SolverId selected_solver_id =
         registry.resolve(config.solver_name);
