@@ -15,3 +15,42 @@ __pycache__/
 *.py[cod]
 # Main CLI experiment output; accepted port evidence lives in porting/results.
 /results/
+/tmp-results/
+/.tmp-*/
+
+# Main may create a Python-compatible <solver>/<run-id> tree below virne/
+# when save_root_dir is omitted. These names are registry leaves, not source
+# directories; listing them explicitly keeps every production directory visible.
+/virne/order_rank/
+/virne/random_rank/
+/virne/grc_rank/
+/virne/ffd_rank/
+/virne/nrm_rank/
+/virne/pl_rank/
+/virne/nea_rank/
+/virne/rw_rank/
+/virne/order_rank_bfs/
+/virne/random_rank_bfs/
+/virne/rw_rank_bfs/
+/virne/random_joint_pr/
+/virne/order_joint_pr/
+/virne/ffd_joint_pr/
+/virne/mip/
+/virne/d_round/
+/virne/r_round/
+/virne/exact_with_risk/
+# Legacy Python/RL output observed in this workspace; ML code is not ported.
+/virne/ppo_dual_gat+/
+
+# Legacy root-level harness output. The harnesses recreate these files in
+# their working directory; committed parity evidence belongs in benchmarks/.
+/typescript
+/centrality_dump.txt
+/csv_big_test.csv
+/csv_test_output.csv
+/eval.txt
+/graph_dump.txt
+/graph_dump_cpp.txt
+/graph_dump_py.txt
+/roundtrip.gml
+/waxman_dump.txt
