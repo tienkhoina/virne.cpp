@@ -39,6 +39,11 @@ __pycache__/
 /virne/d_round/
 /virne/r_round/
 /virne/exact_with_risk/
+/virne/ga_meta/
+/virne/sa_meta/
+/virne/ts_meta/
+/virne/pso_meta/
+/virne/aco_meta/
 # Legacy Python/RL output observed in this workspace; ML code is not ported.
 /virne/ppo_dual_gat+/
 

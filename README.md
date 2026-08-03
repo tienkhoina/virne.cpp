@@ -18,6 +18,8 @@ of scope for this port.
   `nrm_rank`, `pl_rank`, `nea_rank`, `rw_rank`, `order_rank_bfs`,
   `random_rank_bfs`, `rw_rank_bfs`, `random_joint_pr`, `order_joint_pr` and
   `ffd_joint_pr`.
+- Registered non-ML meta-heuristics: `ga_meta`, `sa_meta`, `ts_meta`,
+  `pso_meta` and `aco_meta`.
 - OR-Tools exact leaves: `mip`, `d_round`, `r_round` and
   `exact_with_risk`. Exact leaves support the prepared multi-resource
   formulation. `exact_with_risk` adds a normalized residual-fragmentation
@@ -43,6 +45,7 @@ The porting status and the non-ML component map are maintained in
 | Python parity and frozen benchmarks | [`benchmarks/README.md`](benchmarks/README.md), [`benchmarks/RESULTS.md`](benchmarks/RESULTS.md) |
 | Exact solver API | [`porting/components/exact_solvers.md`](porting/components/exact_solvers.md) |
 | Fragmentation-aware exact API | [`porting/components/exact_with_risk.md`](porting/components/exact_with_risk.md) |
+| Meta-heuristic API and worker contract | [`porting/components/meta_heuristic.md`](porting/components/meta_heuristic.md) |
 
 When a subsystem document and this README differ, the subsystem document and
 the public header are authoritative.

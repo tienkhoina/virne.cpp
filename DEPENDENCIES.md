@@ -96,12 +96,12 @@ standard-library implementations use the portable, zero-initializing fallback
 and do not select that GNU-only pipeline.
 
 Boost 1.85.0 is enforced by `static_assert`. When GNU libstdc++ is selected,
-the Random fast path is also hard-rejected unless the compiler is GCC 11.4 and
-the library reports `_GLIBCXX_RELEASE=11`, `__GLIBCXX__=20230528`; non-GNU
-standard libraries use the portable fallback. Therefore any accepted
-GCC/libstdc++ change is an explicit compatibility review, not a routine
-toolchain bump: update the guard, inspect the vector layout, then pass Random's
-bit-exact differential suite, its large-output case, ASan/UBSan and the Random
-benchmark before accepting the new baseline. The accepted risk and fallback
-are documented in `random/README.md`; the graph-side Boost risks are documented
-in `graph/API.md`.
+the Random direct-output fast path is enabled only when the compiler is GCC
+11.4 and the library reports `_GLIBCXX_RELEASE=11`, `__GLIBCXX__=20230528`;
+other GNU and non-GNU standard libraries use the portable fallback. Therefore
+any accepted GCC/libstdc++ change is an explicit compatibility review, not a
+routine toolchain bump: update the guard, inspect the vector layout, then pass
+Random's bit-exact differential suite, its large-output case, ASan/UBSan and
+the Random benchmark before accepting the new baseline. The accepted risk and
+fallback are documented in `random/README.md`; the graph-side Boost risks are
+documented in `graph/API.md`.

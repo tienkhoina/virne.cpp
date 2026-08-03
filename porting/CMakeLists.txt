@@ -1510,6 +1510,30 @@ add_test(
 )
 
 add_executable(
+    vne_meta_heuristic_unit
+    meta_heuristic_unit.cpp
+)
+
+target_link_libraries(
+    vne_meta_heuristic_unit
+    PRIVATE
+        vne_meta_heuristic
+        vne_controller
+        vne_counter
+        vne_recorder
+        vne_logger
+        vne_physical_network
+        vne_virtual_network
+        random_lib
+        Threads::Threads
+)
+
+add_test(
+    NAME vne_meta_heuristic_unit
+    COMMAND vne_meta_heuristic_unit
+)
+
+add_executable(
     vne_exact_solver_unit
     exact_solver_unit.cpp
 )

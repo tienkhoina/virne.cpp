@@ -5,6 +5,7 @@
 
 #include "../solver/heuristic/registry.h"
 #include "../solver/exact/exact_solver.h"
+#include "../solver/meta_heuristic/meta_heuristic.h"
 #include "../../random/random_context.h"
 
 #include <algorithm>
@@ -882,6 +883,18 @@ MainRunReport run_main_config(const MainConfig& config) {
         random.python(),
         config.exact_solver_parameters,
         config.exact_risk_parameters);
+    solver::meta::MetaHeuristicOptions meta_options;
+    meta_options.evaluation_workers = config.workers.node_rank.rank_workers;
+    meta_options.candidate_workers =
+        std::max(
+            config.workers.node_rank.node_candidate_workers,
+            config.workers.node_rank.link_candidate_workers);
+    meta_options.topology_constraint_workers =
+        config.workers.node_rank.link_topology_constraint_workers;
+    solver::meta::register_meta_heuristic_solvers(
+        registry,
+        random.python(),
+        meta_options);
     registry.freeze();
     const solver::SolverId selected_solver_id =
         registry.resolve(config.solver_name);

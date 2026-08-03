@@ -104,16 +104,11 @@ bool checked_poisson_candidate(
 // deployment, start the lifetime of trivial scalars without value-initializing
 // them, advance libstdc++'s finish pointer, then move the base vector out. This
 // saves one complete memory pass while retaining the existing std::vector API.
-// The fallback remains fully portable (but pays the zero-fill) on other STLs.
-#if defined(__GLIBCXX__)
-static_assert(
-    _GLIBCXX_RELEASE == 11 &&
-        __GLIBCXX__ == 20230528 &&
-        __GNUC__ == 11 &&
-        __GNUC_MINOR__ == 4,
-    "DirectOutputVector is pinned to GCC 11.4/libstdc++ 11 (20230528); "
-    "audit the vector layout and rerun Random differential/sanitizer tests "
-    "before changing this guard");
+// The fallback remains fully portable (but pays the zero-fill) on other
+// standard-library/compiler tuples.
+#if defined(__GLIBCXX__) && \
+    _GLIBCXX_RELEASE == 11 && __GLIBCXX__ == 20230528 && \
+    __GNUC__ == 11 && __GNUC_MINOR__ == 4
 
 template<typename T>
 class DirectOutputVector final : public std::vector<T>

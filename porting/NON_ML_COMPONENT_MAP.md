@@ -33,10 +33,14 @@ breaks equal-flow-length ties without allowing risk to select a longer route;
 floating-only flow uses a two-phase primary-objective lock. Its API and focused
 proof are in `components/exact_with_risk.md`.
 
+The five canonical meta-heuristic entries are implemented in the isolated
+`vne_meta_heuristic` library. Read `components/meta_heuristic.md` and its
+focused worker/output gate before reopening source. ML/RL and the unregistered
+infeasibility-survival prototype remain deferred.
+
 The canonical `solver.heuristic` directory is complete; read
 `components/heuristic_registry.md` rather than reopening its implementation.
-For exact work, read `components/exact_solvers.md`; finish its listed
-validation before moving to meta-heuristics. Reuse completed dependencies and
+For exact work, read `components/exact_solvers.md`. Reuse completed dependencies and
 open their source only where the API document cannot resolve parity or a
 measured hot-path optimization. Torch-backed seeding, ML/RL and specialized
 Controller MCF remain deferred.

@@ -442,13 +442,14 @@ valid Poisson lambdas reject out-of-range floating candidates before conversion
 to `int64_t`.
 
 This is an accepted implementation-layout risk, not a standard C++ vector API.
-Non-GNU standard libraries take the portable zero-initializing fallback. When
-GNU libstdc++ is selected, a `static_assert` hard-rejects any compiler or
-library other than GCC 11.4/libstdc++ 11 (`20230528`). A toolchain upgrade
-requires deliberately updating that guard after a layout audit, then passing
-the complete bit-exact differential suite, the large-`randint` continuation
-checks, ASan/UBSan, and the Random benchmark. The production dependency and
-toolchain policy is frozen in `../DEPENDENCIES.md`.
+Non-GNU standard libraries take the portable zero-initializing fallback. GNU
+libstdc++ also takes that fallback unless the compiler/library tuple is exactly
+GCC 11.4/libstdc++ 11 (`20230528`); only that pinned tuple enables the direct
+output path. A toolchain upgrade requires deliberately updating that guard
+after a layout audit, then passing the complete bit-exact differential suite,
+the large-`randint` continuation checks, ASan/UBSan, and the Random benchmark.
+The production dependency and toolchain policy is frozen in
+`../DEPENDENCIES.md`.
 
 ## Oracle, tests, and benchmark scope
 

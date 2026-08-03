@@ -737,3 +737,14 @@ catalog, runs every factory, compares exact workers=1/4 output and RNG
 continuation, and covers BFS/joint partial rollback. Its compact native timing
 was 70.8778 ms at workers=1 and 36.7232 ms at workers=4 (1.930x faster). The
 frozen Python/C++ node-rank evidence was not rerun.
+
+## Meta-heuristic solver gate
+
+Read `components/meta_heuristic.md` before using the five typed registry
+entries `ga_meta`, `sa_meta`, `ts_meta`, `pso_meta` and `aco_meta`. The focused
+unit executes every algorithm and compares worker widths 1/4 for exact
+solution signatures and `PyRandom` continuation. Candidate generation stays
+on the coordinator; independent evaluations use the existing deterministic
+executor. The single focused result is frozen in
+`results/meta_heuristic_2026-08-03.md`; the tiny fixture is intentionally not a
+production throughput claim.
