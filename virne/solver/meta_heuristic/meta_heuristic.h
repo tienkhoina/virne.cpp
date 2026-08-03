@@ -9,6 +9,10 @@
 
 class PyRandom;
 
+namespace virne::core {
+class PreparedCounter;
+}
+
 namespace virne::solver::meta {
 
 enum class MetaAlgorithm : std::uint8_t {
@@ -86,7 +90,8 @@ private:
         const network::VirtualNetwork& virtual_network,
         const network::PhysicalNetwork& physical_network,
         const std::vector<Vertex>& virtual_nodes,
-        const std::vector<core::SolutionNodeId>& position) const;
+        const std::vector<core::SolutionNodeId>& position,
+        const core::PreparedCounter& prepared_counter) const;
 
     Population evaluate_positions(
         const network::VirtualNetwork& virtual_network,

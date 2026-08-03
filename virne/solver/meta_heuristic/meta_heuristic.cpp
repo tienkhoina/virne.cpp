@@ -56,6 +56,7 @@ core::NodeSlots MetaHeuristicSolver::make_node_slots(
     core::NodeSlots slots;
     const std::size_t count = std::min(
         virtual_nodes.size(), position.size());
+    slots.reserve(count);
     for (std::size_t index = 0U; index < count; ++index) {
         slots.insert_or_assign(
             static_cast<core::SolutionNodeId>(virtual_nodes[index]),
@@ -68,7 +69,8 @@ MetaHeuristicSolver::Candidate MetaHeuristicSolver::evaluate(
     const network::VirtualNetwork& virtual_network,
     const network::PhysicalNetwork& physical_network,
     const std::vector<Vertex>& virtual_nodes,
-    const std::vector<core::SolutionNodeId>& position) const {
+    const std::vector<core::SolutionNodeId>& position,
+    const core::PreparedCounter& prepared_counter) const {
     network::PhysicalNetwork working_physical = physical_network.clone();
     core::Solution solution = core::Solution::from_v_net(virtual_network);
     auto prepared_controller = controller().prepare(
@@ -86,10 +88,6 @@ MetaHeuristicSolver::Candidate MetaHeuristicSolver::evaluate(
         solution,
         deploy_options);
 
-    // Counter is prepared against the immutable virtual graph.  It fills the
-    // fixed cost/revenue fields used by every meta objective without touching
-    // the caller's Recorder or the live physical network.
-    const auto prepared_counter = counter().prepare(virtual_network);
     prepared_counter.count_solution(solution);
 
     double fitness = kInfinity;
@@ -110,6 +108,12 @@ MetaHeuristicSolver::Population MetaHeuristicSolver::evaluate_positions(
         return {};
     }
 
+    // Counter bindings are immutable for one virtual request. Prepare them
+    // once on the coordinator instead of rebuilding the same registry view
+    // for every candidate.
+    const core::PreparedCounter prepared_counter =
+        counter().prepare(virtual_network);
+
     // The coordinator owns all random draws. Each worker receives an already
     // materialized position and evaluates it against its own physical clone;
     // no shared Solution, network mutation, Recorder, or RNG is touched.
@@ -126,7 +130,8 @@ MetaHeuristicSolver::Population MetaHeuristicSolver::evaluate_positions(
                     virtual_network,
                     physical_network,
                     virtual_nodes,
-                    positions[index]));
+                    positions[index],
+                    prepared_counter));
             }
         });
 
@@ -194,6 +199,7 @@ void MetaHeuristicSolver::repair_position(
     std::vector<core::SolutionNodeId>& position,
     std::size_t physical_node_count) const {
     std::vector<std::uint8_t> used(physical_node_count, 0U);
+    std::size_t next_free = 0U;
     for (core::SolutionNodeId& value : position) {
         if (value >= 0 &&
             static_cast<std::uint64_t>(value) < physical_node_count &&
@@ -203,14 +209,14 @@ void MetaHeuristicSolver::repair_position(
         }
 
         value = core::SolutionNodeId{-1};
-        for (std::size_t candidate = 0U;
-             candidate < physical_node_count;
-             ++candidate) {
-            if (used[candidate] == 0U) {
-                used[candidate] = 1U;
-                value = static_cast<core::SolutionNodeId>(candidate);
-                break;
-            }
+        while (next_free < physical_node_count &&
+               used[next_free] != 0U) {
+            ++next_free;
+        }
+        if (next_free < physical_node_count) {
+            used[next_free] = 1U;
+            value = static_cast<core::SolutionNodeId>(next_free);
+            ++next_free;
         }
     }
 }
@@ -228,31 +234,45 @@ std::vector<core::SolutionNodeId> MetaHeuristicSolver::neighbor_position(
          ++attempt) {
         const std::size_t virtual_index = static_cast<std::size_t>(
             random_->randrange(static_cast<std::uint64_t>(result.size())));
-        std::vector<core::SolutionNodeId> available;
-        available.reserve(physical_node_count);
+        std::vector<std::uint8_t> used(physical_node_count, 0U);
+        for (std::size_t other = 0U; other < result.size(); ++other) {
+            if (other == virtual_index || result[other] < 0 ||
+                static_cast<std::uint64_t>(result[other]) >=
+                    physical_node_count) {
+                continue;
+            }
+            used[static_cast<std::size_t>(result[other])] = 1U;
+        }
+
+        std::size_t available_count = 0U;
         for (std::size_t candidate = 0U;
              candidate < physical_node_count;
              ++candidate) {
-            const auto value = static_cast<core::SolutionNodeId>(candidate);
-            if (value == result[virtual_index]) {
-                continue;
-            }
-            bool used_elsewhere = false;
-            for (std::size_t other = 0U; other < result.size(); ++other) {
-                if (other != virtual_index && result[other] == value) {
-                    used_elsewhere = true;
-                    break;
-                }
-            }
-            if (!used_elsewhere) {
-                available.push_back(value);
+            if (static_cast<core::SolutionNodeId>(candidate) !=
+                    result[virtual_index] &&
+                used[candidate] == 0U) {
+                ++available_count;
             }
         }
-        if (!available.empty()) {
-            const auto selected = static_cast<std::size_t>(
+        if (available_count != 0U) {
+            std::size_t selected = static_cast<std::size_t>(
                 random_->randrange(
-                    static_cast<std::uint64_t>(available.size())));
-            result[virtual_index] = available[selected];
+                    static_cast<std::uint64_t>(available_count)));
+            for (std::size_t candidate = 0U;
+                 candidate < physical_node_count;
+                 ++candidate) {
+                if (static_cast<core::SolutionNodeId>(candidate) ==
+                        result[virtual_index] ||
+                    used[candidate] != 0U) {
+                    continue;
+                }
+                if (selected == 0U) {
+                    result[virtual_index] =
+                        static_cast<core::SolutionNodeId>(candidate);
+                    return result;
+                }
+                --selected;
+            }
             return result;
         }
     }
@@ -430,6 +450,8 @@ core::Solution MetaHeuristicSolver::run_tabu_search(
          ++iteration) {
         PositionBatch next_positions;
         next_positions.reserve(individuals.size());
+        std::vector<std::size_t> active_indices;
+        active_indices.reserve(individuals.size());
         std::vector<Move> selected_moves(
             individuals.size(), Move{0U, core::SolutionNodeId{-1}});
         std::vector<std::uint8_t> found(individuals.size(), 0U);
@@ -473,22 +495,20 @@ core::Solution MetaHeuristicSolver::run_tabu_search(
                 found[individual_index] = 1U;
                 break;
             }
-            next_positions.push_back(std::move(next_position));
+            if (found[individual_index] != 0U) {
+                active_indices.push_back(individual_index);
+                next_positions.push_back(std::move(next_position));
+            }
         }
 
         Population next_population = evaluate_positions(
-            virtual_network,
-            physical_network,
-            virtual_nodes,
-            next_positions);
-        for (std::size_t individual_index = 0U;
-             individual_index < individuals.size();
-             ++individual_index) {
-            if (found[individual_index] == 0U) {
-                continue;
-            }
+            virtual_network, physical_network, virtual_nodes, next_positions);
+        for (std::size_t active_index = 0U;
+             active_index < active_indices.size();
+             ++active_index) {
+            const std::size_t individual_index = active_indices[active_index];
             Candidate& current = individuals[individual_index];
-            Candidate next = std::move(next_population[individual_index]);
+            Candidate next = std::move(next_population[active_index]);
             tabu[individual_index].push_back(
                 selected_moves[individual_index]);
             if (tabu[individual_index].size() > options_.tabu_tenure) {
@@ -591,11 +611,15 @@ core::Solution MetaHeuristicSolver::run_ant_colony(
             Position position(
                 virtual_nodes.size(), core::SolutionNodeId{-1});
             std::vector<std::uint8_t> used(physical_count, 0U);
+            std::vector<std::size_t> candidates;
+            std::vector<double> weights;
+            candidates.reserve(physical_count);
+            weights.reserve(physical_count);
             for (std::size_t virtual_index = 0U;
                  virtual_index < virtual_nodes.size();
                  ++virtual_index) {
-                std::vector<std::size_t> candidates;
-                std::vector<double> weights;
+                candidates.clear();
+                weights.clear();
                 for (std::size_t physical_index = 0U;
                      physical_index < physical_count;
                      ++physical_index) {

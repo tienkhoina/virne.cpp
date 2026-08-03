@@ -107,6 +107,14 @@ Solution::Solution(const SolutionMetadata metadata)
       v_net_arrival_time(metadata.v_net_arrival_time),
       v_net_num_nodes(metadata.v_net_num_nodes),
       v_net_num_edges(metadata.v_net_num_edges) {
+    // Request cardinalities are fixed at construction. Pre-size the ordered
+    // maps once so every controller/solver candidate avoids repeated vector
+    // growth and hash-table rehashing while retaining insertion order.
+    node_slots.reserve(v_net_num_nodes);
+    link_paths.reserve(v_net_num_edges);
+    node_slots_info.reserve(v_net_num_nodes);
+    link_paths_info.reserve(v_net_num_edges);
+    // reset() clears entries without discarding these capacities.
     reset();
 }
 

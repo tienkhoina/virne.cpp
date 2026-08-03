@@ -122,6 +122,15 @@ public:
     std::size_t size() const noexcept { return entries_.size(); }
     bool empty() const noexcept { return entries_.empty(); }
 
+    // Reserve both the ordered storage and its numeric index before a known
+    // batch is populated. Solution maps remain dynamic compatibility fields,
+    // but their cardinality is known at the solver boundary; reserving here
+    // avoids repeated growth/rehash in candidate hot paths.
+    void reserve(std::size_t count) {
+        entries_.reserve(count);
+        index_.reserve(count);
+    }
+
     const std::vector<Entry>& entries() const noexcept { return entries_; }
 
     std::optional<EntryId> find_id(const Key& key) const {

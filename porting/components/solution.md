@@ -70,6 +70,10 @@ including `place_result=true`, `route_result=true`, empty ordered containers,
 and both single-step extrema at negative infinity. Feasibility is exactly
 `bool(result) && total_hard_constraint_violation <= 0`.
 
+The ordered node/link maps reserve their known request cardinalities during
+construction. This changes only allocation strategy; insertion order and the
+compact-ID contract are unchanged.
+
 `from_v_net` requires the completed request ID, lifetime, and arrival-time
 fields. A missing field is a typed construction error, corresponding to the
 Python attribute failure. Arbitrary reflection, method shadowing, and updates
