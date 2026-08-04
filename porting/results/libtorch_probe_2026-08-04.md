@@ -8,6 +8,9 @@
 - Installed path: `libs/libtorch`
 - Windows install path: `libs/libtorch-win`
 - Windows archive SHA-256: `f2c2e46073848a8e0150984ef26af7c112149a61401063dd4b1f12b7905dac41`
+- Windows payload integrity: `build-version=2.6.0+cpu`, Torch CMake config,
+  import libraries, and runtime DLLs present; native Windows compile/run still
+  requires the MSVC/clang-cl toolchain.
 - Torch build version: `2.6.0+cpu`
 - ABI: `_GLIBCXX_USE_CXX11_ABI=0`, inherited from the archive's CMake target
 
