@@ -67,8 +67,11 @@ The differential gate records 59 tensors covering data/batch operations,
 reductions, edge utilities, pooling, GCN/GAT outputs, attention, and gradients.
 See `porting/results/pyg_lite_2026-08-04.md` for the frozen timing.
 
-## Deferred surface
+## Related surface
 
-Generic `MessagePassing`, heterogeneous data/convolution, and lazy bipartite
-GAT channels are separate components. Unused PyG APIs are intentionally not
-ported. Invalid Virne `NNConv`/`PNAConv` call sites are also outside this gate.
+The bounded homogeneous propagation callback and the two Virne custom layers
+are complete and documented in `porting/components/message_passing.md`.
+Generic
+heterogeneous data/convolution and lazy bipartite GAT channels remain separate
+components. Unused PyG APIs are intentionally not ported. Invalid Virne
+`NNConv`/`PNAConv` call sites are also outside this gate.

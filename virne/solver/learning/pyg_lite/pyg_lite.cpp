@@ -1231,6 +1231,17 @@ void GATConvImpl::reset_parameters() {
         torch::NoGradGuard guard;
         bias.zero_();
     }
+    clear_cached_topology();
+}
+
+void GATConvImpl::clear_cached_topology() noexcept {
+    cached_input_edge_index_ = torch::Tensor();
+    cached_input_edge_attr_.reset();
+    cached_edge_index_ = torch::Tensor();
+    cached_edge_attr_.reset();
+    cached_num_nodes_.reset();
+    cached_edge_index_version_ = 0;
+    cached_edge_attr_version_ = 0;
 }
 
 void GATConvImpl::to(
@@ -1238,6 +1249,7 @@ void GATConvImpl::to(
     torch::Dtype dtype,
     const bool non_blocking) {
     torch::nn::Module::to(device, dtype, non_blocking);
+    clear_cached_topology();
     if (options_.fill_value.kind == SelfLoopFillKind::tensor
         && options_.fill_value.value.has_value()) {
         options_.fill_value.value = options_.fill_value.value->to(
@@ -1247,6 +1259,7 @@ void GATConvImpl::to(
 
 void GATConvImpl::to(const torch::Dtype dtype, const bool non_blocking) {
     torch::nn::Module::to(dtype, non_blocking);
+    clear_cached_topology();
     if (options_.fill_value.kind == SelfLoopFillKind::tensor
         && options_.fill_value.value.has_value()) {
         options_.fill_value.value = options_.fill_value.value->to(
@@ -1256,6 +1269,7 @@ void GATConvImpl::to(const torch::Dtype dtype, const bool non_blocking) {
 
 void GATConvImpl::to(torch::Device device, const bool non_blocking) {
     torch::nn::Module::to(device, non_blocking);
+    clear_cached_topology();
     if (options_.fill_value.kind == SelfLoopFillKind::tensor
         && options_.fill_value.value.has_value()) {
         options_.fill_value.value = options_.fill_value.value->to(
@@ -1293,14 +1307,57 @@ GATForwardResult GATConvImpl::forward_impl(
 
     torch::Tensor edge_index = original_edge_index;
     if (options_.add_self_loops) {
-        LoopResult without = remove_self_loops(edge_index, std::move(edge_attr));
-        LoopResult with = add_self_loops(
-            without.edge_index,
-            std::move(without.edge_attr),
-            options_.fill_value,
-            nodes);
-        edge_index = std::move(with.edge_index);
-        edge_attr = std::move(with.edge_attr);
+        const std::optional<torch::Tensor> input_edge_attr = edge_attr;
+        const bool fill_requires_grad =
+            options_.fill_value.kind == SelfLoopFillKind::tensor
+            && options_.fill_value.value.has_value()
+            && options_.fill_value.value->requires_grad();
+        const bool cache_allowed = !fill_requires_grad
+            && (!input_edge_attr.has_value()
+                || !input_edge_attr->requires_grad());
+        const std::uint32_t edge_index_version =
+            tensor_version(original_edge_index);
+        const std::uint32_t edge_attr_version = input_edge_attr.has_value()
+            ? tensor_version(*input_edge_attr)
+            : 0U;
+        const bool cache_hit = cache_allowed
+            && cached_edge_index_.defined()
+            && cached_num_nodes_.has_value()
+            && *cached_num_nodes_ == nodes
+            && cached_input_edge_index_.defined()
+            && cached_input_edge_index_.unsafeGetTensorImpl()
+                == original_edge_index.unsafeGetTensorImpl()
+            && cached_edge_index_version_ == edge_index_version
+            && cached_input_edge_attr_.has_value() == input_edge_attr.has_value()
+            && (!input_edge_attr.has_value()
+                || (cached_input_edge_attr_->unsafeGetTensorImpl()
+                        == input_edge_attr->unsafeGetTensorImpl()
+                    && cached_edge_attr_version_ == edge_attr_version));
+        if (cache_hit) {
+            edge_index = cached_edge_index_;
+            edge_attr = cached_edge_attr_;
+        } else {
+            LoopResult without = remove_self_loops(
+                edge_index, std::move(edge_attr));
+            LoopResult with = add_self_loops(
+                without.edge_index,
+                std::move(without.edge_attr),
+                options_.fill_value,
+                nodes);
+            edge_index = std::move(with.edge_index);
+            edge_attr = std::move(with.edge_attr);
+            if (cache_allowed) {
+                cached_input_edge_index_ = original_edge_index;
+                cached_input_edge_attr_ = input_edge_attr;
+                cached_edge_index_ = edge_index;
+                cached_edge_attr_ = edge_attr;
+                cached_num_nodes_ = nodes;
+                cached_edge_index_version_ = edge_index_version;
+                cached_edge_attr_version_ = edge_attr_version;
+            } else {
+                clear_cached_topology();
+            }
+        }
     }
 
     const torch::Tensor source = edge_index.select(0, 0);

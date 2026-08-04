@@ -96,7 +96,8 @@ A component is `COMPLETE` only when all of the following exist and pass:
 | Learning/ML | `rl_policy.MlpActorCritic` / Actor / Critic | **COMPLETE / EXACT WINDOWS CPU GATE PASS** | `porting/components/mlp_policy.md`, `porting/results/mlp_policy_2026-08-04.md`; 7/7 bit-exact Python cases, action-dimension invariant and exact timed outputs |
 | Learning/ML | dense `rl_core.TensorConvertor` paths | **COMPLETE / EXACT WINDOWS CPU GATE PASS** | `porting/components/tensor_convertor.md`, `porting/results/tensor_convertor_2026-08-04.md`; 9/9 bit-exact MLP/CNN/MLP-FC/attention cases, 3.057x dense conversion |
 | Learning/ML | homogeneous PyG-lite core | **COMPLETE / 59/59 BIT-EXACT LINUX + WINDOWS CPU GATE PASS** | `porting/components/pyg_lite.md`, `porting/results/pyg_lite_2026-08-04.md`; typed Data/Batch, scatter, edge utilities, pooling, GCN and GAT; CPU/CUDA-neutral ATen source |
-| Learning/ML | remaining `solver/learning/**` | IN PROGRESS | next PyG leaf: custom message passing/heterogeneous typed data; dense `FeatureConstructor`/`obs_handler`, then training/RL control remain pending |
+| Learning/ML | bounded homogeneous custom message passing | **COMPLETE / 3/3 BIT-EXACT CPU GATE PASS** | `porting/components/message_passing.md`, `porting/results/message_passing_2026-08-04.md`; GraphViNE 0.924x and EdgeFusion 1.653x C++ speedup, device-neutral ATen source |
+| Learning/ML | remaining `solver/learning/**` | IN PROGRESS | next PyG leaf: heterogeneous typed data/convolution; dense `FeatureConstructor`/`obs_handler`, then training/RL control remain pending |
 
 ## Completed behavior
 
@@ -799,9 +800,10 @@ equal-hop lower-risk choice and rejects a longer low-risk alternative. See
 
 ## Next component
 
-The ML port is active. The next PyG leaf is the small typed propagation surface
-needed by `GraphViNEConv` and `EdgeFusionGATConv`, followed by heterogeneous
-typed data/convolution. The dense `FeatureConstructor`/`obs_handler` path and
-then training/RL control remain separate gates. Reuse the completed registries
-and all frozen graph/controller/random/config APIs. The non-RL environment
-continues to use its exact Torch-free gate.
+The ML port is active. The bounded homogeneous propagation surface for
+`GraphViNEConv` and `EdgeFusionGATConv` is complete. The next PyG leaf is
+heterogeneous typed data/convolution, followed by the dense
+`FeatureConstructor`/`obs_handler` path and then training/RL control as
+separate gates. Reuse the completed registries and all frozen
+graph/controller/random/config APIs. The non-RL environment continues to use
+its exact Torch-free gate.

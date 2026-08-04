@@ -1,6 +1,7 @@
 add_library(
     vne_learning_pyg_lite
     pyg_lite.cpp
+    message_passing.cpp
 )
 
 target_include_directories(

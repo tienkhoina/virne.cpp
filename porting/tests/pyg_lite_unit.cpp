@@ -555,6 +555,45 @@ void test_gat_convolution() {
         require_finite(item.value().grad(), "GATConv parameter gradient: " + item.key());
     }
 
+    // Immutable inference topology is cached after the first call. Compare
+    // the cache-hit output with a fresh module, then mutate both inputs to
+    // ensure tensor version checks invalidate the cached edge transform.
+    pyg::GATConv uncached(options);
+    {
+        torch::NoGradGuard guard;
+        auto target_parameters = uncached->named_parameters(true);
+        for (const auto& item : model->named_parameters(true)) {
+            target_parameters[item.key()].copy_(item.value());
+        }
+    }
+    const torch::Tensor cached_output = model->forward(
+        x.detach(), edge_index, edge_attr);
+    const torch::Tensor reference_output = uncached->forward(
+        x.detach(), edge_index, edge_attr);
+    require_close(
+        cached_output, reference_output,
+        "GATConv topology cache hit mismatch");
+    torch::Tensor changed_edges = edge_index.clone();
+    torch::Tensor changed_attrs = edge_attr.clone();
+    changed_edges.index_put_({0, 0}, 1);
+    changed_attrs.index_put_({0, 0}, 9.0);
+    const torch::Tensor changed_output = model->forward(
+        x.detach(), changed_edges, changed_attrs);
+    const torch::Tensor changed_reference = uncached->forward(
+        x.detach(), changed_edges, changed_attrs);
+    require_close(
+        changed_output, changed_reference,
+        "GATConv topology cache invalidation mismatch");
+
+    // Grad-tracked edge attributes must never be retained by the cache: the
+    // loop-fill path remains differentiable for training callers.
+    torch::Tensor grad_attrs = edge_attr.detach().clone();
+    grad_attrs.set_requires_grad(true);
+    const torch::Tensor grad_output = model->forward(
+        x.detach(), edge_index, grad_attrs);
+    grad_output.square().mean().backward();
+    require_finite(grad_attrs.grad(), "GATConv edge attribute gradient");
+
     pyg::GATConvOptions mean_options{};
     mean_options.in_channels = 2;
     mean_options.out_channels = 3;

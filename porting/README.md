@@ -191,6 +191,26 @@ The frozen CPU gate is 59/59 bit-exact. See
 `porting/results/pyg_lite_2026-08-04.md` for the API, device contract, and
 paired timings.
 
+## Custom homogeneous message passing gate
+
+The bounded propagation API and the active Virne `GraphViNEConv` and
+`EdgeFusionGATConv` paths are implemented in
+`virne/solver/learning/pyg_lite/message_passing.h`. They use typed options,
+direct tensor fields, and ATen kernels on the input device; PyG and
+`torch_scatter` remain Python-only oracle dependencies.
+
+```powershell
+cmake --build build-ml-win-msvc --config Release `
+  --target vne_message_passing_unit vne_message_passing_harness --parallel 1
+.\build-ml-win-msvc\porting\Release\vne_message_passing_unit.exe
+```
+
+The focused Python differential has 3/3 bit-exact records. On the frozen CPU
+fixture, with both processes pinned to one core, GraphViNE measured 0.924x and
+EdgeFusion measured 1.653x C++ speedup.
+See `porting/components/message_passing.md` and
+`porting/results/message_passing_2026-08-04.md` for API and method details.
+
 ## Differential and canonical timing
 
 Run from the directory containing sibling `virne` and `virne.cpp` checkouts:

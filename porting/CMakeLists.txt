@@ -1803,6 +1803,37 @@ if(VIRNE_ENABLE_ML)
     )
 
     add_executable(
+        vne_message_passing_unit
+        tests/message_passing_unit.cpp
+    )
+
+    target_link_libraries(
+        vne_message_passing_unit
+        PRIVATE
+            vne_learning_pyg_lite
+    )
+
+    virne_configure_libtorch_executable(vne_message_passing_unit)
+
+    add_test(
+        NAME vne_message_passing_unit
+        COMMAND vne_message_passing_unit
+    )
+
+    add_executable(
+        vne_message_passing_harness
+        message_passing_harness.cpp
+    )
+
+    target_link_libraries(
+        vne_message_passing_harness
+        PRIVATE
+            vne_learning_pyg_lite
+    )
+
+    virne_configure_libtorch_executable(vne_message_passing_harness)
+
+    add_executable(
         vne_pyg_lite_harness
         pyg_lite_harness.cpp
     )

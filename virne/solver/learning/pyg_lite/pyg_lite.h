@@ -276,12 +276,24 @@ public:
     torch::Tensor bias;
 
 private:
+    void clear_cached_topology() noexcept;
+
     GATForwardResult forward_impl(
         const torch::Tensor& x,
         const torch::Tensor& edge_index,
         std::optional<torch::Tensor> edge_attr);
 
     GATConvOptions options_;
+    // Self-loop construction is topology-only. Cache it for immutable
+    // inference graphs, but never cache edge attributes that participate in
+    // autograd.
+    torch::Tensor cached_input_edge_index_;
+    std::optional<torch::Tensor> cached_input_edge_attr_;
+    torch::Tensor cached_edge_index_;
+    std::optional<torch::Tensor> cached_edge_attr_;
+    std::optional<std::int64_t> cached_num_nodes_;
+    std::uint32_t cached_edge_index_version_ = 0;
+    std::uint32_t cached_edge_attr_version_ = 0;
 };
 TORCH_MODULE(GATConv);
 

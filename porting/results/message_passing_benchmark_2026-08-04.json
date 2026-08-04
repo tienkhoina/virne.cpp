@@ -1,0 +1,31 @@
+{
+  "component": "message_passing",
+  "device": "cpu",
+  "parity": {
+    "total": 3,
+    "passed": 3,
+    "max_abs_error": 0.0,
+    "errors": [],
+    "status": "PASS"
+  },
+  "benchmark": {
+    "graph_vine": {
+      "python_median_ns_per_iteration": 403186.6666666667,
+      "cpp_median_ns_per_iteration": 436154,
+      "cpp_speedup": 0.9244135481198538,
+      "python_signature": -346375.09375,
+      "cpp_signature": -346375.09375,
+      "output": "PASS"
+    },
+    "edge_fusion": {
+      "python_median_ns_per_iteration": 3851177.3333333335,
+      "cpp_median_ns_per_iteration": 2329804,
+      "cpp_speedup": 1.6530048593501143,
+      "python_signature": -28578568192.0,
+      "cpp_signature": -28578568192,
+      "output": "PASS"
+    }
+  },
+  "python_torch": "2.6.0+cu124",
+  "status": "PASS"
+}
