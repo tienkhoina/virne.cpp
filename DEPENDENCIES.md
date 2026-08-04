@@ -14,8 +14,8 @@ tracked by Git.
 | OR-Tools reference source | 9.15 | `libs/ortools-src` | audit/reference only; not linked |
 | OR-Tools C++ (Linux) | 9.15.6755 | `libs/ortools` | imported shared target `virne_ortools` |
 | OR-Tools C++ (Windows) | 9.15.6755 | `libs/ortools-win` | imported DLL/import-library target `virne_ortools` |
-| LibTorch (CPU, shared) | 2.6.0+cpu | `libs/libtorch` | opt-in imported target `virne_libtorch` (probe only) |
-| LibTorch (Windows CPU, shared) | 2.6.0+cpu | `libs/libtorch-win` | opt-in imported target `virne_libtorch` (probe only) |
+| LibTorch (CPU, shared) | 2.6.0+cpu | `libs/libtorch` | opt-in imported target `virne_libtorch` (probe + ML leaves) |
+| LibTorch (Windows CPU, shared) | 2.6.0+cpu | `libs/libtorch-win` | opt-in imported target `virne_libtorch` (probe + ML leaves) |
 
 The production CMake files deliberately do not call `find_package` for the
 Boost/yaml-cpp/tabulate/OR-Tools rows above. LibTorch is the one exception: its
@@ -42,6 +42,7 @@ in the repository-owned, machine-readable `DEPENDENCIES.sha256` manifest.
 | OR-Tools Visual Studio 2022 C++ 9.15.6755 | `https://github.com/google/or-tools/releases/download/v9.15/or-tools_x64_VisualStudio2022_cpp_v9.15.6755.zip` | `43429c741641c8b495ee77e44ea00f0f4524519495fd2edaf929003aa2b2ea30` |
 | LibTorch shared CPU 2.6.0 | `https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-2.6.0%2Bcpu.zip` | `ad2901049e4d660097f1f54470d60c5afd3de1c293800fd1ae39ac3f9c7d2578` |
 | LibTorch Windows shared CPU 2.6.0 | `https://download.pytorch.org/libtorch/cpu/libtorch-win-shared-with-deps-2.6.0%2Bcpu.zip` | `f2c2e46073848a8e0150984ef26af7c112149a61401063dd4b1f12b7905dac41` |
+| Python Windows CPU oracle wheel 2.6.0 | `https://download.pytorch.org/whl/cpu/torch-2.6.0%2Bcpu-cp312-cp312-win_amd64.whl` | `4027d982eb2781c93825ab9527f17fbbb12dbabf422298e4b954be60016f87d8` |
 
 The complete reconstruction procedure from the repository root is:
 
@@ -63,6 +64,8 @@ curl -fL 'https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-2.
   -o '.deps-cache/libtorch-shared-with-deps-2.6.0+cpu.zip'
 curl -fL 'https://download.pytorch.org/libtorch/cpu/libtorch-win-shared-with-deps-2.6.0%2Bcpu.zip' \
   -o '.deps-cache/libtorch-win-shared-with-deps-2.6.0+cpu.zip'
+curl -fL 'https://download.pytorch.org/whl/cpu/torch-2.6.0%2Bcpu-cp312-cp312-win_amd64.whl' \
+  -o '.deps-cache/torch-2.6.0+cpu-cp312-cp312-win_amd64.whl'
 (cd .deps-cache && sha256sum -c ../DEPENDENCIES.sha256)
 
 tar -xzf .deps-cache/boost_1_85_0.tar.gz -C libs
@@ -95,10 +98,13 @@ NetworkX oracle. The oracle baseline is CPython 3.10, NetworkX 3.4.2, NumPy
 production C++ binaries. See `benchmarks/requirements.txt`. The prepared
 workspace uses pip 25.1.1 inside that `.venv`.
 
-The Python oracle image used for ML compatibility checks contains
+The Linux Python oracle image used for ML compatibility checks contains
 `torch==2.6.0+cu124` (CUDA libraries are present but CUDA is disabled on the
-CPU-only runner). The vendored C++ payload is the matching 2.6.0 CPU archive,
-which uses the old libstdc++ ABI used by that wheel. Point
+CPU-only runner). Native Windows parity uses the pinned CPython 3.12
+`torch==2.6.0+cpu` wheel above, installed only inside the ignored
+`.deps-cache/python-torch26` test environment. The vendored C++ payload is the
+matching 2.6.0 CPU archive; the Linux payload uses the old libstdc++ ABI used
+by the Linux wheel. Point
 `VIRNE_LIBTORCH_ROOT` at the official 2.6.0 CUDA archive instead when building
 on a CUDA runner; the probe and the `virne_libtorch` interface do not hard-code
 CPU kernels and select `--device cuda` only when `torch::cuda::is_available()`
@@ -146,8 +152,8 @@ ctest --test-dir build-libtorch-win -C Release `
 
 The probe is intentionally isolated from the non-RL environment. Environment
 construction/output parity remains the existing exact gate in
-`porting/compare_environment.py`; LibTorch is prepared for the deferred
-learning/RL leaves rather than being introduced into that frozen lifecycle.
+`porting/compare_environment.py`; LibTorch now backs opt-in ML leaves beginning
+with `MLPNet`, but is not introduced into that frozen lifecycle.
 
 Boost upgrades are special: graph hot loops intentionally depend on the
 1.85.0 adjacency-list layout.  `graph/graph_types.h` has a compile-time version

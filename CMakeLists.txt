@@ -51,6 +51,16 @@ option(
     "Build the local LibTorch probe and expose virne_libtorch"
     OFF
 )
+option(
+    VIRNE_ENABLE_ML
+    "Build the isolated Torch-backed ML leaves and parity targets"
+    OFF
+)
+
+if(VIRNE_ENABLE_ML AND NOT VIRNE_ENABLE_LIBTORCH)
+    message(FATAL_ERROR
+        "VIRNE_ENABLE_ML requires VIRNE_ENABLE_LIBTORCH=ON")
+endif()
 
 if(WIN32)
     set(VIRNE_LIBTORCH_DEFAULT_ROOT ${VIRNE_LIB_DIR}/libtorch-win)
@@ -127,6 +137,57 @@ if(VIRNE_ENABLE_LIBTORCH)
     # probe version stable across both archives.
     string(STRIP "${VIRNE_LIBTORCH_VERSION}" VIRNE_LIBTORCH_VERSION)
 
+    target_compile_definitions(
+        virne_libtorch
+        INTERFACE
+            "VIRNE_LIBTORCH_VERSION=\"${VIRNE_LIBTORCH_VERSION}\""
+    )
+
+    # Every standalone Torch executable needs the same local runtime policy.
+    # Keep this helper at the dependency boundary so new ML leaves do not
+    # duplicate platform-specific RPATH/DLL handling.
+    function(virne_configure_libtorch_executable TARGET_NAME)
+        if(NOT TARGET ${TARGET_NAME})
+            message(FATAL_ERROR
+                "Unknown LibTorch executable target: ${TARGET_NAME}")
+        endif()
+        if(UNIX)
+            set_property(
+                TARGET ${TARGET_NAME}
+                APPEND
+                PROPERTY BUILD_RPATH "${VIRNE_LIBTORCH_ROOT}/lib"
+            )
+            set_property(
+                TARGET ${TARGET_NAME}
+                APPEND
+                PROPERTY INSTALL_RPATH "${VIRNE_LIBTORCH_ROOT}/lib"
+            )
+        elseif(WIN32)
+            if(EXISTS "${VIRNE_LIBTORCH_ROOT}/bin")
+                add_custom_command(
+                    TARGET ${TARGET_NAME}
+                    POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E copy_directory
+                        "${VIRNE_LIBTORCH_ROOT}/bin"
+                        "$<TARGET_FILE_DIR:${TARGET_NAME}>"
+                    VERBATIM
+                )
+            endif()
+            file(GLOB VIRNE_LIBTORCH_WINDOWS_DLLS
+                "${VIRNE_LIBTORCH_ROOT}/lib/*.dll")
+            foreach(VIRNE_LIBTORCH_DLL IN LISTS VIRNE_LIBTORCH_WINDOWS_DLLS)
+                add_custom_command(
+                    TARGET ${TARGET_NAME}
+                    POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                        "${VIRNE_LIBTORCH_DLL}"
+                        "$<TARGET_FILE_DIR:${TARGET_NAME}>"
+                    VERBATIM
+                )
+            endforeach()
+        endif()
+    endfunction()
+
     add_executable(
         vne_libtorch_probe
         porting/libtorch_probe.cpp
@@ -136,50 +197,7 @@ if(VIRNE_ENABLE_LIBTORCH)
         PRIVATE
             virne_libtorch
     )
-    target_compile_definitions(
-        vne_libtorch_probe
-        PRIVATE
-            "VIRNE_LIBTORCH_VERSION=\"${VIRNE_LIBTORCH_VERSION}\""
-    )
-    if(UNIX)
-        set_property(
-            TARGET vne_libtorch_probe
-            APPEND
-            PROPERTY BUILD_RPATH "${VIRNE_LIBTORCH_ROOT}/lib"
-        )
-        set_property(
-            TARGET vne_libtorch_probe
-            APPEND
-            PROPERTY INSTALL_RPATH "${VIRNE_LIBTORCH_ROOT}/lib"
-        )
-    elseif(WIN32)
-        # Official Windows archives place runtime DLLs in `bin`; a few
-        # repackaged archives keep them beside the import libraries in `lib`.
-        # Copy either layout next to the probe so it runs from a clean build
-        # tree without PATH mutations.
-        if(EXISTS "${VIRNE_LIBTORCH_ROOT}/bin")
-            add_custom_command(
-                TARGET vne_libtorch_probe
-                POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy_directory
-                    "${VIRNE_LIBTORCH_ROOT}/bin"
-                    "$<TARGET_FILE_DIR:vne_libtorch_probe>"
-                VERBATIM
-            )
-        endif()
-        file(GLOB VIRNE_LIBTORCH_WINDOWS_DLLS
-            "${VIRNE_LIBTORCH_ROOT}/lib/*.dll")
-        foreach(VIRNE_LIBTORCH_DLL IN LISTS VIRNE_LIBTORCH_WINDOWS_DLLS)
-            add_custom_command(
-                TARGET vne_libtorch_probe
-                POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                    "${VIRNE_LIBTORCH_DLL}"
-                    "$<TARGET_FILE_DIR:vne_libtorch_probe>"
-                VERBATIM
-            )
-        endforeach()
-    endif()
+    virne_configure_libtorch_executable(vne_libtorch_probe)
 
     add_test(
         NAME vne_libtorch_probe

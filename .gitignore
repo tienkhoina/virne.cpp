@@ -44,7 +44,7 @@ __pycache__/
 /virne/ts_meta/
 /virne/pso_meta/
 /virne/aco_meta/
-# Legacy Python/RL output observed in this workspace; ML code is not ported.
+# Legacy Python/RL experiment output observed in this workspace.
 /virne/ppo_dual_gat+/
 
 # Legacy root-level harness output. The harnesses recreate these files in

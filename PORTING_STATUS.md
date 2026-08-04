@@ -89,10 +89,11 @@ A component is `COMPLETE` only when all of the following exist and pass:
 | Non-ML solver | BFS, joint place-route and complete 14-solver heuristic registry | **COMPLETE / COLLECTIVE GATE PASS** | `porting/components/heuristic_registry.md`, `vne_heuristic_all_unit` |
 | Non-ML solver | exact (`mip`, `d_round`, `r_round`) | **IMPLEMENTED / FOCUSED GATES PASS** | `porting/components/exact_solvers.md`, `porting/results/exact_solvers_2026-07-31.md`; 1/1 Docker GCC 11 unit; focused MIP structural match + 1.955914x median; all three native Main smokes pass; full parity remains open |
 | Non-ML solver | `exact_with_risk` | **IMPLEMENTED / FOCUSED OBJECTIVE GATE PASS** | `porting/components/exact_with_risk.md`; copied exact MIP feasibility rows with normalized scarcity/balance/bridge tie-breaker; equal-hop and shorter-route dominance tests pass |
-| Non-ML solver | meta-heuristic (`ga_meta`, `sa_meta`, `ts_meta`, `pso_meta`, `aco_meta`) | **IMPLEMENTED / FOCUSED GATE PASS** | `porting/components/meta_heuristic.md`, `porting/results/meta_heuristic_2026-08-03.md`, `vne_meta_heuristic_unit`; ML/RL remains deferred |
+| Non-ML solver | meta-heuristic (`ga_meta`, `sa_meta`, `ts_meta`, `pso_meta`, `aco_meta`) | **IMPLEMENTED / FOCUSED GATE PASS** | `porting/components/meta_heuristic.md`, `porting/results/meta_heuristic_2026-08-03.md`, `vne_meta_heuristic_unit` |
 | System | online/offline/changeable/time-window + main config runtime | **IMPLEMENTED / EXACT ONLINE GATE PASS** | `porting/components/system.md`, `porting/results/system_main_e2e_differential_2026-07-30.json`, `porting/results/system_transaction_integration_2026-07-30.md` |
-| ML runtime boundary | vendored LibTorch 2.6.0 CPU + CUDA-compatible probe (Linux + Windows) | **IMPLEMENTED / NATIVE LINUX + WINDOWS GATE PASS** | `DEPENDENCIES.md`, `porting/components/libtorch.md`, `porting/results/libtorch_probe_2026-08-04.md`; Python oracle check awaits Docker daemon recovery; learning/RL remains deferred |
-| Learning/ML | `solver/learning/**` | OUT OF SCOPE | explicitly deferred |
+| ML runtime boundary | vendored LibTorch 2.6.0 CPU + CUDA-compatible probe (Linux + Windows) | **IMPLEMENTED / NATIVE LINUX + WINDOWS GATE PASS** | `DEPENDENCIES.md`, `porting/components/libtorch.md`, `porting/results/libtorch_probe_2026-08-04.md` |
+| Learning/ML | `neural_network.MLPNet` | **COMPLETE / EXACT WINDOWS CPU GATE PASS** | `porting/components/mlp_net.md`, `porting/results/mlp_net_2026-08-04.md`; 9/9 bit-exact Python cases and exact timed output |
+| Learning/ML | remaining `solver/learning/**` | IN PROGRESS | next independent composition leaf: `rl_policy.MlpActorCritic`; PyG/training/RL control remains pending |
 
 ## Completed behavior
 
@@ -741,6 +742,17 @@ and native worker/output controls are split from the Python-compatible
 while `native_config.yaml` retains the C++ extension. Both are resolved only at
 the cold boundary, and no YAML traversal reaches a hot loop.
 
+The first Torch-backed ML leaf, `neural_network.MLPNet`, is complete behind
+`VIRNE_ENABLE_ML`. Its fixed options are typed, hidden dimensions resolve once
+at construction, and `forward` delegates directly to the registered Sequential
+without dynamic names. The C++ module preserves Python state names, layer and
+orthogonal-initialization order, BatchNorm buffers, rank-2/rank-3 behavior and
+the original compatibility quirk that accepts but ignores `dropout_prob`.
+Native Windows Torch/LibTorch 2.6.0+cpu passed all 9 bit-exact initialization,
+RNG, state and forward cases. The frozen compact 1-thread policy-shaped timing
+also matched its output checksum and measured C++ at 1.041x Python throughput.
+See `porting/components/mlp_net.md`.
+
 The experimental `exact_with_risk` leaf is now registered as a fourth exact
 solver. It copies the exact MIP feasibility formulation and changes only the
 objective: a normalized marginal fragmentation surrogate combines residual
@@ -754,12 +766,9 @@ equal-hop lower-risk choice and rejects a longer low-risk alternative. See
 
 ## Next component
 
-Finish the concrete compatibility review and distinct Python
-LP-rounding/RNG differentials before changing the
-exact state to `COMPLETE`; the focused structural timing is not a substitute.
-After that, the next independent solver leaf is `solver/meta_heuristic`;
-specialized Controller MCF paths remain separate scope. Reuse the completed
-registries and all frozen graph/controller/random/config APIs. The LibTorch
-2.6.0 runtime is now vendored behind an opt-in ABI boundary and its CPU output
-probe is compared with the Python 2.6.0 oracle. ML/RL implementation remains
-deferred; the non-RL environment continues to use its exact Torch-free gate.
+The ML port is now active. Its next independent composition leaf is
+`rl_policy.MlpActorCritic`, reusing the completed `MLPNet`; tensor conversion
+and feature construction follow after that, while PyG-dependent networks and
+training/RL control remain separate gates. Reuse the completed registries and
+all frozen graph/controller/random/config APIs. The non-RL environment
+continues to use its exact Torch-free gate.

@@ -1,5 +1,9 @@
 find_package(Threads REQUIRED)
 
+if(VIRNE_ENABLE_ML)
+    add_subdirectory(learning)
+endif()
+
 add_library(vne_link_rank
     rank/link_rank.cpp
 )

@@ -1688,3 +1688,36 @@ target_link_libraries(
         random_lib
         Threads::Threads
 )
+
+if(VIRNE_ENABLE_ML)
+    add_executable(
+        vne_mlp_net_unit
+        mlp_net_unit.cpp
+    )
+
+    target_link_libraries(
+        vne_mlp_net_unit
+        PRIVATE
+            vne_learning_mlp
+    )
+
+    virne_configure_libtorch_executable(vne_mlp_net_unit)
+
+    add_test(
+        NAME vne_mlp_net_unit
+        COMMAND vne_mlp_net_unit
+    )
+
+    add_executable(
+        vne_mlp_net_harness
+        mlp_net_harness.cpp
+    )
+
+    target_link_libraries(
+        vne_mlp_net_harness
+        PRIVATE
+            vne_learning_mlp
+    )
+
+    virne_configure_libtorch_executable(vne_mlp_net_harness)
+endif()

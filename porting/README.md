@@ -1,6 +1,6 @@
 # Port verification workflow
 
-Start at `../PORTING_STATUS.md`. The frozen foundation and non-ML dependency map
+Start at `../PORTING_STATUS.md`. The frozen foundation and dependency map
 are documented in this directory; do not rediscover them by scanning the whole
 repository unless the pinned source commit changes.
 
@@ -92,6 +92,32 @@ python /workspace/cpp/porting/compare_environment.py \
   --source /src/virne/virne/core/environment.py \
   --harness /workspace/cpp/.docker-smoke/build-port-release/porting/vne_environment_harness
 ```
+
+## MLPNet exact gate
+
+`MLPNet` is the first completed Torch-backed leaf. It is isolated from the
+default build behind `VIRNE_ENABLE_ML=ON` and reuses the vendored LibTorch
+target. The tested native Windows commands are:
+
+```powershell
+cmake -S . -B build-ml-win-msvc -G "Visual Studio 17 2022" -A x64 `
+  -DVIRNE_ENABLE_LIBTORCH=ON -DVIRNE_ENABLE_ML=ON `
+  -DVIRNE_LIBTORCH_ROOT="$((Resolve-Path .\libs\libtorch-win).Path)"
+cmake --build build-ml-win-msvc --config Release `
+  --target vne_mlp_net_unit vne_mlp_net_harness --parallel 4
+ctest --test-dir build-ml-win-msvc -C Release `
+  -R '^vne_mlp_net_unit$' --output-on-failure
+
+.\.deps-cache\python-torch26\Scripts\python.exe `
+  .\porting\compare_mlp_net.py `
+  --harness .\build-ml-win-msvc\porting\Release\vne_mlp_net_harness.exe `
+  --python-source ..\virne\virne\solver\learning\neural_network\mlp.py `
+  --threads 1 --warmups 3 --repetitions 5 --iterations 20
+```
+
+The comparator pins the Python leaf SHA-256, direct-loads only that file and
+requires exact state, RNG, BatchNorm and forward bytes before accepting timing.
+The accepted benchmark is frozen in `results/mlp_net_2026-08-04.md`.
 
 ## Differential and canonical timing
 
