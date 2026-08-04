@@ -122,6 +122,10 @@ if(VIRNE_ENABLE_LIBTORCH)
     if(NOT VIRNE_LIBTORCH_VERSION)
         set(VIRNE_LIBTORCH_VERSION "unknown")
     endif()
+    # The official Windows payload stores this line as CRLF with a trailing
+    # space, while the Linux payload uses LF.  Keep the machine-readable
+    # probe version stable across both archives.
+    string(STRIP "${VIRNE_LIBTORCH_VERSION}" VIRNE_LIBTORCH_VERSION)
 
     add_executable(
         vne_libtorch_probe

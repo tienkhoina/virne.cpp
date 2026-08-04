@@ -9,8 +9,9 @@
 - Windows install path: `libs/libtorch-win`
 - Windows archive SHA-256: `f2c2e46073848a8e0150984ef26af7c112149a61401063dd4b1f12b7905dac41`
 - Windows payload integrity: `build-version=2.6.0+cpu`, Torch CMake config,
-  import libraries, and runtime DLLs present; native Windows compile/run still
-  requires the MSVC/clang-cl toolchain.
+  import libraries, and runtime DLLs present. Native Windows compile/run was
+  verified with Visual Studio Community 2022 MSVC 19.41.34123 and Windows SDK
+  10.0.22621.
 - Torch build version: `2.6.0+cpu`
 - ABI: `_GLIBCXX_USE_CXX11_ABI=0`, inherited from the archive's CMake target
 
@@ -26,6 +27,18 @@ CTest with one intra-op/inter-op worker. Its deterministic CPU output was:
 
 The fixed matrix values are `[14, 38, 62; 38, 126, 214; 62, 214, 366]`;
 the digest is independent of the LibTorch thread width for this case.
+
+The same CMake target was configured with the Windows payload and passed the
+MSVC Release gate (`1/1` CTest). Its output was byte-for-byte identical to the
+Linux probe, including the normalized version field:
+
+```json
+{"libtorch_version":"2.6.0+cpu","device":"cpu","cuda_available":false,"threads":1,"interop_threads":1,"shape":[3,3],"dtype":"float64","checksum":"15003413940045531672","output_bytes":72,"sum_bits":"4091b80000000000"}
+```
+
+The build emitted only C4267 conversion warnings from vendored LibTorch
+headers; no project-source errors occurred. The post-build step copied the
+CPU runtime DLLs beside `vne_libtorch_probe.exe`.
 
 ## Python/original comparison
 

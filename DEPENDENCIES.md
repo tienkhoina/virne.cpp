@@ -132,14 +132,16 @@ docker exec virne-cpp-dev ctest --test-dir /work/build-libtorch `
 ```
 
 Windows (Visual Studio/clang-cl) uses the same option and target after
-`libs/libtorch-win` is populated:
+`libs/libtorch-win` is populated. The tested MSVC multi-config command is:
 
 ```powershell
-cmake -S . -B build-libtorch-win -G Ninja `
+cmake -S . -B build-libtorch-win -G "Visual Studio 17 2022" -A x64 `
   -DCMAKE_BUILD_TYPE=Release -DVIRNE_ENABLE_LIBTORCH=ON `
   -DVIRNE_LIBTORCH_ROOT="$((Resolve-Path .\libs\libtorch-win).Path)"
-cmake --build build-libtorch-win --target vne_libtorch_probe
-ctest --test-dir build-libtorch-win -R '^vne_libtorch_probe$' --output-on-failure
+cmake --build build-libtorch-win --config Release --target vne_libtorch_probe
+ctest --test-dir build-libtorch-win -C Release `
+  -R '^vne_libtorch_probe$' --output-on-failure
+.\build-libtorch-win\Release\vne_libtorch_probe.exe --threads 1 --device cpu
 ```
 
 The probe is intentionally isolated from the non-RL environment. Environment
