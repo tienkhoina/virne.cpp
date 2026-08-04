@@ -1,6 +1,6 @@
 # Virne Python to C++ port status
 
-Last verified: 2026-08-03 (Asia/Saigon).
+Last verified: 2026-08-04 (Asia/Saigon).
 
 This file is the entry point for continuing the port. Read it and the linked
 component note before opening the original Python implementation.
