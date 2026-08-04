@@ -164,6 +164,33 @@ The comparator isolates only the Python class and requires nine exact dense
 MLP/CNN/MLP-FC/attention cases before interpreting the frozen timing. PyG paths
 are not claimed by this gate.
 
+## PyG-lite homogeneous exact gate
+
+The opt-in ML build now provides typed `Data`/`Batch`, scatter, edge utilities,
+dense batching, pooling, `GCNConv`, and homogeneous `GATConv` using only
+LibTorch/ATen. PyG 2.7 is an oracle, not a native dependency. Fixed fields are
+direct members; `Batch` resolves graph counts, maximum node count, and edge
+offsets once for hot consumers.
+
+```powershell
+cmake --build build-ml-win-msvc --config Release `
+  --target vne_pyg_lite_unit vne_pyg_lite_harness --parallel 1
+.\build-ml-win-msvc\porting\Release\vne_pyg_lite_unit.exe
+
+docker run --rm `
+  --mount "type=bind,source=$((Resolve-Path .\virne.cpp).Path),target=/work" `
+  -w /work virne-cpu:latest `
+  python porting/compare_pyg_lite.py `
+    --harness /work/build-pyg-oracle/vne_pyg_lite_harness `
+    --mode all --device cpu --threads 1 `
+    --warmups 2 --repetitions 5 --iterations 2
+```
+
+The frozen CPU gate is 59/59 bit-exact. See
+`porting/components/pyg_lite.md` and
+`porting/results/pyg_lite_2026-08-04.md` for the API, device contract, and
+paired timings.
+
 ## Differential and canonical timing
 
 Run from the directory containing sibling `virne` and `virne.cpp` checkouts:

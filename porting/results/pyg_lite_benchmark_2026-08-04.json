@@ -1,0 +1,36 @@
+{
+  "benchmark": {
+    "gat": {
+      "cpp_median_ns_per_iteration": 24294083.0,
+      "cpp_speedup": 0.9355860848915352,
+      "output": "PASS",
+      "python_median_ns_per_iteration": 22729206.0
+    },
+    "gcn": {
+      "cpp_median_ns_per_iteration": 6546483.5,
+      "cpp_speedup": 1.8322225206861058,
+      "output": "PASS",
+      "python_median_ns_per_iteration": 11994614.5
+    },
+    "utility_pipeline": {
+      "cpp_median_ns_per_iteration": 7017663.5,
+      "cpp_speedup": 1.0389171552611491,
+      "output": "PASS",
+      "python_median_ns_per_iteration": 7290771.0
+    }
+  },
+  "component": "pyg_lite",
+  "device": "cpu",
+  "parity": {
+    "bit_exact": 59,
+    "exact_required": true,
+    "max_abs_error": 0.0,
+    "passed": 59,
+    "status": "PASS",
+    "total": 59
+  },
+  "python_pyg": "2.7.0",
+  "python_torch": "2.6.0+cu124",
+  "status": "PASS",
+  "threads": 1
+}

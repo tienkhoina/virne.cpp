@@ -95,7 +95,8 @@ A component is `COMPLETE` only when all of the following exist and pass:
 | Learning/ML | `neural_network.MLPNet` | **COMPLETE / EXACT WINDOWS CPU GATE PASS** | `porting/components/mlp_net.md`, `porting/results/mlp_net_2026-08-04.md`; 9/9 bit-exact Python cases and exact timed output |
 | Learning/ML | `rl_policy.MlpActorCritic` / Actor / Critic | **COMPLETE / EXACT WINDOWS CPU GATE PASS** | `porting/components/mlp_policy.md`, `porting/results/mlp_policy_2026-08-04.md`; 7/7 bit-exact Python cases, action-dimension invariant and exact timed outputs |
 | Learning/ML | dense `rl_core.TensorConvertor` paths | **COMPLETE / EXACT WINDOWS CPU GATE PASS** | `porting/components/tensor_convertor.md`, `porting/results/tensor_convertor_2026-08-04.md`; 9/9 bit-exact MLP/CNN/MLP-FC/attention cases, 3.057x dense conversion |
-| Learning/ML | remaining `solver/learning/**` | IN PROGRESS | next end-to-end input leaf: dense `FeatureConstructor`/`obs_handler`; PyG/training/RL control remains pending |
+| Learning/ML | homogeneous PyG-lite core | **COMPLETE / 59/59 BIT-EXACT LINUX + WINDOWS CPU GATE PASS** | `porting/components/pyg_lite.md`, `porting/results/pyg_lite_2026-08-04.md`; typed Data/Batch, scatter, edge utilities, pooling, GCN and GAT; CPU/CUDA-neutral ATen source |
+| Learning/ML | remaining `solver/learning/**` | IN PROGRESS | next PyG leaf: custom message passing/heterogeneous typed data; dense `FeatureConstructor`/`obs_handler`, then training/RL control remain pending |
 
 ## Completed behavior
 
@@ -775,6 +776,16 @@ match every byte, and the frozen multi-resource batch conversion is 3.057x
 Python with an exact 400,000-byte output checksum. PyG graph batching remains
 a separate component. See `porting/components/tensor_convertor.md`.
 
+The homogeneous PyG-lite core now replaces the PyG operations used by Virne
+with typed direct fields and LibTorch/ATen kernels. `Batch` stores `edge_ptr`,
+`num_graphs`, and `max_num_nodes` once so hot graph extraction and dense
+conversion do not repeat string lookup or device-side size inference. Data,
+scatter, edge utilities, pooling, GCN/GAT outputs, attention, and gradients
+match all 59 Python records bit-for-bit on CPU. The frozen paired timing gives
+1.039x for the utility pipeline, 1.832x for GCN, and 0.936x for GAT. Linux and
+MSVC unit gates pass; CUDA dispatch is device-neutral but awaits hardware.
+See `porting/components/pyg_lite.md`.
+
 The experimental `exact_with_risk` leaf is now registered as a fourth exact
 solver. It copies the exact MIP feasibility formulation and changes only the
 objective: a normalized marginal fragmentation surrogate combines residual
@@ -788,9 +799,9 @@ equal-hop lower-risk choice and rejects a longer low-risk alternative. See
 
 ## Next component
 
-The ML port is active. Its next end-to-end input leaf is the dense
-`FeatureConstructor`/`obs_handler` path that produces the completed
-TensorConvertor's 14+11 multi-resource features. PyG-dependent conversions and
-networks, then training/RL control, remain separate gates. Reuse the completed
-registries and all frozen graph/controller/random/config APIs. The non-RL
-environment continues to use its exact Torch-free gate.
+The ML port is active. The next PyG leaf is the small typed propagation surface
+needed by `GraphViNEConv` and `EdgeFusionGATConv`, followed by heterogeneous
+typed data/convolution. The dense `FeatureConstructor`/`obs_handler` path and
+then training/RL control remain separate gates. Reuse the completed registries
+and all frozen graph/controller/random/config APIs. The non-RL environment
+continues to use its exact Torch-free gate.

@@ -155,6 +155,10 @@ construction/output parity remains the existing exact gate in
 `porting/compare_environment.py`; LibTorch now backs opt-in ML leaves beginning
 with `MLPNet`, but is not introduced into that frozen lifecycle.
 
+PyG 2.7.0 is used only inside the Python differential container for the
+PyG-lite oracle. It is deliberately not vendored or linked by C++; the native
+homogeneous graph-learning core uses the existing LibTorch/ATen dependency.
+
 Boost upgrades are special: graph hot loops intentionally depend on the
 1.85.0 adjacency-list layout.  `graph/graph_types.h` has a compile-time version
 guard, and the upgrade procedure in `graph/API.md` is mandatory.

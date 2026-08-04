@@ -1783,4 +1783,35 @@ if(VIRNE_ENABLE_ML)
     )
 
     virne_configure_libtorch_executable(vne_tensor_convertor_harness)
+
+    add_executable(
+        vne_pyg_lite_unit
+        tests/pyg_lite_unit.cpp
+    )
+
+    target_link_libraries(
+        vne_pyg_lite_unit
+        PRIVATE
+            vne_learning_pyg_lite
+    )
+
+    virne_configure_libtorch_executable(vne_pyg_lite_unit)
+
+    add_test(
+        NAME vne_pyg_lite_unit
+        COMMAND vne_pyg_lite_unit
+    )
+
+    add_executable(
+        vne_pyg_lite_harness
+        pyg_lite_harness.cpp
+    )
+
+    target_link_libraries(
+        vne_pyg_lite_harness
+        PRIVATE
+            vne_learning_pyg_lite
+    )
+
+    virne_configure_libtorch_executable(vne_pyg_lite_harness)
 endif()
