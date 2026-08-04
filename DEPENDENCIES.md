@@ -110,7 +110,15 @@ Windows archive supplies MSVC import libraries and runtime DLLs; the probe's
 post-build step copies both the official `bin/` DLL layout and any DLLs found
 beside `lib/` next to the executable. The Windows archive/hash is intentionally
 not added to `DEPENDENCIES.sha256` until it can be downloaded and verified on a
-Windows-capable network; do not substitute the Linux `.so` payload.
+Windows-capable network. Capture it before treating the Windows payload as a
+reproducible release dependency:
+
+```powershell
+(Get-FileHash .deps-cache\libtorch-win-shared-with-deps-2.6.0+cpu.zip `
+  -Algorithm SHA256).Hash.ToLower()
+```
+
+Do not substitute the Linux `.so` payload.
 
 Build the opt-in target in the pinned GCC 11 container:
 
