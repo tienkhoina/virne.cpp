@@ -15,6 +15,7 @@ tracked by Git.
 | OR-Tools C++ (Linux) | 9.15.6755 | `libs/ortools` | imported shared target `virne_ortools` |
 | OR-Tools C++ (Windows) | 9.15.6755 | `libs/ortools-win` | imported DLL/import-library target `virne_ortools` |
 | LibTorch (CPU, shared) | 2.6.0+cpu | `libs/libtorch` | opt-in imported target `virne_libtorch` (probe only) |
+| LibTorch (Windows CPU, shared) | 2.6.0+cpu | `libs/libtorch-win` | opt-in imported target `virne_libtorch` (probe only) |
 
 The production CMake files deliberately do not call `find_package` for the
 Boost/yaml-cpp/tabulate/OR-Tools rows above. LibTorch is the one exception: its
@@ -40,6 +41,7 @@ in the repository-owned, machine-readable `DEPENDENCIES.sha256` manifest.
 | OR-Tools Ubuntu 22.04 C++ 9.15.6755 | `https://github.com/google/or-tools/releases/download/v9.15/or-tools_amd64_ubuntu-22.04_cpp_v9.15.6755.tar.gz` | `0b30114d7c05f0596286bf3ef8d02adcf5f45be3b39273490e6bb74a2a9bd1ea` |
 | OR-Tools Visual Studio 2022 C++ 9.15.6755 | `https://github.com/google/or-tools/releases/download/v9.15/or-tools_x64_VisualStudio2022_cpp_v9.15.6755.zip` | `43429c741641c8b495ee77e44ea00f0f4524519495fd2edaf929003aa2b2ea30` |
 | LibTorch shared CPU 2.6.0 | `https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-2.6.0%2Bcpu.zip` | `ad2901049e4d660097f1f54470d60c5afd3de1c293800fd1ae39ac3f9c7d2578` |
+| LibTorch Windows shared CPU 2.6.0 | `https://download.pytorch.org/libtorch/cpu/libtorch-win-shared-with-deps-2.6.0%2Bcpu.zip` | **pending archive download in the Windows engine** |
 
 The complete reconstruction procedure from the repository root is:
 
@@ -59,6 +61,8 @@ curl -fL https://github.com/google/or-tools/releases/download/v9.15/or-tools_x64
   -o .deps-cache/or-tools_x64_VisualStudio2022_cpp_v9.15.6755.zip
 curl -fL 'https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-2.6.0%2Bcpu.zip' \
   -o '.deps-cache/libtorch-shared-with-deps-2.6.0+cpu.zip'
+curl -fL 'https://download.pytorch.org/libtorch/cpu/libtorch-win-shared-with-deps-2.6.0%2Bcpu.zip' \
+  -o '.deps-cache/libtorch-win-shared-with-deps-2.6.0+cpu.zip'
 (cd .deps-cache && sha256sum -c ../DEPENDENCIES.sha256)
 
 tar -xzf .deps-cache/boost_1_85_0.tar.gz -C libs
@@ -74,6 +78,10 @@ mv libs/or-tools_x86_64_Ubuntu-22.04_cpp_v9.15.6755 libs/ortools
 unzip -q .deps-cache/or-tools_x64_VisualStudio2022_cpp_v9.15.6755.zip -d libs
 mv libs/or-tools_x64_VisualStudio2022_cpp_v9.15.6755 libs/ortools-win
 unzip -q '.deps-cache/libtorch-shared-with-deps-2.6.0+cpu.zip' -d libs
+mkdir -p .deps-cache/libtorch-win-extract
+unzip -q '.deps-cache/libtorch-win-shared-with-deps-2.6.0+cpu.zip' \
+  -d .deps-cache/libtorch-win-extract
+mv .deps-cache/libtorch-win-extract/libtorch libs/libtorch-win
 ```
 
 These commands are for a fresh clone where the destination directories
@@ -97,6 +105,13 @@ CPU kernels and select `--device cuda` only when `torch::cuda::is_available()`
 is true. Do not link Torch targets into the frozen ABI-1 non-RL libraries until
 the ML leaf has an explicit ABI boundary.
 
+On Windows, CMake defaults `VIRNE_LIBTORCH_ROOT` to `libs/libtorch-win`. The
+Windows archive supplies MSVC import libraries and runtime DLLs; the probe's
+post-build step copies both the official `bin/` DLL layout and any DLLs found
+beside `lib/` next to the executable. The Windows archive/hash is intentionally
+not added to `DEPENDENCIES.sha256` until it can be downloaded and verified on a
+Windows-capable network; do not substitute the Linux `.so` payload.
+
 Build the opt-in target in the pinned GCC 11 container:
 
 ```powershell
@@ -108,6 +123,17 @@ docker exec virne-cpp-dev cmake --build /work/build-libtorch -j 4 `
   --target vne_libtorch_probe
 docker exec virne-cpp-dev ctest --test-dir /work/build-libtorch `
   -R '^vne_libtorch_probe$' --output-on-failure
+```
+
+Windows (Visual Studio/clang-cl) uses the same option and target after
+`libs/libtorch-win` is populated:
+
+```powershell
+cmake -S . -B build-libtorch-win -G Ninja `
+  -DCMAKE_BUILD_TYPE=Release -DVIRNE_ENABLE_LIBTORCH=ON `
+  -DVIRNE_LIBTORCH_ROOT="$((Resolve-Path .\libs\libtorch-win).Path)"
+cmake --build build-libtorch-win --target vne_libtorch_probe
+ctest --test-dir build-libtorch-win -R '^vne_libtorch_probe$' --output-on-failure
 ```
 
 The probe is intentionally isolated from the non-RL environment. Environment

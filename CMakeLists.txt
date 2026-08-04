@@ -52,9 +52,15 @@ option(
     OFF
 )
 
+if(WIN32)
+    set(VIRNE_LIBTORCH_DEFAULT_ROOT ${VIRNE_LIB_DIR}/libtorch-win)
+else()
+    set(VIRNE_LIBTORCH_DEFAULT_ROOT ${VIRNE_LIB_DIR}/libtorch)
+endif()
+
 set(
     VIRNE_LIBTORCH_ROOT
-    ${VIRNE_LIB_DIR}/libtorch
+    ${VIRNE_LIBTORCH_DEFAULT_ROOT}
     CACHE PATH
     "Vendored LibTorch installation root"
 )
@@ -142,6 +148,33 @@ if(VIRNE_ENABLE_LIBTORCH)
             APPEND
             PROPERTY INSTALL_RPATH "${VIRNE_LIBTORCH_ROOT}/lib"
         )
+    elseif(WIN32)
+        # Official Windows archives place runtime DLLs in `bin`; a few
+        # repackaged archives keep them beside the import libraries in `lib`.
+        # Copy either layout next to the probe so it runs from a clean build
+        # tree without PATH mutations.
+        if(EXISTS "${VIRNE_LIBTORCH_ROOT}/bin")
+            add_custom_command(
+                TARGET vne_libtorch_probe
+                POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_directory
+                    "${VIRNE_LIBTORCH_ROOT}/bin"
+                    "$<TARGET_FILE_DIR:vne_libtorch_probe>"
+                VERBATIM
+            )
+        endif()
+        file(GLOB VIRNE_LIBTORCH_WINDOWS_DLLS
+            "${VIRNE_LIBTORCH_ROOT}/lib/*.dll")
+        foreach(VIRNE_LIBTORCH_DLL IN LISTS VIRNE_LIBTORCH_WINDOWS_DLLS)
+            add_custom_command(
+                TARGET vne_libtorch_probe
+                POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    "${VIRNE_LIBTORCH_DLL}"
+                    "$<TARGET_FILE_DIR:vne_libtorch_probe>"
+                VERBATIM
+            )
+        endforeach()
     endif()
 
     add_test(

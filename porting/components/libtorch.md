@@ -2,17 +2,19 @@
 
 ## Status
 
-The 2.6.0 shared CPU LibTorch archive is vendored at `libs/libtorch` and is
-resolved only by the opt-in CMake option `VIRNE_ENABLE_LIBTORCH=ON`. The
-default build and the frozen non-RL environment do not link Torch. This is a
-dependency/runtime gate, not an implementation of `virne/solver/learning`.
+The 2.6.0 shared CPU LibTorch archive is vendored at `libs/libtorch` for Linux;
+Windows uses the parallel `libs/libtorch-win` payload. Both are resolved only
+by the opt-in CMake option `VIRNE_ENABLE_LIBTORCH=ON`. The default build and
+the frozen non-RL environment do not link Torch. This is a dependency/runtime
+gate, not an implementation of `virne/solver/learning`.
 
 ## CMake/API
 
 `virne_libtorch` is an interface target backed by the archive's own
-`TorchConfig.cmake`. `VIRNE_LIBTORCH_ROOT` overrides the default
-`libs/libtorch` path and may point at the matching official CUDA archive on a
-CUDA runner. The only current executable is `vne_libtorch_probe`:
+`TorchConfig.cmake`. `VIRNE_LIBTORCH_ROOT` overrides the platform default
+(`libs/libtorch` on Linux, `libs/libtorch-win` on Windows) and may point at the
+matching official CUDA archive on a CUDA runner. The only current executable
+is `vne_libtorch_probe`:
 
 ```text
 vne_libtorch_probe [--threads N] [--device cpu|cuda|auto]
@@ -35,7 +37,8 @@ Output fields are stable and machine-readable:
 | `shape`, `dtype` | fixed probe tensor metadata |
 | `checksum`, `output_bytes`, `sum_bits` | FNV-1a/bit-exact output digest |
 
-The C++ probe uses typed tensor operations and does not expose dynamic string
+On Windows the target copies `bin/*.dll` and any `lib/*.dll` beside the probe;
+Linux uses an explicit sibling-library RPATH. The C++ probe uses typed tensor operations and does not expose dynamic string
 maps in a hot loop. Future ML leaves should keep Torch at this explicit ABI
 boundary; do not mix the archive's ABI-0 target into the ABI-1 non-RL libraries
 without a separate reviewed interface.
