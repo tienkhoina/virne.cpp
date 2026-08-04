@@ -1720,4 +1720,35 @@ if(VIRNE_ENABLE_ML)
     )
 
     virne_configure_libtorch_executable(vne_mlp_net_harness)
+
+    add_executable(
+        vne_mlp_policy_unit
+        mlp_policy_unit.cpp
+    )
+
+    target_link_libraries(
+        vne_mlp_policy_unit
+        PRIVATE
+            vne_learning_mlp_policy
+    )
+
+    virne_configure_libtorch_executable(vne_mlp_policy_unit)
+
+    add_test(
+        NAME vne_mlp_policy_unit
+        COMMAND vne_mlp_policy_unit
+    )
+
+    add_executable(
+        vne_mlp_policy_harness
+        mlp_policy_harness.cpp
+    )
+
+    target_link_libraries(
+        vne_mlp_policy_harness
+        PRIVATE
+            vne_learning_mlp_policy
+    )
+
+    virne_configure_libtorch_executable(vne_mlp_policy_harness)
 endif()

@@ -93,7 +93,8 @@ A component is `COMPLETE` only when all of the following exist and pass:
 | System | online/offline/changeable/time-window + main config runtime | **IMPLEMENTED / EXACT ONLINE GATE PASS** | `porting/components/system.md`, `porting/results/system_main_e2e_differential_2026-07-30.json`, `porting/results/system_transaction_integration_2026-07-30.md` |
 | ML runtime boundary | vendored LibTorch 2.6.0 CPU + CUDA-compatible probe (Linux + Windows) | **IMPLEMENTED / NATIVE LINUX + WINDOWS GATE PASS** | `DEPENDENCIES.md`, `porting/components/libtorch.md`, `porting/results/libtorch_probe_2026-08-04.md` |
 | Learning/ML | `neural_network.MLPNet` | **COMPLETE / EXACT WINDOWS CPU GATE PASS** | `porting/components/mlp_net.md`, `porting/results/mlp_net_2026-08-04.md`; 9/9 bit-exact Python cases and exact timed output |
-| Learning/ML | remaining `solver/learning/**` | IN PROGRESS | next independent composition leaf: `rl_policy.MlpActorCritic`; PyG/training/RL control remains pending |
+| Learning/ML | `rl_policy.MlpActorCritic` / Actor / Critic | **COMPLETE / EXACT WINDOWS CPU GATE PASS** | `porting/components/mlp_policy.md`, `porting/results/mlp_policy_2026-08-04.md`; 7/7 bit-exact Python cases, action-dimension invariant and exact timed outputs |
+| Learning/ML | remaining `solver/learning/**` | IN PROGRESS | next Torch-only leaf: `TensorConvertor.obs_as_tensor_for_mlp`; PyG/training/RL control remains pending |
 
 ## Completed behavior
 
@@ -753,6 +754,17 @@ RNG, state and forward cases. The frozen compact 1-thread policy-shaped timing
 also matched its output checksum and measured C++ at 1.041x Python throughput.
 See `porting/components/mlp_net.md`.
 
+The first policy composition, `MlpActorCritic`, now reuses that frozen MLP
+without a dynamic observation map: future conversion code resolves Python's
+fixed `p_net_x` key once and passes the Tensor directly. Actor returns `[B,N]`;
+Critic returns `[B,1]`; registered state names remain
+`actor.net.lins.N.*`/`critic.net.lins.N.*`. Seven Python/C++ cases match
+bit-exactly, including composite RNG continuation, the 25-feature
+multi-resource input and standalone BatchNorm behavior. `action_dim=1` and
+`997` produce identical state/output as in Python. The frozen paired-inference
+timing has exact Actor/Critic checksums and measured C++ at 1.022x Python.
+See `porting/components/mlp_policy.md`.
+
 The experimental `exact_with_risk` leaf is now registered as a fourth exact
 solver. It copies the exact MIP feasibility formulation and changes only the
 objective: a normalized marginal fragmentation surrogate combines residual
@@ -766,9 +778,9 @@ equal-hop lower-risk choice and rejects a longer low-risk alternative. See
 
 ## Next component
 
-The ML port is now active. Its next independent composition leaf is
-`rl_policy.MlpActorCritic`, reusing the completed `MLPNet`; tensor conversion
-and feature construction follow after that, while PyG-dependent networks and
-training/RL control remain separate gates. Reuse the completed registries and
-all frozen graph/controller/random/config APIs. The non-RL environment
-continues to use its exact Torch-free gate.
+The ML port is active. Its next Torch-only leaf is
+`TensorConvertor.obs_as_tensor_for_mlp`, feeding the completed MLP policy with
+the exact `[B,Np,Fp+Fv]` layout; feature construction follows after that.
+PyG-dependent networks and training/RL control remain separate gates. Reuse
+the completed registries and all frozen graph/controller/random/config APIs.
+The non-RL environment continues to use its exact Torch-free gate.

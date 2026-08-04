@@ -119,6 +119,29 @@ The comparator pins the Python leaf SHA-256, direct-loads only that file and
 requires exact state, RNG, BatchNorm and forward bytes before accepting timing.
 The accepted benchmark is frozen in `results/mlp_net_2026-08-04.md`.
 
+## MLP actor/critic exact gate
+
+The first policy composition reuses `MLPNet` and accepts `p_net_x` directly at
+the typed C++ boundary. Build and verify only its isolated targets:
+
+```powershell
+cmake --build build-ml-win-msvc --config Release `
+  --target vne_mlp_policy_unit vne_mlp_policy_harness --parallel 1
+ctest --test-dir build-ml-win-msvc -C Release `
+  -R '^vne_mlp_policy_unit$' --output-on-failure
+
+.\.deps-cache\python-torch26\Scripts\python.exe `
+  .\porting\compare_mlp_policy.py `
+  --harness .\build-ml-win-msvc\porting\Release\vne_mlp_policy_harness.exe `
+  --python-source ..\virne\virne\solver\learning\rl_policy\mlp_policy.py `
+  --mlp-source ..\virne\virne\solver\learning\neural_network\mlp.py `
+  --threads 1 --warmups 3 --repetitions 5 --iterations 20
+```
+
+The comparator AST-extracts only MlpActorCritic/Actor/Critic, rejects Virne or
+PyG imports, and requires seven bit-exact cases plus the inert `action_dim`
+invariant before accepting the frozen paired timing.
+
 ## Differential and canonical timing
 
 Run from the directory containing sibling `virne` and `virne.cpp` checkouts:
