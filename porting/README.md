@@ -51,6 +51,48 @@ docker build --tag virne-python-oracle:py310-nonml `
 The Dockerfile pins the CPython base digest and exact NumPy/NetworkX versions.
 It does not install original Virne or any ML dependency.
 
+## Optional LibTorch runtime/probe
+
+LibTorch 2.6.0+cpu is vendored at `libs/libtorch`; the normal non-ML build does
+not link it. Configure the isolated target only when checking the ML runtime
+boundary:
+
+```powershell
+docker start virne-engine-keepalive
+docker exec virne-cpp-dev cmake -S /work -B /work/build-libtorch `
+  -DCMAKE_BUILD_TYPE=Release -DVIRNE_ENABLE_LIBTORCH=ON `
+  -DVIRNE_LIBTORCH_ROOT=/work/libs/libtorch
+docker exec virne-cpp-dev cmake --build /work/build-libtorch -j 4 `
+  --target vne_libtorch_probe
+docker exec virne-cpp-dev ctest --test-dir /work/build-libtorch `
+  -R '^vne_libtorch_probe$' --output-on-failure
+```
+
+Compare the fixed CPU tensor output with the Python oracle (the oracle wheel is
+Torch 2.6.0+cu124, so version/capability fields are informational):
+
+```powershell
+$cppRoot = (Resolve-Path .\virne.cpp).Path
+docker run --rm `
+  --mount "type=bind,source=$cppRoot,target=/work" `
+  --workdir /work virne-cpu:latest `
+  python /work/porting/compare_libtorch_probe.py `
+    --native /work/build-libtorch/vne_libtorch_probe --threads 1 --device cpu `
+    --output /work/porting/results/libtorch_probe_2026-08-04.json
+```
+
+For a CUDA LibTorch archive, set `VIRNE_LIBTORCH_ROOT` to that archive's local
+path and run the probe with `--device cuda` on a CUDA-enabled runner. Keep the
+thread-pool width fixed at process/worker startup; do not mutate global Torch
+thread settings inside a hot request loop. The exact non-RL environment gate
+is independent and remains:
+
+```text
+python /workspace/cpp/porting/compare_environment.py \
+  --source /src/virne/virne/core/environment.py \
+  --harness /workspace/cpp/.docker-smoke/build-port-release/porting/vne_environment_harness
+```
+
 ## Differential and canonical timing
 
 Run from the directory containing sibling `virne` and `virne.cpp` checkouts:

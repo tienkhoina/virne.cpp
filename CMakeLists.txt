@@ -40,6 +40,116 @@ set(
     ${CMAKE_CURRENT_SOURCE_DIR}/libs
 )
 
+# LibTorch is an opt-in binary dependency.  The frozen non-RL leaves do not
+# link it, so a normal build remains independent of Torch and keeps the
+# existing ABI.  Enabling this option builds the isolated probe and exposes
+# the local `virne_libtorch` interface for future ML/RL leaves.  The Torch
+# package config is the one shipped by the vendored archive; no system/Conda
+# Torch is accepted.
+option(
+    VIRNE_ENABLE_LIBTORCH
+    "Build the local LibTorch probe and expose virne_libtorch"
+    OFF
+)
+
+set(
+    VIRNE_LIBTORCH_ROOT
+    ${VIRNE_LIB_DIR}/libtorch
+    CACHE PATH
+    "Vendored LibTorch installation root"
+)
+
+if(VIRNE_ENABLE_LIBTORCH)
+    if(NOT EXISTS
+        "${VIRNE_LIBTORCH_ROOT}/share/cmake/Torch/TorchConfig.cmake")
+        message(FATAL_ERROR
+            "Missing vendored LibTorch package config: "
+            "${VIRNE_LIBTORCH_ROOT}/share/cmake/Torch/TorchConfig.cmake")
+    endif()
+
+    # LibTorch supplies its own Caffe2/Torch imported targets and ABI flags.
+    # Restrict the search to the workspace so a host Torch cannot silently
+    # change the binary ABI or numerical backend.
+    find_package(
+        Torch
+        CONFIG
+        REQUIRED
+        PATHS "${VIRNE_LIBTORCH_ROOT}"
+        NO_DEFAULT_PATH
+    )
+
+    if(NOT TARGET torch)
+        message(FATAL_ERROR "Vendored LibTorch did not define target torch")
+    endif()
+
+    add_library(
+        virne_libtorch
+        INTERFACE
+    )
+
+    target_link_libraries(
+        virne_libtorch
+        INTERFACE
+            torch
+    )
+
+    # TorchConfig already carries the old/new libstdc++ ABI flag.  Keep the
+    # include and library directories explicit as well so the runtime loader
+    # finds the sibling LibTorch DSOs without LD_LIBRARY_PATH.
+    target_include_directories(
+        virne_libtorch
+        INTERFACE
+            ${TORCH_INCLUDE_DIRS}
+    )
+    target_link_directories(
+        virne_libtorch
+        INTERFACE
+            ${VIRNE_LIBTORCH_ROOT}/lib
+    )
+
+    file(
+        STRINGS
+        "${VIRNE_LIBTORCH_ROOT}/build-version"
+        VIRNE_LIBTORCH_VERSION
+        LIMIT_COUNT 1
+    )
+    if(NOT VIRNE_LIBTORCH_VERSION)
+        set(VIRNE_LIBTORCH_VERSION "unknown")
+    endif()
+
+    add_executable(
+        vne_libtorch_probe
+        porting/libtorch_probe.cpp
+    )
+    target_link_libraries(
+        vne_libtorch_probe
+        PRIVATE
+            virne_libtorch
+    )
+    target_compile_definitions(
+        vne_libtorch_probe
+        PRIVATE
+            "VIRNE_LIBTORCH_VERSION=\"${VIRNE_LIBTORCH_VERSION}\""
+    )
+    if(UNIX)
+        set_property(
+            TARGET vne_libtorch_probe
+            APPEND
+            PROPERTY BUILD_RPATH "${VIRNE_LIBTORCH_ROOT}/lib"
+        )
+        set_property(
+            TARGET vne_libtorch_probe
+            APPEND
+            PROPERTY INSTALL_RPATH "${VIRNE_LIBTORCH_ROOT}/lib"
+        )
+    endif()
+
+    add_test(
+        NAME vne_libtorch_probe
+        COMMAND vne_libtorch_probe --threads 1 --device cpu
+    )
+endif()
+
 # OR-Tools is consumed through the official prebuilt C++ distribution pinned
 # in DEPENDENCIES.md. Keep Linux (Docker/GCC) and Windows (MSVC-compatible
 # clang-cl) payloads inside the workspace; no system/Conda solver is accepted.

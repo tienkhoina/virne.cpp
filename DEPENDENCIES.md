@@ -14,10 +14,16 @@ tracked by Git.
 | OR-Tools reference source | 9.15 | `libs/ortools-src` | audit/reference only; not linked |
 | OR-Tools C++ (Linux) | 9.15.6755 | `libs/ortools` | imported shared target `virne_ortools` |
 | OR-Tools C++ (Windows) | 9.15.6755 | `libs/ortools-win` | imported DLL/import-library target `virne_ortools` |
+| LibTorch (CPU, shared) | 2.6.0+cpu | `libs/libtorch` | opt-in imported target `virne_libtorch` (probe only) |
 
-The production CMake files deliberately do not call `find_package` for these
-libraries.  Add future C++ dependencies under `libs/`, pin their version here,
-and expose an explicit local target; do not install them into the environment.
+The production CMake files deliberately do not call `find_package` for the
+Boost/yaml-cpp/tabulate/OR-Tools rows above. LibTorch is the one exception: its
+vendored archive owns `share/cmake/Torch/TorchConfig.cmake`, and CMake loads
+that config only when `-DVIRNE_ENABLE_LIBTORCH=ON` with an explicit local path.
+This keeps the default non-RL build independent of Torch while allowing the
+same API to be reused by future CUDA/RL leaves. Add future C++ dependencies
+under `libs/`, pin their version here, and expose an explicit local target; do
+not install them into the environment.
 
 `/libs/` is intentionally a workspace-local payload and is ignored by Git.
 The prepared workspace already contains all listed local payloads. A fresh clone
@@ -33,6 +39,7 @@ in the repository-owned, machine-readable `DEPENDENCIES.sha256` manifest.
 | OR-Tools source 9.15 | `https://github.com/google/or-tools/releases/download/v9.15/or-tools-9.15.tar.gz` | `599c870319bb127441d92c452d8f79bca46ca6fd295c1deb8031ed303a361311` |
 | OR-Tools Ubuntu 22.04 C++ 9.15.6755 | `https://github.com/google/or-tools/releases/download/v9.15/or-tools_amd64_ubuntu-22.04_cpp_v9.15.6755.tar.gz` | `0b30114d7c05f0596286bf3ef8d02adcf5f45be3b39273490e6bb74a2a9bd1ea` |
 | OR-Tools Visual Studio 2022 C++ 9.15.6755 | `https://github.com/google/or-tools/releases/download/v9.15/or-tools_x64_VisualStudio2022_cpp_v9.15.6755.zip` | `43429c741641c8b495ee77e44ea00f0f4524519495fd2edaf929003aa2b2ea30` |
+| LibTorch shared CPU 2.6.0 | `https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-2.6.0%2Bcpu.zip` | `ad2901049e4d660097f1f54470d60c5afd3de1c293800fd1ae39ac3f9c7d2578` |
 
 The complete reconstruction procedure from the repository root is:
 
@@ -50,6 +57,8 @@ curl -fL https://github.com/google/or-tools/releases/download/v9.15/or-tools_amd
   -o .deps-cache/or-tools_amd64_ubuntu-22.04_cpp_v9.15.6755.tar.gz
 curl -fL https://github.com/google/or-tools/releases/download/v9.15/or-tools_x64_VisualStudio2022_cpp_v9.15.6755.zip \
   -o .deps-cache/or-tools_x64_VisualStudio2022_cpp_v9.15.6755.zip
+curl -fL 'https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-2.6.0%2Bcpu.zip' \
+  -o '.deps-cache/libtorch-shared-with-deps-2.6.0+cpu.zip'
 (cd .deps-cache && sha256sum -c ../DEPENDENCIES.sha256)
 
 tar -xzf .deps-cache/boost_1_85_0.tar.gz -C libs
@@ -64,6 +73,7 @@ tar -xzf .deps-cache/or-tools_amd64_ubuntu-22.04_cpp_v9.15.6755.tar.gz -C libs
 mv libs/or-tools_x86_64_Ubuntu-22.04_cpp_v9.15.6755 libs/ortools
 unzip -q .deps-cache/or-tools_x64_VisualStudio2022_cpp_v9.15.6755.zip -d libs
 mv libs/or-tools_x64_VisualStudio2022_cpp_v9.15.6755 libs/ortools-win
+unzip -q '.deps-cache/libtorch-shared-with-deps-2.6.0+cpu.zip' -d libs
 ```
 
 These commands are for a fresh clone where the destination directories
@@ -76,6 +86,34 @@ NetworkX oracle. The oracle baseline is CPython 3.10, NetworkX 3.4.2, NumPy
 1.26.4 and SciPy 1.15.3; it is never linked into, imported by, or required by
 production C++ binaries. See `benchmarks/requirements.txt`. The prepared
 workspace uses pip 25.1.1 inside that `.venv`.
+
+The Python oracle image used for ML compatibility checks contains
+`torch==2.6.0+cu124` (CUDA libraries are present but CUDA is disabled on the
+CPU-only runner). The vendored C++ payload is the matching 2.6.0 CPU archive,
+which uses the old libstdc++ ABI used by that wheel. Point
+`VIRNE_LIBTORCH_ROOT` at the official 2.6.0 CUDA archive instead when building
+on a CUDA runner; the probe and the `virne_libtorch` interface do not hard-code
+CPU kernels and select `--device cuda` only when `torch::cuda::is_available()`
+is true. Do not link Torch targets into the frozen ABI-1 non-RL libraries until
+the ML leaf has an explicit ABI boundary.
+
+Build the opt-in target in the pinned GCC 11 container:
+
+```powershell
+docker start virne-engine-keepalive
+docker exec virne-cpp-dev cmake -S /work -B /work/build-libtorch `
+  -DCMAKE_BUILD_TYPE=Release -DVIRNE_ENABLE_LIBTORCH=ON `
+  -DVIRNE_LIBTORCH_ROOT=/work/libs/libtorch
+docker exec virne-cpp-dev cmake --build /work/build-libtorch -j 4 `
+  --target vne_libtorch_probe
+docker exec virne-cpp-dev ctest --test-dir /work/build-libtorch `
+  -R '^vne_libtorch_probe$' --output-on-failure
+```
+
+The probe is intentionally isolated from the non-RL environment. Environment
+construction/output parity remains the existing exact gate in
+`porting/compare_environment.py`; LibTorch is prepared for the deferred
+learning/RL leaves rather than being introduced into that frozen lifecycle.
 
 Boost upgrades are special: graph hot loops intentionally depend on the
 1.85.0 adjacency-list layout.  `graph/graph_types.h` has a compile-time version
