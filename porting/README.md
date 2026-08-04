@@ -142,6 +142,28 @@ The comparator AST-extracts only MlpActorCritic/Actor/Critic, rejects Virne or
 PyG imports, and requires seven bit-exact cases plus the inert `action_dim`
 invariant before accepting the frozen paired timing.
 
+## Dense TensorConvertor exact gate
+
+The completed dense conversion paths use typed single/batch observations and
+feed `[B,500,25]` directly into the MLP policy:
+
+```powershell
+cmake --build build-ml-win-msvc --config Release `
+  --target vne_tensor_convertor_unit vne_tensor_convertor_harness --parallel 1
+ctest --test-dir build-ml-win-msvc -C Release `
+  -R '^vne_tensor_convertor_unit$' --output-on-failure
+
+.\.deps-cache\python-torch26\Scripts\python.exe `
+  .\porting\compare_tensor_convertor.py `
+  --harness .\build-ml-win-msvc\porting\Release\vne_tensor_convertor_harness.exe `
+  --python-source ..\virne\virne\solver\learning\rl_core\tensor_convertor.py `
+  --threads 1 --warmups 3 --repetitions 5 --iterations 20
+```
+
+The comparator isolates only the Python class and requires nine exact dense
+MLP/CNN/MLP-FC/attention cases before interpreting the frozen timing. PyG paths
+are not claimed by this gate.
+
 ## Differential and canonical timing
 
 Run from the directory containing sibling `virne` and `virne.cpp` checkouts:

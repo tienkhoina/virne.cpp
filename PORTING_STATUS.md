@@ -94,7 +94,8 @@ A component is `COMPLETE` only when all of the following exist and pass:
 | ML runtime boundary | vendored LibTorch 2.6.0 CPU + CUDA-compatible probe (Linux + Windows) | **IMPLEMENTED / NATIVE LINUX + WINDOWS GATE PASS** | `DEPENDENCIES.md`, `porting/components/libtorch.md`, `porting/results/libtorch_probe_2026-08-04.md` |
 | Learning/ML | `neural_network.MLPNet` | **COMPLETE / EXACT WINDOWS CPU GATE PASS** | `porting/components/mlp_net.md`, `porting/results/mlp_net_2026-08-04.md`; 9/9 bit-exact Python cases and exact timed output |
 | Learning/ML | `rl_policy.MlpActorCritic` / Actor / Critic | **COMPLETE / EXACT WINDOWS CPU GATE PASS** | `porting/components/mlp_policy.md`, `porting/results/mlp_policy_2026-08-04.md`; 7/7 bit-exact Python cases, action-dimension invariant and exact timed outputs |
-| Learning/ML | remaining `solver/learning/**` | IN PROGRESS | next Torch-only leaf: `TensorConvertor.obs_as_tensor_for_mlp`; PyG/training/RL control remains pending |
+| Learning/ML | dense `rl_core.TensorConvertor` paths | **COMPLETE / EXACT WINDOWS CPU GATE PASS** | `porting/components/tensor_convertor.md`, `porting/results/tensor_convertor_2026-08-04.md`; 9/9 bit-exact MLP/CNN/MLP-FC/attention cases, 3.057x dense conversion |
+| Learning/ML | remaining `solver/learning/**` | IN PROGRESS | next end-to-end input leaf: dense `FeatureConstructor`/`obs_handler`; PyG/training/RL control remains pending |
 
 ## Completed behavior
 
@@ -765,6 +766,15 @@ multi-resource input and standalone BatchNorm behavior. `action_dim=1` and
 timing has exact Actor/Critic checksums and measured C++ at 1.022x Python.
 See `porting/components/mlp_policy.md`.
 
+The dense `TensorConvertor` input paths are also complete. Single and batched
+observations use direct fixed members, not Python-style maps; MLP combines the
+14 physical and 11 virtual-node features into the exact `[B,500,25]` Tensor
+consumed by the completed policy. CNN, MLP-FC and attention layouts plus the
+fixed general fields are covered by the same API. Nine cross-language cases
+match every byte, and the frozen multi-resource batch conversion is 3.057x
+Python with an exact 400,000-byte output checksum. PyG graph batching remains
+a separate component. See `porting/components/tensor_convertor.md`.
+
 The experimental `exact_with_risk` leaf is now registered as a fourth exact
 solver. It copies the exact MIP feasibility formulation and changes only the
 objective: a normalized marginal fragmentation surrogate combines residual
@@ -778,9 +788,9 @@ equal-hop lower-risk choice and rejects a longer low-risk alternative. See
 
 ## Next component
 
-The ML port is active. Its next Torch-only leaf is
-`TensorConvertor.obs_as_tensor_for_mlp`, feeding the completed MLP policy with
-the exact `[B,Np,Fp+Fv]` layout; feature construction follows after that.
-PyG-dependent networks and training/RL control remain separate gates. Reuse
-the completed registries and all frozen graph/controller/random/config APIs.
-The non-RL environment continues to use its exact Torch-free gate.
+The ML port is active. Its next end-to-end input leaf is the dense
+`FeatureConstructor`/`obs_handler` path that produces the completed
+TensorConvertor's 14+11 multi-resource features. PyG-dependent conversions and
+networks, then training/RL control, remain separate gates. Reuse the completed
+registries and all frozen graph/controller/random/config APIs. The non-RL
+environment continues to use its exact Torch-free gate.

@@ -1751,4 +1751,36 @@ if(VIRNE_ENABLE_ML)
     )
 
     virne_configure_libtorch_executable(vne_mlp_policy_harness)
+
+    add_executable(
+        vne_tensor_convertor_unit
+        tensor_convertor_unit.cpp
+    )
+
+    target_link_libraries(
+        vne_tensor_convertor_unit
+        PRIVATE
+            vne_learning_tensor_convertor
+            vne_learning_mlp_policy
+    )
+
+    virne_configure_libtorch_executable(vne_tensor_convertor_unit)
+
+    add_test(
+        NAME vne_tensor_convertor_unit
+        COMMAND vne_tensor_convertor_unit
+    )
+
+    add_executable(
+        vne_tensor_convertor_harness
+        tensor_convertor_harness.cpp
+    )
+
+    target_link_libraries(
+        vne_tensor_convertor_harness
+        PRIVATE
+            vne_learning_tensor_convertor
+    )
+
+    virne_configure_libtorch_executable(vne_tensor_convertor_harness)
 endif()
