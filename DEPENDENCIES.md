@@ -41,7 +41,7 @@ in the repository-owned, machine-readable `DEPENDENCIES.sha256` manifest.
 | OR-Tools Ubuntu 22.04 C++ 9.15.6755 | `https://github.com/google/or-tools/releases/download/v9.15/or-tools_amd64_ubuntu-22.04_cpp_v9.15.6755.tar.gz` | `0b30114d7c05f0596286bf3ef8d02adcf5f45be3b39273490e6bb74a2a9bd1ea` |
 | OR-Tools Visual Studio 2022 C++ 9.15.6755 | `https://github.com/google/or-tools/releases/download/v9.15/or-tools_x64_VisualStudio2022_cpp_v9.15.6755.zip` | `43429c741641c8b495ee77e44ea00f0f4524519495fd2edaf929003aa2b2ea30` |
 | LibTorch shared CPU 2.6.0 | `https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-2.6.0%2Bcpu.zip` | `ad2901049e4d660097f1f54470d60c5afd3de1c293800fd1ae39ac3f9c7d2578` |
-| LibTorch Windows shared CPU 2.6.0 | `https://download.pytorch.org/libtorch/cpu/libtorch-win-shared-with-deps-2.6.0%2Bcpu.zip` | **pending archive download in the Windows engine** |
+| LibTorch Windows shared CPU 2.6.0 | `https://download.pytorch.org/libtorch/cpu/libtorch-win-shared-with-deps-2.6.0%2Bcpu.zip` | `f2c2e46073848a8e0150984ef26af7c112149a61401063dd4b1f12b7905dac41` |
 
 The complete reconstruction procedure from the repository root is:
 
@@ -108,10 +108,8 @@ the ML leaf has an explicit ABI boundary.
 On Windows, CMake defaults `VIRNE_LIBTORCH_ROOT` to `libs/libtorch-win`. The
 Windows archive supplies MSVC import libraries and runtime DLLs; the probe's
 post-build step copies both the official `bin/` DLL layout and any DLLs found
-beside `lib/` next to the executable. The Windows archive/hash is intentionally
-not added to `DEPENDENCIES.sha256` until it can be downloaded and verified on a
-Windows-capable network. Capture it before treating the Windows payload as a
-reproducible release dependency:
+beside `lib/` next to the executable. The Windows archive is verified in
+`DEPENDENCIES.sha256`; re-check it after downloading on another machine with:
 
 ```powershell
 (Get-FileHash .deps-cache\libtorch-win-shared-with-deps-2.6.0+cpu.zip `

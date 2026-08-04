@@ -6,8 +6,8 @@
 - URL: `https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-2.6.0%2Bcpu.zip`
 - SHA-256: `ad2901049e4d660097f1f54470d60c5afd3de1c293800fd1ae39ac3f9c7d2578`
 - Installed path: `libs/libtorch`
-- Windows install path: `libs/libtorch-win` (CMake/DLL layout is implemented;
-  the Windows archive is still pending download and SHA-256 capture)
+- Windows install path: `libs/libtorch-win`
+- Windows archive SHA-256: `f2c2e46073848a8e0150984ef26af7c112149a61401063dd4b1f12b7905dac41`
 - Torch build version: `2.6.0+cpu`
 - ABI: `_GLIBCXX_USE_CXX11_ABI=0`, inherited from the archive's CMake target
 

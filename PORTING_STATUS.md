@@ -91,7 +91,7 @@ A component is `COMPLETE` only when all of the following exist and pass:
 | Non-ML solver | `exact_with_risk` | **IMPLEMENTED / FOCUSED OBJECTIVE GATE PASS** | `porting/components/exact_with_risk.md`; copied exact MIP feasibility rows with normalized scarcity/balance/bridge tie-breaker; equal-hop and shorter-route dominance tests pass |
 | Non-ML solver | meta-heuristic (`ga_meta`, `sa_meta`, `ts_meta`, `pso_meta`, `aco_meta`) | **IMPLEMENTED / FOCUSED GATE PASS** | `porting/components/meta_heuristic.md`, `porting/results/meta_heuristic_2026-08-03.md`, `vne_meta_heuristic_unit`; ML/RL remains deferred |
 | System | online/offline/changeable/time-window + main config runtime | **IMPLEMENTED / EXACT ONLINE GATE PASS** | `porting/components/system.md`, `porting/results/system_main_e2e_differential_2026-07-30.json`, `porting/results/system_transaction_integration_2026-07-30.md` |
-| ML runtime boundary | vendored LibTorch 2.6.0 CPU + CUDA-compatible probe (Linux + Windows layout) | **IMPLEMENTED / NATIVE LINUX GATE PASS** | `DEPENDENCIES.md`, `porting/components/libtorch.md`, `porting/results/libtorch_probe_2026-08-04.md`; Windows archive/hash and Python oracle check await network/daemon recovery; learning/RL remains deferred |
+| ML runtime boundary | vendored LibTorch 2.6.0 CPU + CUDA-compatible probe (Linux + Windows) | **IMPLEMENTED / NATIVE LINUX GATE PASS** | `DEPENDENCIES.md`, `porting/components/libtorch.md`, `porting/results/libtorch_probe_2026-08-04.md`; Python oracle check awaits Docker daemon recovery; learning/RL remains deferred |
 | Learning/ML | `solver/learning/**` | OUT OF SCOPE | explicitly deferred |
 
 ## Completed behavior
