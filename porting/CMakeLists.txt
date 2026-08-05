@@ -1845,4 +1845,31 @@ if(VIRNE_ENABLE_ML)
     )
 
     virne_configure_libtorch_executable(vne_pyg_lite_harness)
+
+    add_executable(
+        vne_feature_constructor_unit
+        tests/feature_constructor_unit.cpp
+    )
+
+    target_link_libraries(
+        vne_feature_constructor_unit
+        PRIVATE
+            vne_learning_feature_constructor
+    )
+
+    add_test(
+        NAME vne_feature_constructor_unit
+        COMMAND vne_feature_constructor_unit
+    )
+
+    add_executable(
+        vne_feature_constructor_harness
+        feature_constructor_harness.cpp
+    )
+
+    target_link_libraries(
+        vne_feature_constructor_harness
+        PRIVATE
+            vne_learning_feature_constructor
+    )
 endif()

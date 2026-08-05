@@ -1,0 +1,27 @@
+{
+  "benchmark": "DEFERRED_UNTIL_EXACT",
+  "component": "feature_constructor",
+  "exact_cases": {
+    "passed": 8,
+    "results": [
+      {"mismatches": [], "name": "obs_physical_multi_resource", "status": "PASS"},
+      {"mismatches": [], "name": "obs_virtual_multi_resource", "status": "PASS"},
+      {"mismatches": [], "name": "feature_p_net_all_flags", "status": "PASS"},
+      {"mismatches": [], "name": "feature_p_net_v_node_all_flags", "status": "PASS"},
+      {"mismatches": [], "name": "feature_p_net_v_net_all_flags", "status": "PASS"},
+      {"mismatches": [], "name": "feature_no_optional_empty_slots", "status": "PASS"},
+      {"mismatches": [], "name": "feature_last_valid_empty_slots", "status": "PASS"},
+      {"mismatches": [], "name": "feature_v_node_curr_end", "status": "PASS"}
+    ],
+    "total": 8
+  },
+  "feature_source_sha256": "0f3c3377545a4b33ba8801415c2826cd7c1409301a0a2856111217d6a9245965",
+  "feature_source_size": 19445,
+  "fixture_version": 1,
+  "global_mismatches": [],
+  "networkx_version": "3.4.2",
+  "numpy_version": "2.2.6",
+  "obs_source_sha256": "61ce92fdef5544ef3a4384872a13bede8c53521db53f8277439f3092a9e99058",
+  "obs_source_size": 20291,
+  "status": "PASS"
+}
