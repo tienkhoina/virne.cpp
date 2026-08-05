@@ -13,6 +13,11 @@ add_library(
     reward_calculator.cpp
 )
 
+add_library(
+    vne_learning_rollout_returns
+    rollout_returns.cpp
+)
+
 target_include_directories(
     vne_learning_tensor_convertor
     PUBLIC
@@ -27,6 +32,12 @@ target_include_directories(
 
 target_include_directories(
     vne_learning_reward_calculator
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_include_directories(
+    vne_learning_rollout_returns
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
@@ -72,3 +83,13 @@ target_compile_features(
     PUBLIC
         cxx_std_17
 )
+
+target_compile_features(
+    vne_learning_rollout_returns
+    PUBLIC
+        cxx_std_17
+)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(vne_learning_rollout_returns PRIVATE -ffp-contract=off)
+endif()

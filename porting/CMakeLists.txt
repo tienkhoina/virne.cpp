@@ -1909,6 +1909,37 @@ if(VIRNE_ENABLE_ML)
     virne_configure_libtorch_executable(vne_reward_calculator_harness)
 
     add_executable(
+        vne_rollout_returns_unit
+        tests/rollout_returns_unit.cpp
+    )
+
+    target_link_libraries(
+        vne_rollout_returns_unit
+        PRIVATE
+            vne_learning_rollout_returns
+    )
+
+    virne_configure_libtorch_executable(vne_rollout_returns_unit)
+
+    add_test(
+        NAME vne_rollout_returns_unit
+        COMMAND vne_rollout_returns_unit
+    )
+
+    add_executable(
+        vne_rollout_returns_harness
+        rollout_returns_harness.cpp
+    )
+
+    target_link_libraries(
+        vne_rollout_returns_harness
+        PRIVATE
+            vne_learning_rollout_returns
+    )
+
+    virne_configure_libtorch_executable(vne_rollout_returns_harness)
+
+    add_executable(
         vne_feature_constructor_unit
         tests/feature_constructor_unit.cpp
     )

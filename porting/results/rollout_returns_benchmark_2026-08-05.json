@@ -1,0 +1,17 @@
+{
+  "component": "rollout_returns",
+  "fixture_version": 1,
+  "benchmark": "gae_returns_4096",
+  "platform": "Windows MSVC Release 19.41 + vendored LibTorch ML configuration",
+  "threads": 1,
+  "warmups": 2,
+  "repetitions": 5,
+  "iterations": 25,
+  "native_samples_ns_per_call": [32144.0, 34348.0, 40404.0, 37928.0, 32068.0],
+  "python_samples_ns_per_call": [1019092.0, 984912.0, 1088648.0, 1102024.0, 1058224.0],
+  "native_median_ns_per_call": 34348.0,
+  "python_median_ns_per_call": 1058224.0,
+  "python_over_native_speedup": 30.80889717014091,
+  "output_checksum": "13995964860393899778",
+  "status": "PASS"
+}

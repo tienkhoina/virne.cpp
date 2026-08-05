@@ -1,0 +1,32 @@
+{
+  "benchmark": {
+    "iterations": 25,
+    "name": "gae_returns_4096",
+    "native_median_ns_per_call": 34348.0,
+    "native_samples_ns_per_call": [
+      32144.0,
+      34348.0,
+      40404.0,
+      37928.0,
+      32068.0
+    ],
+    "output_checksum": "13995964860393899778",
+    "python_median_ns_per_call": 1058224.0,
+    "python_over_native_speedup": 30.80889717014091,
+    "python_samples_ns_per_call": [
+      1019092.0,
+      984912.0,
+      1088648.0,
+      1102024.0,
+      1058224.0
+    ],
+    "repetitions": 5,
+    "threads": 1,
+    "warmups": 2
+  },
+  "component": "rollout_returns",
+  "exact_outputs": "5/5",
+  "fixture_version": 1,
+  "mismatches": [],
+  "status": "PASS"
+}

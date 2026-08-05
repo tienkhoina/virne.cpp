@@ -100,7 +100,8 @@ A component is `COMPLETE` only when all of the following exist and pass:
 | Learning/ML | `obs_handler` + dense `rl_core.FeatureConstructor` | **COMPLETE / 8/8 EXACT LINUX GATE PASS** | `porting/components/feature_constructor.md`, `porting/results/feature_constructor_differential_2026-08-05.json`; split stateless observations from prepared ID-only feature construction, multi-resource fixture, worker determinism, and bounded Python/native timing |
 | Learning/ML | heterogeneous typed data + bipartite GAT + `HeteroConv` | **COMPLETE / 12/12 BIT-EXACT LINUX GATE PASS** | `porting/components/hetero_pyg.md`, `porting/results/hetero_pyg_differential_2026-08-05.json`; fixed node/relation IDs, PyG reduction order, 3.551x/3.598x native speedup at 1/4 threads |
 | Learning/ML | `rl_core.reward_calculator` registry + four formulas | **COMPLETE / 4/4 EXACT LINUX GATE PASS** | `porting/components/reward_calculator.md`, `porting/results/reward_calculator_differential_2026-08-05.json`; typed registry and direct Solution reward mutation, 19.217x scalar speedup |
-| Learning/ML | remaining `solver/learning/**` | IN PROGRESS | next independent leaf: rollout return/advantage utilities, then reward/control and training integration |
+| Learning/ML | `rl_core` rollout returns/advantages + cost returns | **COMPLETE / 5/5 EXACT WINDOWS MSVC GATE PASS** | `porting/components/rollout_returns.md`, `porting/results/rollout_returns_differential_2026-08-05.json`; typed GAE/MC/TD and reachability/cumulative helpers, 30.809x focused speedup |
+| Learning/ML | remaining `solver/learning/**` | IN PROGRESS | next independent leaf: typed RolloutBuffer storage/lifecycle, then action/control and training integration |
 
 ## Completed behavior
 
@@ -803,10 +804,10 @@ equal-hop lower-risk choice and rejects a longer low-risk alternative. See
 
 ## Next component
 
-The ML port is active. The bounded homogeneous propagation surface for
-`GraphViNEConv` and `EdgeFusionGATConv`, plus the dense `obs_handler` and
-`FeatureConstructor` bridge, is complete as separate gates. The next PyG leaf
-is heterogeneous typed data/convolution, followed by reward/control and
-training integration. Reuse the completed registries and all frozen
+The ML port is active. The bounded homogeneous and heterogeneous PyG surfaces,
+dense observation/feature bridges, reward registry, and rollout return helpers
+are complete as separate gates. The next leaf is typed `RolloutBuffer`
+storage/lifecycle (including fixed basic/calc/extend/cost lanes); action/control
+and training integration follow. Reuse the completed registries and all frozen
 graph/controller/random/config APIs. The non-RL environment continues to use
 its exact Torch-free gate.
