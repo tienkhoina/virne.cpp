@@ -1,0 +1,25 @@
+{
+  "benchmark": {
+    "name": "mask_logits_256x1024",
+    "native_median_ns_per_call": 212630.0,
+    "native_samples_ns_per_call": [
+      212160.0,
+      212630.0,
+      240410.0
+    ],
+    "output_checksum": "9213111756712424923",
+    "python_median_ns_per_call": 221350.0,
+    "python_over_native_speedup": 1.0410102055213282,
+    "python_samples_ns_per_call": [
+      221170.0,
+      221350.0,
+      223770.0
+    ]
+  },
+  "benchmark_mismatches": [],
+  "component": "action_mask",
+  "exact_cases": "9/9",
+  "fixture_version": 1,
+  "mismatches": [],
+  "status": "PASS"
+}

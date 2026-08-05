@@ -23,6 +23,11 @@ add_library(
     rollout_buffer.cpp
 )
 
+add_library(
+    vne_learning_action_mask
+    action_mask.cpp
+)
+
 target_include_directories(
     vne_learning_tensor_convertor
     PUBLIC
@@ -49,6 +54,12 @@ target_include_directories(
 
 target_include_directories(
     vne_learning_rollout_buffer
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_include_directories(
+    vne_learning_action_mask
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
@@ -107,10 +118,22 @@ target_compile_features(
         cxx_std_17
 )
 
+target_compile_features(
+    vne_learning_action_mask
+    PUBLIC
+        cxx_std_17
+)
+
 target_link_libraries(
     vne_learning_rollout_buffer
     PUBLIC
         vne_learning_rollout_returns
+)
+
+target_link_libraries(
+    vne_learning_action_mask
+    PUBLIC
+        virne_libtorch
 )
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")

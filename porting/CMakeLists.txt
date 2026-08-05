@@ -1691,6 +1691,37 @@ target_link_libraries(
 
 if(VIRNE_ENABLE_ML)
     add_executable(
+        vne_action_mask_unit
+        tests/action_mask_unit.cpp
+    )
+
+    target_link_libraries(
+        vne_action_mask_unit
+        PRIVATE
+            vne_learning_action_mask
+    )
+
+    virne_configure_libtorch_executable(vne_action_mask_unit)
+
+    add_test(
+        NAME vne_action_mask_unit
+        COMMAND vne_action_mask_unit
+    )
+
+    add_executable(
+        vne_action_mask_harness
+        action_mask_harness.cpp
+    )
+
+    target_link_libraries(
+        vne_action_mask_harness
+        PRIVATE
+            vne_learning_action_mask
+    )
+
+    virne_configure_libtorch_executable(vne_action_mask_harness)
+
+    add_executable(
         vne_mlp_net_unit
         mlp_net_unit.cpp
     )

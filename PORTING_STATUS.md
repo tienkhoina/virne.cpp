@@ -102,7 +102,8 @@ A component is `COMPLETE` only when all of the following exist and pass:
 | Learning/ML | `rl_core.reward_calculator` registry + four formulas | **COMPLETE / 4/4 EXACT LINUX GATE PASS** | `porting/components/reward_calculator.md`, `porting/results/reward_calculator_differential_2026-08-05.json`; typed registry and direct Solution reward mutation, 19.217x scalar speedup |
 | Learning/ML | `rl_core` rollout returns/advantages + cost returns | **COMPLETE / 5/5 EXACT WINDOWS MSVC GATE PASS** | `porting/components/rollout_returns.md`, `porting/results/rollout_returns_differential_2026-08-05.json`; typed GAE/MC/TD and reachability/cumulative helpers, 30.809x focused speedup |
 | Learning/ML | typed `rl_core.RolloutBuffer` storage/lifecycle | **COMPLETE / 12/12 EXACT WINDOWS MSVC GATE PASS** | `porting/components/rollout_buffer.md`, `porting/results/rollout_buffer_differential_2026-08-05.json`; fixed scalar/ID lanes, extension enums, ordered split/merge, cost/average variants, 31.242x selection speedup |
-| Learning/ML | remaining `solver/learning/**` | IN PROGRESS | next independent leaf: RL action/control utilities, then training integration |
+| Learning/ML | `rl_core` action-mask helpers | **COMPLETE / 9/9 EXACT WINDOWS MSVC GATE PASS** | `porting/components/action_mask.md`, `porting/results/action_mask_differential_2026-08-05.json`; typed CPU/CUDA-neutral logit/probability masking, scalar fill broadcast, 1.041x focused native speedup |
+| Learning/ML | remaining `solver/learning/**` | IN PROGRESS | next independent leaf: observation/statistics utility boundary, then training integration |
 
 ## Completed behavior
 
@@ -807,7 +808,7 @@ equal-hop lower-risk choice and rejects a longer low-risk alternative. See
 
 The ML port is active. The bounded homogeneous and heterogeneous PyG surfaces,
 dense observation/feature bridges, reward registry, rollout return helpers,
-and typed rollout storage are complete as separate gates. The next leaf is the
-RL action/control utility boundary, followed by training integration. Reuse the
+typed rollout storage, and action-mask boundary are complete as separate gates.
+The next leaf is the observation/statistics utility boundary, followed by training integration. Reuse the
 completed registries and all frozen graph/controller/random/config APIs. The
 non-RL environment continues to use its exact Torch-free gate.
