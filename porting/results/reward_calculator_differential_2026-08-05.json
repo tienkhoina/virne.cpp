@@ -1,0 +1,8 @@
+{
+  "component": "reward_calculator",
+  "fixture_version": 1,
+  "exact_outputs": "4/4",
+  "status": "PASS",
+  "unit": "vne_reward_calculator_unit: PASS",
+  "ctest": "1/1 passed"
+}

@@ -1878,6 +1878,37 @@ if(VIRNE_ENABLE_ML)
     virne_configure_libtorch_executable(vne_hetero_pyg_harness)
 
     add_executable(
+        vne_reward_calculator_unit
+        tests/reward_calculator_unit.cpp
+    )
+
+    target_link_libraries(
+        vne_reward_calculator_unit
+        PRIVATE
+            vne_learning_reward_calculator
+    )
+
+    virne_configure_libtorch_executable(vne_reward_calculator_unit)
+
+    add_test(
+        NAME vne_reward_calculator_unit
+        COMMAND vne_reward_calculator_unit
+    )
+
+    add_executable(
+        vne_reward_calculator_harness
+        reward_calculator_harness.cpp
+    )
+
+    target_link_libraries(
+        vne_reward_calculator_harness
+        PRIVATE
+            vne_learning_reward_calculator
+    )
+
+    virne_configure_libtorch_executable(vne_reward_calculator_harness)
+
+    add_executable(
         vne_feature_constructor_unit
         tests/feature_constructor_unit.cpp
     )

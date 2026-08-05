@@ -1,0 +1,14 @@
+{
+  "component": "reward_calculator",
+  "benchmark": "fixed_reward_compute",
+  "threads": 1,
+  "warmups": 2,
+  "repetitions": 5,
+  "iterations": 1000,
+  "native_samples_ns_per_call": [3.285, 3.167, 3.195, 3.005, 3.186],
+  "python_samples_ns_per_call": [61.916, 61.388, 61.028, 61.224, 61.056],
+  "native_median_ns_per_call": 3.186,
+  "python_median_ns_per_call": 61.224,
+  "python_over_native_speedup": 19.216572504708097,
+  "status": "PASS"
+}

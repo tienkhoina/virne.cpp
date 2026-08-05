@@ -8,6 +8,11 @@ add_library(
     feature_constructor.cpp
 )
 
+add_library(
+    vne_learning_reward_calculator
+    reward_calculator.cpp
+)
+
 target_include_directories(
     vne_learning_tensor_convertor
     PUBLIC
@@ -16,6 +21,12 @@ target_include_directories(
 
 target_include_directories(
     vne_learning_feature_constructor
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_include_directories(
+    vne_learning_reward_calculator
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
@@ -36,6 +47,14 @@ target_link_libraries(
         vne_topological_metric_calculator
 )
 
+target_link_libraries(
+    vne_learning_reward_calculator
+    PUBLIC
+        vne_solution
+        vne_physical_network
+        vne_virtual_network
+)
+
 target_compile_features(
     vne_learning_tensor_convertor
     PUBLIC
@@ -44,6 +63,12 @@ target_compile_features(
 
 target_compile_features(
     vne_learning_feature_constructor
+    PUBLIC
+        cxx_std_17
+)
+
+target_compile_features(
+    vne_learning_reward_calculator
     PUBLIC
         cxx_std_17
 )
