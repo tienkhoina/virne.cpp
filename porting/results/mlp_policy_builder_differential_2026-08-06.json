@@ -1,0 +1,50 @@
+{
+  "benchmark": {
+    "configurations_per_sample": 65536,
+    "name": "prepared_options_65536",
+    "native_median_ns_per_configuration": 48.9959716796875,
+    "native_samples_ns_per_batch": [
+      3211000,
+      3351600,
+      3161900
+    ],
+    "native_scope": "make_mlp_actor_critic_options(prepared typed config)",
+    "output_checksum": "16947531349973059386",
+    "python_median_ns_per_configuration": 13288.304138183594,
+    "python_over_native_speedup": 271.21217689193395,
+    "python_samples_ns_per_batch": [
+      829423000,
+      870871400,
+      870862300
+    ],
+    "python_scope": "three AST policy-builder option APIs(prepared config)",
+    "repetitions": 3,
+    "warmups": 1
+  },
+  "benchmark_mismatches": [],
+  "component": "mlp_policy_builder",
+  "exact_cases": "3/3",
+  "fixture_version": 1,
+  "mismatches": [],
+  "oracle_backend": "ast_isolated_build_mlp_policy_and_helpers",
+  "python_source": {
+    "build_mlp_policy_sha256": "6838dd4480c24caa08ded302a68c1b91e171ade21b194c8eae08f6ecfead9db7",
+    "file_sha256": "ae7c0b6a7438313571f891e109404a912be092d34a7f3660fcf1bb658317bf7f",
+    "path": "D:\\Virne to cpp\\virne\\virne\\solver\\learning\\rl_core\\policy_builder.py",
+    "policy_config_sources": {
+      "api_sha256": {
+        "PolicyBuilder.get_feature_dim_config": "da9fe38abe293fd7e0dcaba4f359527b93a830f061551c3ff497680829714aae",
+        "PolicyBuilder.get_general_nn_config": "9cf3c58863c14f180aaca199379dd1e56b0a3f1845319fca14875fedf4752578",
+        "get_p_net_edge_dim": "3e3668d9065c788f93475b2277c8e5797ce3740cf8744229eef4d2aa7450da1d",
+        "get_p_net_x_dim": "f7f512f9dfb461f24d86309e90e94e4078169e62933db40fa3e81ff640c9de3c",
+        "get_v_net_edge_dim": "e38e17e131c3a160d75d00a5a437eeedf3a0f74d41609b11070d60eab1670ff9",
+        "get_v_net_x_dim": "042ac8fcbc1687c9e3a01e9484d4c825c7c0fcd71477941efa18bbe15820a924",
+        "get_v_node_x_dim": "9777dfb9f0847b2f554a5b86963c119b86642665648f6ad721246e991e40ba82"
+      },
+      "combined_api_sha256": "74e2ffe8be7a36ef6f009eb8180bea4e23dab01754b8236b1f8c5f3bff5df4a7",
+      "file_sha256": "ae7c0b6a7438313571f891e109404a912be092d34a7f3660fcf1bb658317bf7f",
+      "path": "D:\\Virne to cpp\\virne\\virne\\solver\\learning\\rl_core\\policy_builder.py"
+    }
+  },
+  "status": "PASS"
+}

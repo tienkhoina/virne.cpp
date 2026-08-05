@@ -10,6 +10,7 @@ namespace virne::solver::learning::rl_core {
 
 enum class PolicyConfigErrorCode : std::uint8_t {
     invalid_physical_node_count,
+    invalid_feature_dimension,
     invalid_embedding_dimension,
     invalid_dropout_probability,
     feature_dimension_overflow,
