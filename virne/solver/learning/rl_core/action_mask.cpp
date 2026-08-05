@@ -2,6 +2,7 @@
 
 #include <torch/torch.h>
 
+#include <limits>
 #include <utility>
 
 namespace virne::solver::learning::rl_core {
@@ -62,8 +63,12 @@ torch::Tensor apply_mask(
     const torch::Tensor normalized = normalize_mask(values, mask);
     // Python constructs a scalar fill tensor and lets where broadcast it.  A
     // scalar avoids materializing a second values-sized buffer on every call.
+    const double representable_fill = values.scalar_type() == torch::kFloat16
+            && fill_value < -65504.0
+        ? -std::numeric_limits<double>::infinity()
+        : fill_value;
     const torch::Tensor fill = torch::full(
-        {}, fill_value, values.options().requires_grad(false));
+        {}, representable_fill, values.options().requires_grad(false));
     return torch::where(normalized, values, fill);
 }
 

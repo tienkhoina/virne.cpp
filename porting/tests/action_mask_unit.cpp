@@ -87,6 +87,23 @@ void test_float64_mask() {
         "float64 probability mask");
 }
 
+void test_mixed_precision_mask() {
+    const auto mask = torch::tensor({1, 0}, torch::kBool);
+    const auto half = rl::apply_mask_to_logit(
+        torch::tensor({1.0F, 2.0F}).to(torch::kFloat16), mask);
+    require(half.scalar_type() == torch::kFloat16
+                && half.index({0}).item<float>() == 1.0F
+                && torch::isneginf(half.index({1})).item<bool>(),
+            "float16 mask matches Python overflow cast");
+
+    const auto bfloat = rl::apply_mask_to_logit(
+        torch::tensor({1.0F, 2.0F}).to(torch::kBFloat16), mask);
+    require(bfloat.scalar_type() == torch::kBFloat16
+                && bfloat.index({0}).item<float>() == 1.0F
+                && bfloat.index({1}).item<float>() < -9.0e7F,
+            "bfloat16 mask keeps the large negative sentinel");
+}
+
 void test_mismatch_rejected() {
     const auto values = torch::ones({2, 2}, torch::kFloat32);
     bool rejected = false;
@@ -145,6 +162,7 @@ int main() {
         test_identity();
         test_float32_masks();
         test_float64_mask();
+        test_mixed_precision_mask();
         test_mismatch_rejected();
         test_typed_errors();
         test_cuda_if_available();

@@ -1,0 +1,55 @@
+{
+  "benchmark": {
+    "device": "cpu",
+    "iterations": 10,
+    "name": "evaluate_256x256",
+    "native_median_ns_per_call": 579090.0,
+    "native_samples_ns_per_call": [
+      586700.0,
+      543960.0,
+      579090.0
+    ],
+    "native_scope": "evaluate_policy_actions(256x256)",
+    "output_checksums": {
+      "benchmark.entropy": "2361714876956643593",
+      "benchmark.log_probabilities": "17161630339474020069",
+      "benchmark.masked_action_probability": "11963763584059790519"
+    },
+    "python_median_ns_per_call": 1027340.0,
+    "python_over_native_speedup": 1.7740592999361067,
+    "python_samples_ns_per_call": [
+      1095880.0,
+      962960.0,
+      1027340.0
+    ],
+    "python_scope": "AST RLSolver.evaluate_actions(256x256)",
+    "repetitions": 3,
+    "threads": 1,
+    "warmups": 1
+  },
+  "benchmark_mismatches": [],
+  "component": "policy_action",
+  "exact_cases": "23/23",
+  "fixture_version": 1,
+  "mismatches": [],
+  "oracle_backend": "ast_isolated_torch_2_6_categorical",
+  "python_sources": {
+    "action_mask": {
+      "file_sha256": "ba1394e89752a70f8d03dbe485125f7c8bffbb77e5767ff000034019f53519e4",
+      "method_sha256": "558964667b0ba69bcbf819542a0cd46d7db39d009998b50ecdacc76fe192e9e2",
+      "path": "D:\\Virne to cpp\\virne\\virne\\solver\\learning\\utils.py"
+    },
+    "rl_solver": {
+      "combined_method_sha256": "a780dc94470de1e9f35d04e854f6e0ae9693a1161706164bc605081f2c065495",
+      "file_sha256": "1285e787ab60c90497625f5b3c39a1f9ee421a15054384143a57759dbd68c1da",
+      "method_sha256": {
+        "evaluate_actions": "4a0951519b8e114945d308e5a614f25dba155a245c10e3618c17637b5c13504f",
+        "get_action_prob_dist": "26fbf85787c899f9f22af5a100ce612b881b34e6fbf5729f63789f455872facf",
+        "select_action": "a5428e4f299954e211c3bf8b9475e1f6904097601923695f63f170aecc58f9f4"
+      },
+      "path": "D:\\Virne to cpp\\virne\\virne\\solver\\learning\\rl_core\\rl_solver.py"
+    }
+  },
+  "status": "PASS",
+  "torch_version": "2.6.0+cpu"
+}

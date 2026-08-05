@@ -26,9 +26,11 @@ Header: `virne/solver/learning/rl_core/action_mask.h`
 
 The operations are device-neutral for CPU and CUDA LibTorch.  A mask with a
 different device is moved to the values device; a different element count is
-rejected by the same reshape contract as Python.  Float32 and Float64 values,
-boolean/integer/float masks, mixed/all-true/all-false masks, vector masks, and
-identity calls are covered by the differential gate.
+rejected by the same reshape contract as Python. Float16 overflow of the
+`-1e8` sentinel is represented as negative infinity exactly like Python's cast.
+Float16 and BFloat16 values are covered by the focused native unit; Float32 and
+Float64 values, boolean/integer/float masks, mixed/all-true/all-false masks,
+vector masks, and identity calls remain covered by the frozen differential gate.
 
 ## Gate and benchmark
 

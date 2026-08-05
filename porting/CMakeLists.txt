@@ -1798,6 +1798,37 @@ if(VIRNE_ENABLE_ML)
     )
 
     add_executable(
+        vne_policy_action_unit
+        tests/policy_action_unit.cpp
+    )
+
+    target_link_libraries(
+        vne_policy_action_unit
+        PRIVATE
+            vne_learning_policy_action
+    )
+
+    virne_configure_libtorch_executable(vne_policy_action_unit)
+
+    add_test(
+        NAME vne_policy_action_unit
+        COMMAND vne_policy_action_unit
+    )
+
+    add_executable(
+        vne_policy_action_harness
+        policy_action_harness.cpp
+    )
+
+    target_link_libraries(
+        vne_policy_action_harness
+        PRIVATE
+            vne_learning_policy_action
+    )
+
+    virne_configure_libtorch_executable(vne_policy_action_harness)
+
+    add_executable(
         vne_graph_observation_sampler_harness
         graph_observation_sampler_harness.cpp
     )
