@@ -1,4 +1,5 @@
 #include "numpy_random_state.h"
+#include "signed_range_math.h"
 
 #include <algorithm>
 #include <cmath>
@@ -814,20 +815,14 @@ NumpyRandomState::randint(
             "low must be less than high for randint");
     }
 
-    using Wide = __int128_t;
-
-    const Wide range =
-        static_cast<Wide>(high)
-        - static_cast<Wide>(low)
-        - 1;
+    const std::uint64_t range =
+        random_detail::ordered_distance(low, high) - 1U;
 
     const std::uint64_t offset =
         interval(
             static_cast<std::uint64_t>(range));
 
-    return static_cast<std::int64_t>(
-        static_cast<Wide>(low)
-        + static_cast<Wide>(offset));
+    return random_detail::add_offset(low, offset);
 }
 
 std::vector<std::int64_t>
@@ -842,13 +837,8 @@ NumpyRandomState::randint(
             "low must be less than high for randint");
     }
 
-    using Wide = __int128_t;
-
     const std::uint64_t maximum =
-        static_cast<std::uint64_t>(
-            static_cast<Wide>(high)
-            - static_cast<Wide>(low)
-            - 1);
+        random_detail::ordered_distance(low, high) - 1U;
     const std::uint64_t mask =
         bit_mask(maximum);
 
@@ -1040,9 +1030,7 @@ NumpyRandomState::randint(
                             if (offset <= maximum32)
                             {
                                 *destination++ =
-                                    static_cast<std::int64_t>(
-                                        static_cast<Wide>(low) +
-                                        static_cast<Wide>(offset));
+                                    random_detail::add_offset(low, offset);
                             }
                         }
                     }
@@ -1169,10 +1157,7 @@ NumpyRandomState::randint(
                     *input++ & mask32;
                 if (offset <= maximum32)
                 {
-                    *output++ =
-                        static_cast<std::int64_t>(
-                            static_cast<Wide>(low) +
-                            static_cast<Wide>(offset));
+                    *output++ = random_detail::add_offset(low, offset);
                 }
             }
             position_ = static_cast<std::size_t>(
@@ -1185,9 +1170,7 @@ NumpyRandomState::randint(
     {
         const std::uint64_t offset =
             interval_masked(maximum, mask);
-        *output++ = static_cast<std::int64_t>(
-            static_cast<Wide>(low) +
-            static_cast<Wide>(offset));
+        *output++ = random_detail::add_offset(low, offset);
     }
     return result;
 }

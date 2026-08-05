@@ -1,4 +1,5 @@
 #include "py_random.h"
+#include "signed_range_math.h"
 
 void
 PyRandom::init_genrand(
@@ -403,60 +404,35 @@ PyRandom::randrange(
             "zero step for randrange()");
     }
 
-    using Wide = __int128_t;
-    using UWide = __uint128_t;
-
-    const Wide wide_start =
-        static_cast<Wide>(start);
-    const Wide width =
-        static_cast<Wide>(stop)
-        - wide_start;
-    const Wide wide_step =
-        static_cast<Wide>(step);
-
-    Wide count = 0;
-
-    if (wide_step > 0)
+    std::uint64_t distance = 0;
+    if (step > 0)
     {
-        if (width <= 0)
+        if (start >= stop)
         {
             throw std::invalid_argument(
                 "empty range for randrange()");
         }
-
-        count =
-            (width - 1) / wide_step + 1;
+        distance = random_detail::ordered_distance(start, stop);
     }
     else
     {
-        if (width >= 0)
+        if (start <= stop)
         {
             throw std::invalid_argument(
                 "empty range for randrange()");
         }
-
-        count =
-            ((-width) - 1) / (-wide_step) + 1;
+        distance = random_detail::ordered_distance(stop, start);
     }
 
-    if (static_cast<UWide>(count)
-        > static_cast<UWide>(
-            std::numeric_limits<uint64_t>::max()))
-    {
-        throw std::overflow_error(
-            "randrange width exceeds the fixed 64-bit compatibility boundary");
-    }
+    const std::uint64_t stride =
+        random_detail::unsigned_magnitude(step);
+    const std::uint64_t count =
+        distance / stride
+        + static_cast<std::uint64_t>(distance % stride != 0U);
 
     const uint64_t offset =
-        randrange(
-            static_cast<uint64_t>(count));
-
-    const Wide result =
-        wide_start
-        + wide_step
-        * static_cast<Wide>(offset);
-
-    return static_cast<int64_t>(result);
+        randrange(count);
+    return random_detail::add_scaled_offset(start, step, offset);
 }
 
 int64_t
@@ -470,27 +446,17 @@ PyRandom::randint(
             "empty range for randint()");
     }
 
-    using Wide = __int128_t;
-    using UWide = __uint128_t;
-
-    const Wide width =
-        static_cast<Wide>(b)
-        - static_cast<Wide>(a)
-        + 1;
-
-    if (static_cast<UWide>(width)
-        > static_cast<UWide>(
-            std::numeric_limits<uint64_t>::max()))
+    const std::uint64_t width =
+        static_cast<std::uint64_t>(b)
+        - static_cast<std::uint64_t>(a)
+        + 1U;
+    if (width == 0U)
     {
         throw std::overflow_error(
             "randint interval exceeds the fixed 64-bit compatibility boundary");
     }
 
     const uint64_t offset =
-        randrange(
-            static_cast<uint64_t>(width));
-
-    return static_cast<int64_t>(
-        static_cast<Wide>(a)
-        + static_cast<Wide>(offset));
+        randrange(width);
+    return random_detail::add_offset(a, offset);
 }

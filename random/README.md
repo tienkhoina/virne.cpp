@@ -386,6 +386,23 @@ Torch, CUDA, backend, and environment steps separately. It must not add a
 LibTorch dependency to this Random component or silently treat
 `RandomContext::set_seed` as the complete Torch seeding policy.
 
+## Portable signed-interval arithmetic
+
+`randrange` and signed `randint` cover intervals that can cross the entire
+`int64_t` domain. Their private `signed_range_math.h` implementation uses
+unsigned distance/magnitude arithmetic and reconstructs the mathematically
+valid signed result without compiler-specific `__int128` types or signed
+overflow. This keeps the public API and RNG draw order unchanged on GCC/Clang
+while allowing the same source to build with MSVC. The complete inclusive
+`[-2^63, 2^63-1]` `PyRandom::randint` domain remains rejected before any draw,
+as required by the fixed 64-bit contract.
+
+The focused unit locks both directions of near-full-width CPython `randrange`,
+its no-consumption rejection, and scalar/vector NumPy `randint` values at the
+signed limits. The Windows MSVC Release gate builds `random_lib`, `test_random`,
+and `vne_utils_config`, then passes `random_python_compat`. Frozen Random
+performance measurements are not rerun for this representation-only fix.
+
 ## Hot-loop and bulk-state rule
 
 MT19937 state has one owner and one logical order. Performance work must obey

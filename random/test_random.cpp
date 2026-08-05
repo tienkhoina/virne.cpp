@@ -216,7 +216,26 @@ int main()
             check_throws([&] { (void)rng.randrange(1, 5, 0); },
                          "zero-step randrange must throw");
             check_throws([&] { (void)rng.randint(5, 4); },
-                         "empty randint must throw");
+                          "empty randint must throw");
+        }
+
+        {
+            constexpr auto low = std::numeric_limits<std::int64_t>::min();
+            constexpr auto high = std::numeric_limits<std::int64_t>::max();
+            PyRandom rng(123);
+            check(rng.randrange(low, high, 1) == -4285599787418930330LL,
+                  "full-width positive randrange differs from CPython");
+            check(rng.randrange(high, low, -1) == -4961369731917536687LL,
+                  "full-width negative randrange differs from CPython");
+            check(rng.randrange(low, high, high) == -1,
+                  "extreme-step randrange differs from CPython");
+
+            PyRandom rejected(321);
+            PyRandom control(321);
+            check_throws([&] { (void)rejected.randint(low, high); },
+                          "complete int64 randint domain must be rejected");
+            check(double_bits(rejected.random()) == double_bits(control.random()),
+                  "rejected full-domain randint consumed RNG state");
         }
 
         {
@@ -398,6 +417,23 @@ int main()
             check(scalar_high_only.randint(101) ==
                       scalar_explicit.randint(0, 101),
                   "randint(high) differs from randint(0, high)");
+        }
+
+        {
+            constexpr auto low = std::numeric_limits<std::int64_t>::min();
+            constexpr auto high = std::numeric_limits<std::int64_t>::max();
+            NumpyRandomState scalar(123);
+            check(scalar.randint(low, high) == 3624216819017203053LL,
+                  "extreme scalar randint differs from NumPy 1.26.4");
+            check(scalar.randint(low, high) == -3945032883802979006LL,
+                  "extreme scalar randint continuation differs from NumPy");
+
+            NumpyRandomState vector(123);
+            check(vector.randint(low, high, 2) ==
+                      std::vector<std::int64_t>({
+                          3624216819017203053LL,
+                          -3945032883802979006LL}),
+                  "extreme vector randint differs from NumPy 1.26.4");
         }
 
         {
