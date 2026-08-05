@@ -105,7 +105,8 @@ A component is `COMPLETE` only when all of the following exist and pass:
 | Learning/ML | `rl_core` action-mask helpers | **COMPLETE / 9/9 EXACT WINDOWS MSVC GATE PASS** | `porting/components/action_mask.md`, `porting/results/action_mask_differential_2026-08-05.json`; typed CPU/CUDA-neutral logit/probability masking, scalar fill broadcast, 1.041x focused native speedup |
 | Learning/ML | `RunningMeanStd` + moment merge utility | **COMPLETE / 4/4 EXACT WINDOWS MSVC GATE PASS** | `porting/components/running_mean_std.md`, `porting/results/running_mean_std_differential_2026-08-05.json`; direct float64 lanes, NumPy population-variance parity, 9.382x focused native speedup |
 | Learning/ML | typed dense/homogeneous observation sampling boundary | **COMPLETE / 15/15 EXACT WINDOWS MSVC GATE PASS** | `porting/components/observation_sampler.md`, `porting/results/observation_sampler_differential_2026-08-05.json`; AST-isolated Python oracle, direct fixed fields, one-time negative-index normalization, PyG rebatching, 3.970x focused native speedup |
-| Learning/ML | remaining `solver/learning/**` | IN PROGRESS | next independent leaf: heterogeneous/dual-graph observation wrappers, then typed policy action/evaluation boundary |
+| Learning/ML | prepared homogeneous/dual/heterogeneous graph observation sampling | **COMPLETE / 99/99 EXACT WINDOWS MSVC GATE PASS** | `porting/components/graph_observation_sampler.md`, `porting/results/graph_observation_sampler_differential_2026-08-05.json`; cached typed gathers, all six relations and three views, 19.681x focused native speedup |
+| Learning/ML | remaining `solver/learning/**` | IN PROGRESS | next independent leaf: typed policy action/evaluation boundary |
 
 ## Completed behavior
 
@@ -810,9 +811,9 @@ equal-hop lower-risk choice and rejects a longer low-risk alternative. See
 
 The ML port is active. The bounded homogeneous and heterogeneous PyG surfaces,
 dense observation/feature bridges, reward registry, rollout return helpers,
-typed rollout storage, action-mask boundary, running statistics, and typed
-observation sampling are complete as separate gates. The next independent leaf
-is the heterogeneous/dual-graph observation wrapper and prepared graph sampling
-boundary, followed by typed policy action/evaluation integration. Reuse the
-completed registries and all frozen graph/controller/random/config APIs. The
-non-RL environment continues to use its exact Torch-free gate.
+typed rollout storage, action-mask boundary, running statistics, and prepared
+dense/homogeneous/dual/heterogeneous observation sampling are complete as
+separate gates. The next independent leaf is typed policy action/evaluation
+integration. Reuse the completed registries and all frozen
+graph/controller/random/config APIs. The non-RL environment continues to use
+its exact Torch-free gate.

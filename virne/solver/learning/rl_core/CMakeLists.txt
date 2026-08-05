@@ -38,6 +38,11 @@ add_library(
     observation_sampler.cpp
 )
 
+add_library(
+    vne_learning_graph_observation_sampler
+    graph_observation_sampler.cpp
+)
+
 target_include_directories(
     vne_learning_tensor_convertor
     PUBLIC
@@ -82,6 +87,12 @@ target_include_directories(
 
 target_include_directories(
     vne_learning_observation_sampler
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_include_directories(
+    vne_learning_graph_observation_sampler
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
@@ -158,6 +169,12 @@ target_compile_features(
         cxx_std_17
 )
 
+target_compile_features(
+    vne_learning_graph_observation_sampler
+    PUBLIC
+        cxx_std_17
+)
+
 target_link_libraries(
     vne_learning_rollout_buffer
     PUBLIC
@@ -172,6 +189,13 @@ target_link_libraries(
 
 target_link_libraries(
     vne_learning_observation_sampler
+    PUBLIC
+        vne_learning_tensor_convertor
+        vne_learning_pyg_lite
+)
+
+target_link_libraries(
+    vne_learning_graph_observation_sampler
     PUBLIC
         vne_learning_tensor_convertor
         vne_learning_pyg_lite

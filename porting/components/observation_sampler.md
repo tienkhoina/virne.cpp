@@ -33,10 +33,10 @@ is source-compatible but was not hardware-gated on this host.
 The homogeneous `Batch` overload implements Python's valid graph-valued
 dictionary branch by selecting graphs and rebatching them. The original
 top-level `Batch` branch calls `.to()` on PyG's returned list and is malformed,
-so that bug is not reproduced. Heterogeneous/dual-graph observation wrappers
-remain a separate integration leaf. Homogeneous graph selection currently
-uses the frozen PyG-lite cold extraction/rebatch boundary; a prepared offset
-cache should replace its host metadata path before graph PPO training.
+so that bug is not reproduced. The legacy homogeneous overload remains a cold
+extraction/rebatch boundary. Repeated homogeneous, dual, and heterogeneous
+minibatch selection now uses the prepared API documented in
+`porting/components/graph_observation_sampler.md`.
 
 ## Verification and performance
 

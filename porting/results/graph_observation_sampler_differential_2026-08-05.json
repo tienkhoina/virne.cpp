@@ -1,0 +1,45 @@
+{
+  "benchmark": {
+    "device": "cpu",
+    "iterations": 10,
+    "name": "prepared_homogeneous_256_to_128",
+    "native_median_ns_per_call": 96280.0,
+    "native_samples_ns_per_call": [
+      96310.0,
+      96280.0,
+      96150.0
+    ],
+    "native_scope": "sample(prepared_selection)",
+    "output_checksums": {
+      "sample.batch": "17145709815638687051",
+      "sample.edge_attr": "15835213635180151839",
+      "sample.edge_index": "10535599191928849237",
+      "sample.edge_ptr": "5406279385973945447",
+      "sample.max_num_nodes": "14514845484917519781",
+      "sample.num_graphs": "2750429125540792901",
+      "sample.ptr": "10710568078434106103",
+      "sample.x": "7300128567569980311"
+    },
+    "python_median_ns_per_call": 1894850.0,
+    "python_over_native_speedup": 19.68061902783548,
+    "python_samples_ns_per_call": [
+      1944620.0,
+      1894850.0,
+      1727630.0
+    ],
+    "python_scope": "AST oracle get_observations_sample",
+    "repetitions": 3,
+    "threads": 1,
+    "warmups": 1
+  },
+  "benchmark_mismatches": [],
+  "component": "graph_observation_sampler",
+  "exact_cases": "99/99",
+  "fixture_version": 1,
+  "mismatches": [],
+  "oracle_backend": "minimal_batch_stub",
+  "python_file_sha256": "ba1394e89752a70f8d03dbe485125f7c8bffbb77e5767ff000034019f53519e4",
+  "python_oracle_sha256": "349ad2c398a1a89c1717202a4d7b424da9c3491d51193e7c86ef7d1550f6e699",
+  "python_source": "D:\\Virne to cpp\\virne\\virne\\solver\\learning\\utils.py",
+  "status": "PASS"
+}
