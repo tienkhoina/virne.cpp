@@ -1691,6 +1691,33 @@ target_link_libraries(
 
 if(VIRNE_ENABLE_ML)
     add_executable(
+        vne_policy_config_unit
+        tests/policy_config_unit.cpp
+    )
+
+    target_link_libraries(
+        vne_policy_config_unit
+        PRIVATE
+            vne_learning_policy_config
+    )
+
+    add_test(
+        NAME vne_policy_config_unit
+        COMMAND vne_policy_config_unit
+    )
+
+    add_executable(
+        vne_policy_config_harness
+        policy_config_harness.cpp
+    )
+
+    target_link_libraries(
+        vne_policy_config_harness
+        PRIVATE
+            vne_learning_policy_config
+    )
+
+    add_executable(
         vne_action_mask_unit
         tests/action_mask_unit.cpp
     )

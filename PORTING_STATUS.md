@@ -107,7 +107,8 @@ A component is `COMPLETE` only when all of the following exist and pass:
 | Learning/ML | typed dense/homogeneous observation sampling boundary | **COMPLETE / 15/15 EXACT WINDOWS MSVC GATE PASS** | `porting/components/observation_sampler.md`, `porting/results/observation_sampler_differential_2026-08-05.json`; AST-isolated Python oracle, direct fixed fields, one-time negative-index normalization, PyG rebatching, 3.970x focused native speedup |
 | Learning/ML | prepared homogeneous/dual/heterogeneous graph observation sampling | **COMPLETE / 99/99 EXACT WINDOWS MSVC GATE PASS** | `porting/components/graph_observation_sampler.md`, `porting/results/graph_observation_sampler_differential_2026-08-05.json`; cached typed gathers, all six relations and three views, 19.681x focused native speedup |
 | Learning/ML | typed policy action/evaluation boundary | **COMPLETE / 23/23 EXACT WINDOWS MSVC GATE PASS** | `porting/components/policy_action.md`, `porting/results/policy_action_differential_2026-08-06.json`; fixed policy flags/mode, Torch 2.6 categorical parity, no-grad inference, FP16/BF16, 1.774x focused native speedup |
-| Learning/ML | remaining `solver/learning/**` | IN PROGRESS | next independent leaf: typed policy feature-dimension/config resolver |
+| Learning/ML | typed policy feature-dimension/config resolver | **COMPLETE / 20/20 EXACT WINDOWS MSVC GATE PASS** | `porting/components/policy_config.md`, `porting/results/policy_config_differential_2026-08-06.json`; shared lightweight config summary, all fixed flags, checked shape arithmetic, 256.600x focused native speedup |
+| Learning/ML | remaining `solver/learning/**` | IN PROGRESS | next independent leaf: typed MLP policy construction adapter |
 
 ## Completed behavior
 
@@ -815,7 +816,7 @@ dense observation/feature bridges, reward registry, rollout return helpers,
 typed rollout storage, action-mask boundary, running statistics, and prepared
 dense/homogeneous/dual/heterogeneous observation sampling, plus typed policy
 action/evaluation are complete as separate gates. The next independent leaf is
-the typed policy feature-dimension/config resolver. Reuse the completed
-registries and all frozen
+the typed MLP policy construction adapter using the completed resolver and
+`MlpActorCritic`. Reuse the completed registries and all frozen
 graph/controller/random/config APIs. The non-RL environment continues to use
 its exact Torch-free gate.

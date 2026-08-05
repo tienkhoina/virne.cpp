@@ -1,6 +1,7 @@
 #pragma once
 
 #include "dataset.h"
+#include "feature_constructor_summary.h"
 
 #include "attribute/attribute_method.h"
 #include "config/config.h"
@@ -90,15 +91,6 @@ struct SimulationConfigInput
     SimulationAttributeKinds virtual_link_attributes;
     ExtractedAttributeKinds extracted_attribute_kinds;
     std::optional<DatasetScalar> seed;
-};
-
-struct FeatureConstructorSummary
-{
-    std::size_t num_extracted_p_node_attrs = 0;
-    std::size_t num_extracted_p_link_attrs = 0;
-    std::size_t num_extracted_v_node_attrs = 0;
-    std::size_t num_extracted_v_link_attrs = 0;
-    std::int64_t p_num_nodes = 0;
 };
 
 struct SimulationConfigSummary

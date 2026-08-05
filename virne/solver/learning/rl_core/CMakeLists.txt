@@ -48,6 +48,11 @@ add_library(
     policy_action.cpp
 )
 
+add_library(
+    vne_learning_policy_config
+    policy_config.cpp
+)
+
 target_include_directories(
     vne_learning_tensor_convertor
     PUBLIC
@@ -104,6 +109,12 @@ target_include_directories(
 
 target_include_directories(
     vne_learning_policy_action
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_include_directories(
+    vne_learning_policy_config
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
@@ -188,6 +199,12 @@ target_compile_features(
 
 target_compile_features(
     vne_learning_policy_action
+    PUBLIC
+        cxx_std_17
+)
+
+target_compile_features(
+    vne_learning_policy_config
     PUBLIC
         cxx_std_17
 )
