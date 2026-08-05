@@ -1,0 +1,38 @@
+{
+  "benchmark": {
+    "device": "cpu",
+    "iterations": 10,
+    "name": "dense_sample_4096_to_1024",
+    "native_median_ns_per_call": 59080.0,
+    "native_samples_ns_per_call": [
+      59750.0,
+      59080.0,
+      58810.0
+    ],
+    "output_checksums": {
+      "action_mask": "7484568950023935690",
+      "curr_v_node_id": "8437390393165635253",
+      "p_net_x": "11612330059562848604",
+      "v_net_size": "6395703600317808738",
+      "v_node_x": "12576463289612607426"
+    },
+    "python_median_ns_per_call": 234540.0,
+    "python_over_native_speedup": 3.9698713608666214,
+    "python_samples_ns_per_call": [
+      233150.0,
+      234540.0,
+      255650.0
+    ],
+    "repetitions": 3,
+    "threads": 1,
+    "warmups": 1
+  },
+  "benchmark_mismatches": [],
+  "component": "observation_sampler",
+  "exact_cases": "15/15",
+  "fixture_version": 2,
+  "mismatches": [],
+  "python_source": "D:\\Virne to cpp\\virne\\virne\\solver\\learning\\utils.py",
+  "python_source_sha256": "349ad2c398a1a89c1717202a4d7b424da9c3491d51193e7c86ef7d1550f6e699",
+  "status": "PASS"
+}

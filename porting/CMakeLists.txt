@@ -1749,6 +1749,37 @@ if(VIRNE_ENABLE_ML)
     )
 
     add_executable(
+        vne_observation_sampler_unit
+        tests/observation_sampler_unit.cpp
+    )
+
+    target_link_libraries(
+        vne_observation_sampler_unit
+        PRIVATE
+            vne_learning_observation_sampler
+    )
+
+    virne_configure_libtorch_executable(vne_observation_sampler_unit)
+
+    add_test(
+        NAME vne_observation_sampler_unit
+        COMMAND vne_observation_sampler_unit
+    )
+
+    add_executable(
+        vne_observation_sampler_harness
+        observation_sampler_harness.cpp
+    )
+
+    target_link_libraries(
+        vne_observation_sampler_harness
+        PRIVATE
+            vne_learning_observation_sampler
+    )
+
+    virne_configure_libtorch_executable(vne_observation_sampler_harness)
+
+    add_executable(
         vne_mlp_net_unit
         mlp_net_unit.cpp
     )

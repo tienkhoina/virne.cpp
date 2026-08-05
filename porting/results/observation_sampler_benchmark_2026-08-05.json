@@ -1,0 +1,22 @@
+{
+  "component": "observation_sampler",
+  "fixture_version": 2,
+  "name": "dense_sample_4096_to_1024",
+  "device": "cpu",
+  "threads": 1,
+  "warmups": 1,
+  "repetitions": 3,
+  "iterations": 10,
+  "native_samples_ns_per_call": [59750.0, 59080.0, 58810.0],
+  "python_samples_ns_per_call": [233150.0, 234540.0, 255650.0],
+  "native_median_ns_per_call": 59080.0,
+  "python_median_ns_per_call": 234540.0,
+  "python_over_native_speedup": 3.9698713608666214,
+  "output_checksums": {
+    "action_mask": "7484568950023935690",
+    "curr_v_node_id": "8437390393165635253",
+    "p_net_x": "11612330059562848604",
+    "v_net_size": "6395703600317808738",
+    "v_node_x": "12576463289612607426"
+  }
+}
