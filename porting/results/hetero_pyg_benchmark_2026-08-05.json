@@ -1,0 +1,30 @@
+{
+  "component": "hetero_pyg",
+  "fixture_version": 1,
+  "benchmark": "hetero_conv_forward",
+  "output_checksum": "4525087838765020817",
+  "threads": {
+    "1": {
+      "warmups": 2,
+      "repetitions": 5,
+      "iterations": 25,
+      "native_samples_ns_per_call": [591033.0, 538535.76, 507382.76, 594564.6, 566128.16],
+      "python_samples_ns_per_call": [1903559.6, 1927094.76, 2010359.08, 2097076.68, 2295769.52],
+      "native_median_ns_per_call": 566128.16,
+      "python_median_ns_per_call": 2010359.08,
+      "python_over_native_speedup": 3.551067094065768,
+      "status": "PASS"
+    },
+    "4": {
+      "warmups": 1,
+      "repetitions": 3,
+      "iterations": 10,
+      "native_samples_ns_per_call": [567253.7, 488304.3, 491910.6],
+      "python_samples_ns_per_call": [1769675.2, 1811924.8, 1692551.9],
+      "native_median_ns_per_call": 491910.6,
+      "python_median_ns_per_call": 1769675.2,
+      "python_over_native_speedup": 3.597554514987073,
+      "status": "PASS"
+    }
+  }
+}

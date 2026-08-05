@@ -1847,6 +1847,37 @@ if(VIRNE_ENABLE_ML)
     virne_configure_libtorch_executable(vne_pyg_lite_harness)
 
     add_executable(
+        vne_hetero_pyg_unit
+        tests/hetero_pyg_unit.cpp
+    )
+
+    target_link_libraries(
+        vne_hetero_pyg_unit
+        PRIVATE
+            vne_learning_pyg_lite
+    )
+
+    virne_configure_libtorch_executable(vne_hetero_pyg_unit)
+
+    add_test(
+        NAME vne_hetero_pyg_unit
+        COMMAND vne_hetero_pyg_unit
+    )
+
+    add_executable(
+        vne_hetero_pyg_harness
+        hetero_pyg_harness.cpp
+    )
+
+    target_link_libraries(
+        vne_hetero_pyg_harness
+        PRIVATE
+            vne_learning_pyg_lite
+    )
+
+    virne_configure_libtorch_executable(vne_hetero_pyg_harness)
+
+    add_executable(
         vne_feature_constructor_unit
         tests/feature_constructor_unit.cpp
     )

@@ -1,0 +1,10 @@
+{
+  "component": "hetero_pyg",
+  "fixture_version": 1,
+  "exact_outputs": "12/12",
+  "status": "PASS",
+  "torch_version": "2.6.0+cu124",
+  "output_checksum": "4525087838765020817",
+  "unit": "vne_hetero_pyg_unit: PASS",
+  "ctest": "1/1 passed"
+}

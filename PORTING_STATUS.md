@@ -1,6 +1,6 @@
 # Virne Python to C++ port status
 
-Last verified: 2026-08-04 (Asia/Saigon).
+Last verified: 2026-08-05 (Asia/Saigon).
 
 This file is the entry point for continuing the port. Read it and the linked
 component note before opening the original Python implementation.
@@ -98,6 +98,7 @@ A component is `COMPLETE` only when all of the following exist and pass:
 | Learning/ML | homogeneous PyG-lite core | **COMPLETE / 59/59 BIT-EXACT LINUX + WINDOWS CPU GATE PASS** | `porting/components/pyg_lite.md`, `porting/results/pyg_lite_2026-08-04.md`; typed Data/Batch, scatter, edge utilities, pooling, GCN and GAT; CPU/CUDA-neutral ATen source |
 | Learning/ML | bounded homogeneous custom message passing | **COMPLETE / 3/3 BIT-EXACT CPU GATE PASS** | `porting/components/message_passing.md`, `porting/results/message_passing_2026-08-04.md`; GraphViNE 0.924x and EdgeFusion 1.653x C++ speedup, device-neutral ATen source |
 | Learning/ML | `obs_handler` + dense `rl_core.FeatureConstructor` | **COMPLETE / 8/8 EXACT LINUX GATE PASS** | `porting/components/feature_constructor.md`, `porting/results/feature_constructor_differential_2026-08-05.json`; split stateless observations from prepared ID-only feature construction, multi-resource fixture, worker determinism, and bounded Python/native timing |
+| Learning/ML | heterogeneous typed data + bipartite GAT + `HeteroConv` | **COMPLETE / 12/12 BIT-EXACT LINUX GATE PASS** | `porting/components/hetero_pyg.md`, `porting/results/hetero_pyg_differential_2026-08-05.json`; fixed node/relation IDs, PyG reduction order, 3.551x/3.598x native speedup at 1/4 threads |
 | Learning/ML | remaining `solver/learning/**` | IN PROGRESS | next independent leaf: heterogeneous typed data/convolution, then reward/control and training integration |
 
 ## Completed behavior
