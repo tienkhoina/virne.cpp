@@ -538,30 +538,74 @@ void RolloutBufferWithCost::reserve(const std::size_t transition_count) {
     baseline_cost_returns.reserve(transition_count);
 }
 
+void RolloutBufferWithCost::validate_cost_lane_lengths() const {
+    const std::size_t transition_count = size();
+    const auto validate_aligned_lane = [transition_count](
+                                           const std::size_t lane_size,
+                                           const char* lane_name) {
+        if (lane_size != 0U && lane_size != transition_count) {
+            throw RolloutBufferException(
+                RolloutBufferErrorCode::length_mismatch,
+                std::string(lane_name) + " length differs from rollout size");
+        }
+    };
+    validate_aligned_lane(costs.size(), "costs");
+    validate_aligned_lane(cost_values.size(), "cost_values");
+    validate_aligned_lane(
+        baseline_cost_returns.size(), "baseline_cost_returns");
+
+    // compute_cost_returns prepends a complete transition-aligned generation
+    // on every call, matching Python.  Therefore k * transition_count is a
+    // valid calculated-lane length, while a partial generation is malformed.
+    if (!cost_returns.empty()
+        && (transition_count == 0U
+            || cost_returns.size() % transition_count != 0U)) {
+        throw RolloutBufferException(
+            RolloutBufferErrorCode::length_mismatch,
+            "cost_returns length is not transition aligned");
+    }
+}
+
 void RolloutBufferWithCost::merge(const RolloutBufferWithCost& buffer) {
     if (this == &buffer) {
         const RolloutBufferWithCost snapshot = buffer;
         merge(snapshot);
         return;
     }
-    // Validate every cost lane that is present before mutating the destination.
-    // Python accepts empty optional lanes but all populated lanes are transition
-    // aligned in active safe-RL call sites.
-    const auto validate_optional_lane = [count = buffer.size()](
-                                            const std::size_t lane_size,
-                                            const char* lane_name) {
-        if (lane_size != 0U && lane_size != count) {
+    validate_cost_lane_lengths();
+    buffer.validate_cost_lane_lengths();
+
+    // Keep every populated cost lane aligned after concatenation.  Empty
+    // aggregate buffers remain a zero-copy schema boundary for the first
+    // episode, while mixing populated and absent lanes in non-empty buffers is
+    // rejected before the base columns are mutated.
+    const std::size_t merged_transition_count = size() + buffer.size();
+    const auto validate_merged_aligned_lane = [merged_transition_count](
+                                                  const std::size_t lane_size,
+                                                  const char* lane_name) {
+        if (lane_size != 0U && lane_size != merged_transition_count) {
             throw RolloutBufferException(
                 RolloutBufferErrorCode::length_mismatch,
-                std::string("source ") + lane_name
+                std::string("merged ") + lane_name
                     + " length differs from rollout size");
         }
     };
-    validate_optional_lane(buffer.costs.size(), "costs");
-    validate_optional_lane(buffer.cost_values.size(), "cost_values");
-    validate_optional_lane(buffer.cost_returns.size(), "cost_returns");
-    validate_optional_lane(
-        buffer.baseline_cost_returns.size(), "baseline_cost_returns");
+    validate_merged_aligned_lane(
+        costs.size() + buffer.costs.size(), "costs");
+    validate_merged_aligned_lane(
+        cost_values.size() + buffer.cost_values.size(), "cost_values");
+    validate_merged_aligned_lane(
+        baseline_cost_returns.size() + buffer.baseline_cost_returns.size(),
+        "baseline_cost_returns");
+    const std::size_t merged_cost_return_count =
+        cost_returns.size() + buffer.cost_returns.size();
+    if (merged_cost_return_count != 0U
+        && (merged_transition_count == 0U
+            || merged_cost_return_count % merged_transition_count != 0U)) {
+        throw RolloutBufferException(
+            RolloutBufferErrorCode::length_mismatch,
+            "merged cost_returns length is not transition aligned");
+    }
     RolloutBuffer::merge(buffer);
     append_all(costs, buffer.costs);
     append_all(cost_values, buffer.cost_values);
@@ -574,6 +618,14 @@ void RolloutBufferWithCost::merge(const RolloutBuffer& buffer) {
     if (cost_buffer != nullptr) {
         merge(*cost_buffer);
         return;
+    }
+    validate_cost_lane_lengths();
+    if (buffer.size() != 0U
+        && (!costs.empty() || !cost_values.empty() || !cost_returns.empty()
+            || !baseline_cost_returns.empty())) {
+        throw RolloutBufferException(
+            RolloutBufferErrorCode::length_mismatch,
+            "cannot append a base rollout to populated cost lanes");
     }
     RolloutBuffer::merge(buffer);
 }
@@ -590,16 +642,21 @@ void RolloutBufferWithCost::compute_cost_returns(
     if (method == CostReturnMethod::cumulative) {
         for (double& cost : costs) cost = cost >= 0.0 ? cost : 0.0;
     }
-    const auto computed =
+    auto computed =
         ::virne::solver::learning::rl_core::compute_cost_returns(
             costs, dones, gamma, method);
     // Python prepends each new result to an existing cost_returns list.  A
     // single range insertion at the front is equivalent and remains O(n).
+    if (cost_returns.empty()) {
+        cost_returns = std::move(computed);
+        return;
+    }
     cost_returns.insert(cost_returns.begin(), computed.begin(), computed.end());
 }
 
 RolloutBufferWithCost RolloutBufferWithCost::get_cost_subbuffer(
     const std::vector<std::size_t>& indices) const {
+    validate_cost_lane_lengths();
     RolloutBufferWithCost result;
     copy_indices_into(result, indices);
     if (!costs.empty()) {

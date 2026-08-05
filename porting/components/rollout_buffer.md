@@ -48,6 +48,12 @@ schema instead of reproducing Python's subclass/dynamic-extension
 `AttributeError`.  Repeated registration is idempotent at the schema level and
 clears the lane, avoiding Python's duplicate-name double-merge bug.
 
+Cost-buffer selection and merge preflight every populated lane before any
+mutation. Repeated `compute_cost_returns` calls retain Python's complete
+`k * transition_count` generations, and self-merge duplicates those generations
+without out-of-range access. Base-class lifecycle and return calculation are
+virtual so cost/average variants remain correct through a `RolloutBuffer&`.
+
 ## Performance and threading contract
 
 All known columns are contiguous vectors.  Dynamic strings stop at the enum

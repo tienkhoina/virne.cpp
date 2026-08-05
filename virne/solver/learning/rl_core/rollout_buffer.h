@@ -172,6 +172,9 @@ public:
 
     [[nodiscard]] RolloutBufferWithCost get_cost_subbuffer(
         const std::vector<std::size_t>& indices) const;
+
+private:
+    void validate_cost_lane_lengths() const;
 };
 
 class RolloutBufferWithAvgReturn : public RolloutBuffer {

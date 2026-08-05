@@ -91,6 +91,23 @@ void test_lifecycle_split_and_merge() {
                 && historical_instances[1].size() == 4U
                 && historical_instances[2].size() == 0U,
             "Python absolute-index instance split compatibility");
+    require(historical_instances[0].observations
+                == std::vector<rl::ObservationId>{0U, 1U}
+                && historical_instances[1].observations
+                    == std::vector<rl::ObservationId>{2U, 3U, 4U, 5U}
+                && historical_instances[2].observations.empty(),
+            "Python absolute-index instance split values");
+
+    rl::RolloutBuffer incomplete_tail;
+    for (std::size_t index = 0U; index < 5U; ++index) {
+        incomplete_tail.add(index, static_cast<std::int64_t>(index), 0.0,
+                            index == 1U, 0.0, 0.0);
+    }
+    const auto complete_instances = incomplete_tail.split_with_instance();
+    require(complete_instances.size() == 1U
+                && complete_instances.front().observations
+                    == std::vector<rl::ObservationId>{0U, 1U},
+            "instance split drops incomplete Python tail");
 
     auto merged = ratios[0];
     const std::size_t old_curr_idx = merged.curr_idx;
@@ -120,6 +137,30 @@ void test_lifecycle_split_and_merge() {
         malformed_threw = error.code() == rl::RolloutBufferErrorCode::length_mismatch;
     }
     require(malformed_threw, "short calculated lane error");
+
+    rl::RolloutBuffer malformed_basic = make_buffer();
+    malformed_basic.actions.pop_back();
+    bool malformed_basic_threw = false;
+    try {
+        static_cast<void>(malformed_basic.get_subbuffer({0U}));
+    } catch (const rl::RolloutBufferException& error) {
+        malformed_basic_threw =
+            error.code() == rl::RolloutBufferErrorCode::length_mismatch;
+    }
+    require(malformed_basic_threw,
+            "short basic lane rejected before selected copy");
+
+    rl::RolloutBuffer malformed_extension = make_buffer();
+    malformed_extension.feasibility_flags.resize(1U);
+    bool malformed_extension_threw = false;
+    try {
+        static_cast<void>(malformed_extension.get_subbuffer({0U}));
+    } catch (const rl::RolloutBufferException& error) {
+        malformed_extension_threw =
+            error.code() == rl::RolloutBufferErrorCode::length_mismatch;
+    }
+    require(malformed_extension_threw,
+            "short extension lane rejected before selected copy");
 }
 
 void test_return_methods() {
@@ -171,6 +212,15 @@ void test_cost_buffer() {
     const auto selected = buffer.get_cost_subbuffer({3U, 0U});
     require_close(selected.costs, {2.0, 1.0}, "cost subbuffer");
 
+    const auto repeated_cost_returns = buffer.cost_returns;
+    buffer.merge(buffer);
+    std::vector<double> doubled_cost_returns = repeated_cost_returns;
+    doubled_cost_returns.insert(doubled_cost_returns.end(),
+                                repeated_cost_returns.begin(),
+                                repeated_cost_returns.end());
+    require_close(buffer.cost_returns, doubled_cost_returns,
+                  "cost self merge after repeated return computation");
+
     rl::RolloutBufferWithCost aggregate;
     rl::RolloutBufferWithCost episode;
     episode.add(7U, 3, 1.0, true, -0.2, 0.4);
@@ -187,6 +237,19 @@ void test_cost_buffer() {
 
     aggregate.merge(aggregate);
     require_close(aggregate.costs, {2.5, 2.5}, "cost self merge");
+
+    rl::RolloutBufferWithCost malformed;
+    malformed.merge(make_buffer());
+    malformed.costs = {1.0};
+    bool malformed_cost_threw = false;
+    try {
+        static_cast<void>(malformed.get_cost_subbuffer({0U}));
+    } catch (const rl::RolloutBufferException& error) {
+        malformed_cost_threw =
+            error.code() == rl::RolloutBufferErrorCode::length_mismatch;
+    }
+    require(malformed_cost_threw,
+            "short cost lane rejected even when selected index exists");
 }
 
 rl::RolloutBufferWithAvgReturn make_avg_buffer() {
@@ -232,6 +295,33 @@ void test_average_return_buffer() {
                   "avg TD advantages");
 }
 
+void test_polymorphic_lifecycle_and_compute() {
+    rl::RolloutBufferWithCost cost;
+    rl::RolloutBuffer* base = &cost;
+    base->reserve(8U);
+    require(cost.costs.capacity() >= 8U,
+            "virtual reserve reaches cost lanes");
+    base->add(1U, 2, 3.0, true, -0.1, 0.5);
+    cost.costs = {2.0};
+    base->merge(*base);
+    require(base->size() == 2U && cost.costs == std::vector<double>{2.0, 2.0},
+            "virtual self merge preserves cost lanes");
+    base->clear();
+    require(base->size() == 0U && cost.costs.empty(),
+            "base clear dispatches virtual cost reset");
+
+    auto average = make_avg_buffer();
+    rl::RolloutBuffer* average_base = &average;
+    average_base->compute_returns_and_advantages(
+        0.4, 0.9, 0.8, rl::RolloutBufferMethod::td);
+    require(average.dones.back() == 0U,
+            "virtual compute reaches average-return override");
+    require_close(average.returns,
+                  {0.5333333333333334, -1.3666666666666665,
+                   1.7333333333333334},
+                  "polymorphic average-return TD");
+}
+
 void test_errors() {
     bool method_threw = false;
     try {
@@ -267,6 +357,7 @@ int main() {
         test_return_methods();
         test_cost_buffer();
         test_average_return_buffer();
+        test_polymorphic_lifecycle_and_compute();
         test_errors();
         std::cout << "rollout_buffer_unit: PASS\n";
         return 0;
