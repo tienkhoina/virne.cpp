@@ -1940,6 +1940,33 @@ if(VIRNE_ENABLE_ML)
     virne_configure_libtorch_executable(vne_rollout_returns_harness)
 
     add_executable(
+        vne_rollout_buffer_unit
+        tests/rollout_buffer_unit.cpp
+    )
+
+    target_link_libraries(
+        vne_rollout_buffer_unit
+        PRIVATE
+            vne_learning_rollout_buffer
+    )
+
+    add_test(
+        NAME vne_rollout_buffer_unit
+        COMMAND vne_rollout_buffer_unit
+    )
+
+    add_executable(
+        vne_rollout_buffer_harness
+        rollout_buffer_harness.cpp
+    )
+
+    target_link_libraries(
+        vne_rollout_buffer_harness
+        PRIVATE
+            vne_learning_rollout_buffer
+    )
+
+    add_executable(
         vne_feature_constructor_unit
         tests/feature_constructor_unit.cpp
     )

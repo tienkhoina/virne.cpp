@@ -18,6 +18,11 @@ add_library(
     rollout_returns.cpp
 )
 
+add_library(
+    vne_learning_rollout_buffer
+    rollout_buffer.cpp
+)
+
 target_include_directories(
     vne_learning_tensor_convertor
     PUBLIC
@@ -38,6 +43,12 @@ target_include_directories(
 
 target_include_directories(
     vne_learning_rollout_returns
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_include_directories(
+    vne_learning_rollout_buffer
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
@@ -90,6 +101,19 @@ target_compile_features(
         cxx_std_17
 )
 
+target_compile_features(
+    vne_learning_rollout_buffer
+    PUBLIC
+        cxx_std_17
+)
+
+target_link_libraries(
+    vne_learning_rollout_buffer
+    PUBLIC
+        vne_learning_rollout_returns
+)
+
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(vne_learning_rollout_returns PRIVATE -ffp-contract=off)
+    target_compile_options(vne_learning_rollout_buffer PRIVATE -ffp-contract=off)
 endif()

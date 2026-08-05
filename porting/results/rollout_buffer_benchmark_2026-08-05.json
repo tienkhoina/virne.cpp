@@ -1,0 +1,17 @@
+{
+  "component": "rollout_buffer",
+  "fixture_version": 1,
+  "benchmark": "subbuffer_select_4096_to_1024",
+  "platform": "Windows MSVC Release 19.41",
+  "threads": 1,
+  "warmups": 1,
+  "repetitions": 3,
+  "iterations": 10,
+  "native_samples_ns_per_call": [18830.0, 17790.0, 18280.0],
+  "python_samples_ns_per_call": [571100.0, 629220.0, 552100.0],
+  "native_median_ns_per_call": 18280.0,
+  "python_median_ns_per_call": 571100.0,
+  "python_over_native_speedup": 31.2417943107221,
+  "output_checksum": "16108351205255056931",
+  "status": "PASS"
+}
