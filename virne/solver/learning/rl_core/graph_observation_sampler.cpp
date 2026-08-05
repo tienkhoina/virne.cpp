@@ -338,8 +338,7 @@ PreparedBatchSelection PreparedBatchObservationSampler::prepare_selection(
     PreparedBatchSelection result;
     result.source_graph_count = graph_count();
     result.output_graph_count = static_cast<std::int64_t>(indices.values().size());
-    result.source_x_identity = tensor_identity(source_.x);
-    result.source_edge_identity = tensor_identity(source_.edge_index);
+    result.owner_identity = owner_identity_;
     result.node_indices = ptr_tensor(node_indices, source_.x.device());
     result.edge_indices = ptr_tensor(edge_indices, source_.edge_index.device());
     result.edge_offsets = ptr_tensor(edge_offsets, source_.edge_index.device());
@@ -364,8 +363,7 @@ pyg_lite::Batch PreparedBatchObservationSampler::sample(
             GraphObservationSampleErrorCode::graph_count_mismatch,
             "homogeneous selection belongs to a different source batch");
     }
-    if (selection.source_x_identity != tensor_identity(source_.x)
-        || selection.source_edge_identity != tensor_identity(source_.edge_index)) {
+    if (selection.owner_identity.get() != owner_identity_.get()) {
         throw GraphObservationSampleException(
             GraphObservationSampleErrorCode::foreign_selection,
             "homogeneous selection belongs to a different prepared batch");
@@ -403,7 +401,6 @@ PreparedHeteroBatchObservationSampler::PreparedHeteroBatchObservationSampler(
     for (std::size_t type = 0U; type < pyg_lite::kHeteroNodeTypes; ++type) {
         node_ptr_[type] = host_i64_vector(
             source_.node_ptr[type], "heterogeneous node ptr");
-        node_identity_[type] = tensor_identity(source_.x[type]);
         validate_cumulative_ptr(
             node_ptr_[type], graph_count(), source_.x[type].size(0),
             "heterogeneous node ptr");
@@ -428,8 +425,7 @@ PreparedHeteroRelationSelection build_relation_selection(
     const HeteroRelationId relation_id,
     const std::array<std::vector<std::int64_t>,
                      pyg_lite::kHeteroNodeTypes>& node_ptr,
-    const std::array<const void*, pyg_lite::kHeteroNodeTypes>&
-        node_identity,
+    const std::shared_ptr<const std::uint8_t>& owner_identity,
     const std::vector<std::int64_t>& edge_ptr,
     const PreparedGraphIndices& indices) {
     if (!relation.present()
@@ -478,8 +474,8 @@ PreparedHeteroRelationSelection build_relation_selection(
     offsets.insert(offsets.end(), source_offsets.begin(), source_offsets.end());
     offsets.insert(offsets.end(), target_offsets.begin(), target_offsets.end());
     PreparedHeteroRelationSelection result;
+    result.owner_identity = owner_identity;
     result.source_edge_identity = tensor_identity(relation.edge_index);
-    result.source_x_identity = node_identity;
     result.relation_id = relation_id;
     result.edge_indices = ptr_tensor(edge_indices, relation.edge_index.device());
     result.endpoint_offsets = ptr_tensor(offsets, relation.edge_index.device())
@@ -521,9 +517,9 @@ PreparedHeteroBatchObservationSampler::prepare_selection(
     PreparedHeteroBatchSelection result;
     result.source_graph_count = graph_count();
     result.output_graph_count = static_cast<std::int64_t>(indices.values().size());
+    result.owner_identity = owner_identity_;
 
     for (std::size_t type = 0U; type < pyg_lite::kHeteroNodeTypes; ++type) {
-        result.source_x_identity[type] = tensor_identity(source_.x[type]);
         const auto& prepared_ptr = node_ptr_[type];
         if (prepared_ptr.size() != static_cast<std::size_t>(graph_count() + 1)
             || prepared_ptr.back() != source_.x[type].size(0)) {
@@ -569,11 +565,9 @@ PreparedHeteroBatchObservationSampler::prepare_selection(
          relation_index < pyg_lite::kHeteroRelations; ++relation_index) {
         const auto relation = static_cast<HeteroRelationId>(relation_index);
         const auto& source_relation = source_.relations[relation_index];
-        result.source_edge_identity[relation_index] =
-            tensor_identity(source_relation.edge_index);
         if (!source_relation.present()) continue;
         result.relations[relation_index] = build_relation_selection(
-            source_relation, relation, node_ptr_, node_identity_,
+            source_relation, relation, node_ptr_, owner_identity_,
             edge_ptr_[relation_index], indices);
     }
     return result;
@@ -590,7 +584,7 @@ PreparedHeteroBatchObservationSampler::prepare_relation_selection(
     const auto prepared_ptr = prepare_hetero_edge_ptr(
         temporary, relation_id, node_ptr_);
     return build_relation_selection(
-        relation, relation_id, node_ptr_, node_identity_, prepared_ptr,
+        relation, relation_id, node_ptr_, owner_identity_, prepared_ptr,
         indices);
 }
 
@@ -600,19 +594,12 @@ PreparedHeteroBatchObservationSampler::sample_relation(
     const HeteroRelationId relation_id,
     const PreparedHeteroRelationSelection& selection,
     const torch::Device& device) const {
-    if (selection.source_edge_identity != tensor_identity(relation.edge_index)
+    if (selection.owner_identity.get() != owner_identity_.get()
+        || selection.source_edge_identity != tensor_identity(relation.edge_index)
         || selection.relation_id != relation_id) {
         throw GraphObservationSampleException(
             GraphObservationSampleErrorCode::foreign_selection,
             "heterogeneous relation selection belongs to another relation");
-    }
-    for (std::size_t type = 0U; type < pyg_lite::kHeteroNodeTypes; ++type) {
-        if (selection.source_x_identity[type]
-            != tensor_identity(source_.x[type])) {
-            throw GraphObservationSampleException(
-                GraphObservationSampleErrorCode::foreign_selection,
-                "heterogeneous relation selection belongs to another node batch");
-        }
     }
     pyg_lite::HeteroRelationData result;
     result.edge_index = relation.edge_index.index_select(
@@ -645,22 +632,10 @@ pyg_lite::HeteroBatch PreparedHeteroBatchObservationSampler::sample(
             GraphObservationSampleErrorCode::graph_count_mismatch,
             "heterogeneous selection belongs to a different source batch");
     }
-    for (std::size_t type = 0U; type < pyg_lite::kHeteroNodeTypes; ++type) {
-        if (selection.source_x_identity[type]
-            != tensor_identity(source_.x[type])) {
-            throw GraphObservationSampleException(
-                GraphObservationSampleErrorCode::foreign_selection,
-                "heterogeneous selection belongs to a different node batch");
-        }
-    }
-    for (std::size_t relation = 0U;
-         relation < pyg_lite::kHeteroRelations; ++relation) {
-        if (selection.source_edge_identity[relation]
-            != tensor_identity(source_.relations[relation].edge_index)) {
-            throw GraphObservationSampleException(
-                GraphObservationSampleErrorCode::foreign_selection,
-                "heterogeneous selection belongs to a different relation batch");
-        }
+    if (selection.owner_identity.get() != owner_identity_.get()) {
+        throw GraphObservationSampleException(
+            GraphObservationSampleErrorCode::foreign_selection,
+            "heterogeneous selection belongs to a different prepared batch");
     }
     pyg_lite::HeteroBatch result;
     result.num_graphs = selection.output_graph_count;
@@ -758,7 +733,6 @@ PreparedHeteroGraphObservationSampler::PreparedHeteroGraphObservationSampler(
     for (std::size_t type = 0U; type < pyg_lite::kHeteroNodeTypes; ++type) {
         node_ptr_[type] = host_i64_vector(
             source.base.node_ptr[type], "heterogeneous observation node ptr");
-        node_identity_[type] = tensor_identity(source.base.x[type]);
     }
     const auto virtual_view = source.view(HeteroObservationViewId::virtual_augmented);
     const auto physical_view = source.view(HeteroObservationViewId::physical_augmented);
@@ -784,10 +758,10 @@ PreparedHeteroGraphObservationSampler::prepare_selection(
     result.base = base_.prepare_selection(indices);
     result.virtual_connect_augmented = build_relation_selection(
         virtual_connect_augmented_, HeteroRelationId::v_connect_v,
-        node_ptr_, node_identity_, virtual_edge_ptr_, indices);
+        node_ptr_, base_.owner_identity_, virtual_edge_ptr_, indices);
     result.physical_connect_augmented = build_relation_selection(
         physical_connect_augmented_, HeteroRelationId::p_connect_p,
-        node_ptr_, node_identity_, physical_edge_ptr_, indices);
+        node_ptr_, base_.owner_identity_, physical_edge_ptr_, indices);
     result.general_indices = ptr_tensor(
         indices.values(), general_source_device(general_));
     return result;

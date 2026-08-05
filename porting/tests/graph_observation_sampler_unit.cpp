@@ -373,6 +373,31 @@ void test_errors_and_cuda() {
     }
     require(foreign_selection, "same-count foreign selection rejected");
 
+    pyg::Data isolated_a;
+    isolated_a.x = torch::arange(4, torch::kFloat32).reshape({2, 2});
+    isolated_a.edge_index = torch::empty({2, 0}, torch::kInt64);
+    pyg::Data isolated_b = isolated_a;
+    isolated_b.x = torch::arange(4, 8, torch::kFloat32).reshape({2, 2});
+    const auto shared_storage_a = pyg::Batch::from_data_list(
+        {isolated_a, isolated_b});
+    auto shared_storage_b = shared_storage_a;
+    shared_storage_b.ptr = torch::tensor({0, 1, 4}, torch::kInt64);
+    shared_storage_b.batch = torch::tensor({0, 1, 1, 1}, torch::kInt64);
+    shared_storage_b.max_num_nodes = 3;
+    rl::PreparedBatchObservationSampler partition_a(shared_storage_a);
+    rl::PreparedBatchObservationSampler partition_b(shared_storage_b);
+    const auto partition_plan = partition_a.prepare_selection(
+        rl::prepare_graph_indices(std::vector<std::int64_t>{0}, 2));
+    bool foreign_partition = false;
+    try {
+        static_cast<void>(partition_b.sample(partition_plan));
+    } catch (const rl::GraphObservationSampleException& error) {
+        foreign_partition = error.code()
+            == rl::GraphObservationSampleErrorCode::foreign_selection;
+    }
+    require(foreign_partition,
+            "shared tensors with a foreign graph partition are rejected");
+
     bool malformed_ptr = false;
     try {
         auto malformed = batch;

@@ -7,6 +7,7 @@
 
 #include <array>
 #include <cstdint>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -68,8 +69,7 @@ PreparedGraphIndices prepare_graph_indices(
 struct PreparedBatchSelection {
     std::int64_t source_graph_count = 0;
     std::int64_t output_graph_count = 0;
-    const void* source_x_identity = nullptr;
-    const void* source_edge_identity = nullptr;
+    std::shared_ptr<const std::uint8_t> owner_identity;
     torch::Tensor node_indices;
     torch::Tensor edge_indices;
     torch::Tensor edge_offsets;
@@ -80,9 +80,8 @@ struct PreparedBatchSelection {
 };
 
 struct PreparedHeteroRelationSelection {
+    std::shared_ptr<const std::uint8_t> owner_identity;
     const void* source_edge_identity = nullptr;
-    std::array<const void*, pyg_lite::kHeteroNodeTypes>
-        source_x_identity{};
     pyg_lite::HeteroRelationId relation_id =
         pyg_lite::HeteroRelationId::p_connect_p;
     torch::Tensor edge_indices;
@@ -92,10 +91,7 @@ struct PreparedHeteroRelationSelection {
 struct PreparedHeteroBatchSelection {
     std::int64_t source_graph_count = 0;
     std::int64_t output_graph_count = 0;
-    std::array<const void*, pyg_lite::kHeteroNodeTypes>
-        source_x_identity{};
-    std::array<const void*, pyg_lite::kHeteroRelations>
-        source_edge_identity{};
+    std::shared_ptr<const std::uint8_t> owner_identity;
     std::array<torch::Tensor, pyg_lite::kHeteroNodeTypes> node_indices{};
     std::array<torch::Tensor, pyg_lite::kHeteroNodeTypes> batch{};
     std::array<torch::Tensor, pyg_lite::kHeteroNodeTypes> node_ptr{};
@@ -127,6 +123,8 @@ public:
 
 private:
     pyg_lite::Batch source_;
+    std::shared_ptr<const std::uint8_t> owner_identity_ =
+        std::make_shared<const std::uint8_t>(0);
     std::vector<std::int64_t> node_ptr_;
     std::vector<std::int64_t> edge_ptr_;
 };
@@ -164,11 +162,13 @@ public:
         const torch::Device& device = torch::kCPU) const;
 
 private:
+    friend class PreparedHeteroGraphObservationSampler;
+
     pyg_lite::HeteroBatch source_;
+    std::shared_ptr<const std::uint8_t> owner_identity_ =
+        std::make_shared<const std::uint8_t>(0);
     std::array<std::vector<std::int64_t>, pyg_lite::kHeteroNodeTypes>
         node_ptr_{};
-    std::array<const void*, pyg_lite::kHeteroNodeTypes>
-        node_identity_{};
     std::array<std::vector<std::int64_t>, pyg_lite::kHeteroRelations>
         edge_ptr_{};
 };
@@ -269,8 +269,6 @@ private:
     pyg_lite::HeteroRelationData physical_connect_augmented_;
     std::array<std::vector<std::int64_t>, pyg_lite::kHeteroNodeTypes>
         node_ptr_{};
-    std::array<const void*, pyg_lite::kHeteroNodeTypes>
-        node_identity_{};
     std::vector<std::int64_t> virtual_edge_ptr_;
     std::vector<std::int64_t> physical_edge_ptr_;
     GeneralTensorObservation general_;

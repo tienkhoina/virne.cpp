@@ -24,8 +24,9 @@ Constructors validate and cache host pointer metadata once. `prepare_selection`
 builds device-resident node/edge gathers and offsets outside the hot path.
 `sample(prepared_selection, device)` then performs only `index_select`, in-place
 endpoint offsets, six fixed relation slots, and an optional CPU/CUDA transfer.
-Plans carry source tensor identities, so a plan from another same-sized batch is
-rejected. Source tensors, plans, and returned shallow metadata/view tensors must
+Plans carry an owned sampler-generation token, so a plan from another sampler
+is rejected even when both batches share tensor storage but use different graph
+partitions. Source tensors, plans, and returned shallow metadata/view tensors must
 remain read-only while caller workers sample them concurrently.
 
 ## Verification and performance
