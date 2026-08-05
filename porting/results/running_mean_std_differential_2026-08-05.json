@@ -1,0 +1,28 @@
+{
+  "benchmark": {
+    "iterations": 5,
+    "name": "running_mean_std_4096x8",
+    "native_median_ns_per_call": 25300.0,
+    "native_samples_ns_per_call": [
+      25300.0,
+      25300.0,
+      25380.0
+    ],
+    "output_checksum": "15486242895814385222",
+    "python_median_ns_per_call": 237360.0,
+    "python_over_native_speedup": 9.381818181818181,
+    "python_samples_ns_per_call": [
+      208840.0,
+      273860.0,
+      237360.0
+    ],
+    "repetitions": 3,
+    "threads": 1,
+    "warmups": 1
+  },
+  "component": "running_mean_std",
+  "exact_cases": "4/4",
+  "fixture_version": 1,
+  "mismatches": [],
+  "status": "PASS"
+}

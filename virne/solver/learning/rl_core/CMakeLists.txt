@@ -28,6 +28,11 @@ add_library(
     action_mask.cpp
 )
 
+add_library(
+    vne_learning_running_mean_std
+    running_mean_std.cpp
+)
+
 target_include_directories(
     vne_learning_tensor_convertor
     PUBLIC
@@ -60,6 +65,12 @@ target_include_directories(
 
 target_include_directories(
     vne_learning_action_mask
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_include_directories(
+    vne_learning_running_mean_std
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
@@ -124,6 +135,12 @@ target_compile_features(
         cxx_std_17
 )
 
+target_compile_features(
+    vne_learning_running_mean_std
+    PUBLIC
+        cxx_std_17
+)
+
 target_link_libraries(
     vne_learning_rollout_buffer
     PUBLIC
@@ -139,4 +156,5 @@ target_link_libraries(
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(vne_learning_rollout_returns PRIVATE -ffp-contract=off)
     target_compile_options(vne_learning_rollout_buffer PRIVATE -ffp-contract=off)
+    target_compile_options(vne_learning_running_mean_std PRIVATE -ffp-contract=off)
 endif()

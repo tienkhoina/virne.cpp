@@ -1722,6 +1722,33 @@ if(VIRNE_ENABLE_ML)
     virne_configure_libtorch_executable(vne_action_mask_harness)
 
     add_executable(
+        vne_running_mean_std_unit
+        tests/running_mean_std_unit.cpp
+    )
+
+    target_link_libraries(
+        vne_running_mean_std_unit
+        PRIVATE
+            vne_learning_running_mean_std
+    )
+
+    add_test(
+        NAME vne_running_mean_std_unit
+        COMMAND vne_running_mean_std_unit
+    )
+
+    add_executable(
+        vne_running_mean_std_harness
+        running_mean_std_harness.cpp
+    )
+
+    target_link_libraries(
+        vne_running_mean_std_harness
+        PRIVATE
+            vne_learning_running_mean_std
+    )
+
+    add_executable(
         vne_mlp_net_unit
         mlp_net_unit.cpp
     )
