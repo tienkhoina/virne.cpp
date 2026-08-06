@@ -1784,6 +1784,37 @@ if(VIRNE_ENABLE_ML)
     virne_configure_libtorch_executable(vne_neural_tensor_harness)
 
     add_executable(
+        vne_gcn_conv_net_unit
+        tests/gcn_conv_net_unit.cpp
+    )
+
+    target_link_libraries(
+        vne_gcn_conv_net_unit
+        PRIVATE
+            vne_learning_gnn
+    )
+
+    virne_configure_libtorch_executable(vne_gcn_conv_net_unit)
+
+    add_test(
+        NAME vne_gcn_conv_net_unit
+        COMMAND vne_gcn_conv_net_unit
+    )
+
+    add_executable(
+        vne_gcn_conv_net_harness
+        gcn_conv_net_harness.cpp
+    )
+
+    target_link_libraries(
+        vne_gcn_conv_net_harness
+        PRIVATE
+            vne_learning_gnn
+    )
+
+    virne_configure_libtorch_executable(vne_gcn_conv_net_harness)
+
+    add_executable(
         vne_positional_encoder_unit
         tests/positional_encoder_unit.cpp
     )

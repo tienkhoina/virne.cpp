@@ -1,0 +1,35 @@
+{
+  "benchmark": {
+    "name": "batch32_nodes16_dim3_to32",
+    "native_median_ns_per_call": 912943,
+    "native_samples_ns": [
+      1046469,
+      912943,
+      907077
+    ],
+    "output_checksum": "19487954877254352",
+    "python_median_ns_per_call": 1001247,
+    "python_over_native_speedup": 1.0967245490682331,
+    "python_samples_ns": [
+      1001247,
+      1809646,
+      914377
+    ],
+    "shape": [
+      512,
+      32
+    ]
+  },
+  "benchmark_mismatches": [],
+  "component": "gcn_conv_net",
+  "exact_cases": "5/5",
+  "fixture_version": 1,
+  "mismatches": [],
+  "oracle_backend": "ast_isolated_torch26_pyg27_gcn_conv_net",
+  "python_source": {
+    "class_sha256": "{\"GCNConvNet\": \"dfba2acc980bbb339901fbabcd0f0c7bd1038efb0cf68213218fab6b87c5a035\", \"GraphPooling\": \"8581024adbc4609b34c629d9340e31900f6155e65531fce29d405d937de399c9\"}",
+    "file_sha256": "4ba777bafa5a104bfad113440e62d1153e63ee12dc78144374575c0e2202863c",
+    "path": "/virne/virne/solver/learning/neural_network/gnn.py"
+  },
+  "status": "PASS"
+}

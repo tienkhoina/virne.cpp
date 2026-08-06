@@ -24,7 +24,7 @@ target_compile_features(
         cxx_std_17
 )
 
-add_subdirectory(neural_network)
 add_subdirectory(pyg_lite)
+add_subdirectory(neural_network)
 add_subdirectory(rl_core)
 add_subdirectory(rl_policy)
