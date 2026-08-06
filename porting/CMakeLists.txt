@@ -1691,6 +1691,37 @@ target_link_libraries(
 
 if(VIRNE_ENABLE_ML)
     add_executable(
+        vne_positional_encoder_unit
+        tests/positional_encoder_unit.cpp
+    )
+
+    target_link_libraries(
+        vne_positional_encoder_unit
+        PRIVATE
+            vne_learning_attention
+    )
+
+    virne_configure_libtorch_executable(vne_positional_encoder_unit)
+
+    add_test(
+        NAME vne_positional_encoder_unit
+        COMMAND vne_positional_encoder_unit
+    )
+
+    add_executable(
+        vne_positional_encoder_harness
+        positional_encoder_harness.cpp
+    )
+
+    target_link_libraries(
+        vne_positional_encoder_harness
+        PRIVATE
+            vne_learning_attention
+    )
+
+    virne_configure_libtorch_executable(vne_positional_encoder_harness)
+
+    add_executable(
         vne_mlp_inference_unit
         tests/mlp_inference_unit.cpp
     )
