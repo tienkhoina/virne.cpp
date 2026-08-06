@@ -1691,6 +1691,37 @@ target_link_libraries(
 
 if(VIRNE_ENABLE_ML)
     add_executable(
+        vne_multi_head_attention_unit
+        tests/multi_head_attention_unit.cpp
+    )
+
+    target_link_libraries(
+        vne_multi_head_attention_unit
+        PRIVATE
+            vne_learning_attention
+    )
+
+    virne_configure_libtorch_executable(vne_multi_head_attention_unit)
+
+    add_test(
+        NAME vne_multi_head_attention_unit
+        COMMAND vne_multi_head_attention_unit
+    )
+
+    add_executable(
+        vne_multi_head_attention_harness
+        multi_head_attention_harness.cpp
+    )
+
+    target_link_libraries(
+        vne_multi_head_attention_harness
+        PRIVATE
+            vne_learning_attention
+    )
+
+    virne_configure_libtorch_executable(vne_multi_head_attention_harness)
+
+    add_executable(
         vne_positional_encoder_unit
         tests/positional_encoder_unit.cpp
     )

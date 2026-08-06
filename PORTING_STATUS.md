@@ -111,6 +111,7 @@ A component is `COMPLETE` only when all of the following exist and pass:
 | Learning/ML | typed MLP policy construction adapter | **COMPLETE / 3/3 EXACT WINDOWS MSVC GATE PASS** | `porting/components/mlp_policy_builder.md`, `porting/results/mlp_policy_builder_differential_2026-08-06.json`; direct fixed options, construction/RNG/device parity, 271.212x focused option-resolution speedup |
 | Learning/ML | typed MLP inference session | **COMPLETE / 3/3 EXACT WINDOWS MSVC GATE PASS** | `porting/components/mlp_inference.md`, `porting/results/mlp_inference_differential_2026-08-06.json`; conversion + actor/critic + action evaluation, 1.650x end-to-end speedup |
 | Learning/ML | `neural_network.PositionalEncoder` | **COMPLETE / 3/3 EXACT WINDOWS MSVC GATE PASS** | `porting/components/positional_encoder.md`, `porting/results/positional_encoder_differential_2026-08-06.json`; typed add/concat enum, registered PE buffer, 2.266x focused speedup |
+| Learning/ML | `neural_network.MultiHeadSelfAttention` | **COMPLETE / 3/3 EXACT WINDOWS MSVC GATE PASS** | `porting/components/multi_head_self_attention.md`, `porting/results/multi_head_attention_differential_2026-08-06.json`; typed head/dimension fields, parameter/RNG parity, 2.062x focused speedup |
 | Learning/ML | remaining `solver/learning/**` | IN PROGRESS | next independent non-training leaf under document-first audit |
 
 ## Completed behavior

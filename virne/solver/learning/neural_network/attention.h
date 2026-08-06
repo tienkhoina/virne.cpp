@@ -6,6 +6,7 @@
 #include <torch/types.h>
 
 #include <cstdint>
+#include <optional>
 
 namespace virne::solver::learning::neural_network {
 
@@ -44,5 +45,42 @@ private:
 };
 
 TORCH_MODULE(PositionalEncoder);
+
+struct MultiHeadSelfAttentionOptions {
+    std::int64_t input_dim = 0;
+    std::int64_t embed_dim = 0;
+    std::int64_t val_dim = 0;
+    std::int64_t key_dim = 0;
+    std::int64_t num_heads = 1;
+};
+
+class MultiHeadSelfAttentionImpl final : public torch::nn::Module {
+public:
+    explicit MultiHeadSelfAttentionImpl(
+        MultiHeadSelfAttentionOptions options);
+
+    torch::Tensor forward(
+        const torch::Tensor& query,
+        const std::optional<torch::Tensor>& key = std::nullopt,
+        const std::optional<torch::Tensor>& value = std::nullopt,
+        const std::optional<torch::Tensor>& attention_mask = std::nullopt);
+
+    [[nodiscard]] const MultiHeadSelfAttentionOptions& options() const noexcept {
+        return options_;
+    }
+    [[nodiscard]] double norm_factor() const noexcept {
+        return norm_factor_;
+    }
+
+    // Names and parameter order match Python's state dictionary.
+    torch::Tensor W_query;
+    torch::Tensor W_key;
+
+private:
+    MultiHeadSelfAttentionOptions options_{};
+    double norm_factor_ = 1.0;
+};
+
+TORCH_MODULE(MultiHeadSelfAttention);
 
 }  // namespace virne::solver::learning::neural_network

@@ -1,0 +1,36 @@
+{
+  "benchmark": {
+    "name": "batch32_seq64_dim64_heads4",
+    "native_median_ns_per_call": 1872000,
+    "native_samples_ns": [
+      2324800,
+      1872000,
+      1833400
+    ],
+    "output_checksum": "5900933371326826081",
+    "python_median_ns_per_call": 3859600,
+    "python_over_native_speedup": 2.0617521367521365,
+    "python_samples_ns": [
+      2871800,
+      4159100,
+      3859600
+    ],
+    "shape": [
+      32,
+      64,
+      64
+    ]
+  },
+  "benchmark_mismatches": [],
+  "component": "multi_head_self_attention",
+  "exact_cases": "3/3",
+  "fixture_version": 1,
+  "mismatches": [],
+  "oracle_backend": "ast_isolated_torch26_multi_head_self_attention",
+  "python_source": {
+    "class_sha256": "8375b9cb580a5ee5f1794adbfe4da6b060b9c32fee7dd27c896e381b0399f896",
+    "file_sha256": "f8dd0940b6d923d9a766635017d7d97048a631611928f10d921597b320660884",
+    "path": "D:\\Virne to cpp\\virne\\virne\\solver\\learning\\neural_network\\att.py"
+  },
+  "status": "PASS"
+}

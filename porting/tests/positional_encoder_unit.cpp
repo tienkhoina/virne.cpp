@@ -91,6 +91,36 @@ void test_validation() {
         "add width mismatch accepted");
 }
 
+void test_multi_head_attention() {
+    torch::manual_seed(73);
+    nn::MultiHeadSelfAttention attention(nn::MultiHeadSelfAttentionOptions{
+        4, 8, 0, 0, 2});
+    const auto query = input(2, 3, 4);
+    const auto key = input(2, 5, 4).add(0.25);
+    const auto output = attention->forward(query, key);
+    require(output.sizes().vec()
+                == std::vector<std::int64_t>({2, 3, 5}),
+            "multi-head compatibility shape mismatch");
+    const auto self_output = attention->forward(query);
+    require(self_output.sizes().vec()
+                == std::vector<std::int64_t>({2, 3, 3}),
+            "self-attention compatibility shape mismatch");
+    require(attention->W_query.defined() && attention->W_key.defined(),
+            "attention parameters were not registered");
+    require(attention->W_query.sizes().vec()
+                == std::vector<std::int64_t>({2, 4, 4}),
+            "query parameter shape mismatch");
+    require(attention->W_key.sizes().vec()
+                == std::vector<std::int64_t>({2, 4, 4}),
+            "key parameter shape mismatch");
+    if (torch::cuda::is_available()) {
+        attention->to(torch::Device(torch::kCUDA, 0));
+        require(attention->forward(
+                    query.to(torch::kCUDA), key.to(torch::kCUDA)).device().is_cuda(),
+                "CUDA attention returned a CPU tensor");
+    }
+}
+
 }  // namespace
 
 int main() {
@@ -100,6 +130,7 @@ int main() {
         test_add_and_concat();
         test_eval_and_device();
         test_validation();
+        test_multi_head_attention();
         std::cout << "positional_encoder_unit: PASS\n";
         return 0;
     } catch (const std::exception& error) {
