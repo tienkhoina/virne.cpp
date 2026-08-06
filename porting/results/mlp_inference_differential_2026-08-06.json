@@ -1,0 +1,61 @@
+{
+  "benchmark": {
+    "batch": 32,
+    "name": "batch32_nodes500",
+    "native_checksums": {
+      "entropy": "11482500480082061985",
+      "log_probabilities": "18105969681786160101",
+      "logits": "15957608749301684327",
+      "values": "7927540762403791895"
+    },
+    "native_median_ns_per_call": 25541900,
+    "native_samples_ns": [
+      25324200,
+      25541900,
+      26653900
+    ],
+    "native_scope": "DenseObservationBatch -> conversion -> MLP actor/critic -> evaluate",
+    "physical_nodes": 500,
+    "python_aggregate_checksum": "4019694815154539465",
+    "python_checksums": {
+      "entropy": "11482500480082061985",
+      "log_probabilities": "18105969681786160101",
+      "logits": "15957608749301684327",
+      "values": "7927540762403791895"
+    },
+    "python_median_ns_per_call": 38531000,
+    "python_over_native_speedup": 1.5085408681421508,
+    "python_samples_ns": [
+      47042500,
+      38531000,
+      36891200
+    ],
+    "python_scope": "raw p_net/v_node -> concat conversion -> MLP actor/critic -> RLSolver.evaluate_actions under inference_mode"
+  },
+  "benchmark_mismatches": [],
+  "component": "mlp_inference",
+  "exact_cases": "3/3",
+  "fixture_version": 1,
+  "mismatches": [],
+  "oracle_backend": "isolated_torch26_mlp_policy_and_rl_solver_methods",
+  "python_source": {
+    "mask": {
+      "file_sha256": "ba1394e89752a70f8d03dbe485125f7c8bffbb77e5767ff000034019f53519e4",
+      "method_sha256": "558964667b0ba69bcbf819542a0cd46d7db39d009998b50ecdacc76fe192e9e2",
+      "path": "D:\\Virne to cpp\\virne\\virne\\solver\\learning\\utils.py"
+    },
+    "mlp_net_sha256": "4f6d24dde669ec310fd2961bb1a6c0945f5a2d93f2042402025acf094eba89cb",
+    "mlp_policy_sha256": "c8998d8bbfb14477c55fbcf9240bf4e0d82ff1e5c51da7b4aa82387432a2e407",
+    "rl_solver": {
+      "combined_method_sha256": "a780dc94470de1e9f35d04e854f6e0ae9693a1161706164bc605081f2c065495",
+      "file_sha256": "1285e787ab60c90497625f5b3c39a1f9ee421a15054384143a57759dbd68c1da",
+      "method_sha256": {
+        "evaluate_actions": "4a0951519b8e114945d308e5a614f25dba155a245c10e3618c17637b5c13504f",
+        "get_action_prob_dist": "26fbf85787c899f9f22af5a100ce612b881b34e6fbf5729f63789f455872facf",
+        "select_action": "a5428e4f299954e211c3bf8b9475e1f6904097601923695f63f170aecc58f9f4"
+      },
+      "path": "D:\\Virne to cpp\\virne\\virne\\solver\\learning\\rl_core\\rl_solver.py"
+    }
+  },
+  "status": "PASS"
+}

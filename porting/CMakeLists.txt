@@ -1691,6 +1691,37 @@ target_link_libraries(
 
 if(VIRNE_ENABLE_ML)
     add_executable(
+        vne_mlp_inference_unit
+        tests/mlp_inference_unit.cpp
+    )
+
+    target_link_libraries(
+        vne_mlp_inference_unit
+        PRIVATE
+            vne_learning_mlp_inference
+    )
+
+    virne_configure_libtorch_executable(vne_mlp_inference_unit)
+
+    add_test(
+        NAME vne_mlp_inference_unit
+        COMMAND vne_mlp_inference_unit
+    )
+
+    add_executable(
+        vne_mlp_inference_harness
+        mlp_inference_harness.cpp
+    )
+
+    target_link_libraries(
+        vne_mlp_inference_harness
+        PRIVATE
+            vne_learning_mlp_inference
+    )
+
+    virne_configure_libtorch_executable(vne_mlp_inference_harness)
+
+    add_executable(
         vne_mlp_policy_builder_unit
         tests/mlp_policy_builder_unit.cpp
     )

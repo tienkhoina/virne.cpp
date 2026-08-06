@@ -58,6 +58,11 @@ add_library(
     mlp_policy_builder.cpp
 )
 
+add_library(
+    vne_learning_mlp_inference
+    mlp_inference.cpp
+)
+
 target_include_directories(
     vne_learning_tensor_convertor
     PUBLIC
@@ -126,6 +131,12 @@ target_include_directories(
 
 target_include_directories(
     vne_learning_mlp_policy_builder
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_include_directories(
+    vne_learning_mlp_inference
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
@@ -226,6 +237,12 @@ target_compile_features(
         cxx_std_17
 )
 
+target_compile_features(
+    vne_learning_mlp_inference
+    PUBLIC
+        cxx_std_17
+)
+
 target_link_libraries(
     vne_learning_rollout_buffer
     PUBLIC
@@ -264,6 +281,14 @@ target_link_libraries(
     PUBLIC
         vne_learning_policy_config
         vne_learning_mlp_policy
+)
+
+target_link_libraries(
+    vne_learning_mlp_inference
+    PUBLIC
+        vne_learning_mlp_policy_builder
+        vne_learning_tensor_convertor
+        vne_learning_policy_action
 )
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
