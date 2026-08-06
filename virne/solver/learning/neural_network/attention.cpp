@@ -195,4 +195,114 @@ torch::Tensor MultiHeadSelfAttentionImpl::forward(
     return torch::tanh(compatibility_raw.mean(0)) * 10.0;
 }
 
+namespace {
+
+MultiHeadAttentionWithOutputOptions validate_output_attention_options(
+    MultiHeadAttentionWithOutputOptions options) {
+    if (options.embedding_dim <= 0 || options.num_heads <= 0) {
+        throw std::invalid_argument(
+            "MultiHeadAttentionWithOutput embedding_dim and num_heads must be positive");
+    }
+    if (options.d_k < 0 || options.d_v < 0) {
+        throw std::invalid_argument(
+            "MultiHeadAttentionWithOutput d_k and d_v cannot be negative");
+    }
+    if (options.d_k == 0) options.d_k = options.embedding_dim;
+    if (options.d_v == 0) options.d_v = options.embedding_dim;
+    if (!std::isfinite(options.dropout)
+        || options.dropout < 0.0
+        || options.dropout > 1.0) {
+        throw std::invalid_argument(
+            "MultiHeadAttentionWithOutput dropout must be in [0, 1]");
+    }
+    return options;
+}
+
+void require_output_attention_input(
+    const torch::Tensor& input,
+    const std::int64_t embedding_dim,
+    const char* name) {
+    if (!input.defined() || input.dim() != 3
+        || input.size(2) != embedding_dim) {
+        throw std::invalid_argument(
+            std::string("MultiHeadAttentionWithOutput ") + name
+            + " must have rank [batch, sequence, embedding_dim]");
+    }
+}
+
+}  // namespace
+
+MultiHeadAttentionWithOutputImpl::MultiHeadAttentionWithOutputImpl(
+    MultiHeadAttentionWithOutputOptions options)
+    : options_(validate_output_attention_options(std::move(options))),
+      scale_(std::sqrt(static_cast<float>(options_.d_k))) {
+    const auto qk_width = options_.num_heads * options_.d_k;
+    const auto v_width = options_.num_heads * options_.d_v;
+    W_q = register_module(
+        "W_q",
+        torch::nn::Linear(torch::nn::LinearOptions(
+                              options_.embedding_dim, qk_width)
+                              .bias(false)));
+    W_k = register_module(
+        "W_k",
+        torch::nn::Linear(torch::nn::LinearOptions(
+                              options_.embedding_dim, qk_width)
+                              .bias(false)));
+    W_v = register_module(
+        "W_v",
+        torch::nn::Linear(torch::nn::LinearOptions(
+                              options_.embedding_dim, v_width)
+                              .bias(false)));
+    dropout = register_module(
+        "dropout", torch::nn::Dropout(torch::nn::DropoutOptions(
+                          options_.dropout)));
+    fc = register_module(
+        "fc",
+        torch::nn::Linear(torch::nn::LinearOptions(
+            v_width, options_.embedding_dim)));
+}
+
+MultiHeadAttentionOutput MultiHeadAttentionWithOutputImpl::forward(
+    const torch::Tensor& query,
+    const torch::Tensor& key,
+    const torch::Tensor& value,
+    const std::optional<torch::Tensor>& attention_mask) {
+    require_output_attention_input(query, options_.embedding_dim, "query");
+    require_output_attention_input(key, options_.embedding_dim, "key");
+    require_output_attention_input(value, options_.embedding_dim, "value");
+    if (query.size(0) != key.size(0) || query.size(0) != value.size(0)) {
+        throw std::invalid_argument(
+            "MultiHeadAttentionWithOutput query/key/value batch sizes differ");
+    }
+
+    const auto batch_size = query.size(0);
+    const auto query_length = query.size(1);
+    const auto key_length = key.size(1);
+    const auto value_length = value.size(1);
+    const auto query_projected = W_q->forward(query).view({
+        batch_size, query_length, options_.num_heads, options_.d_k});
+    const auto key_projected = W_k->forward(key).view({
+        batch_size, key_length, options_.num_heads, options_.d_k});
+    const auto value_projected = W_v->forward(value).view({
+        batch_size, value_length, options_.num_heads, options_.d_v});
+    const auto queries = query_projected.transpose(1, 2);
+    const auto keys = key_projected.transpose(1, 2);
+    const auto values = value_projected.transpose(1, 2);
+
+    auto scores = torch::matmul(queries, keys.transpose(-2, -1)) / scale_;
+    if (attention_mask.has_value()) {
+        scores = scores.masked_fill(attention_mask->eq(0), -1e9);
+    }
+    auto weights = torch::softmax(scores, -1);
+    weights = dropout->forward(weights);
+    const auto attention_output = torch::matmul(weights, values)
+                                      .transpose(1, 2)
+                                      .contiguous()
+                                      .view({
+                                          batch_size,
+                                          query_length,
+                                          options_.num_heads * options_.d_v});
+    return MultiHeadAttentionOutput{fc->forward(attention_output), weights};
+}
+
 }  // namespace virne::solver::learning::neural_network

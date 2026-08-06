@@ -1722,6 +1722,37 @@ if(VIRNE_ENABLE_ML)
     virne_configure_libtorch_executable(vne_multi_head_attention_harness)
 
     add_executable(
+        vne_multi_head_attention_with_output_unit
+        tests/multi_head_attention_with_output_unit.cpp
+    )
+
+    target_link_libraries(
+        vne_multi_head_attention_with_output_unit
+        PRIVATE
+            vne_learning_attention
+    )
+
+    virne_configure_libtorch_executable(vne_multi_head_attention_with_output_unit)
+
+    add_test(
+        NAME vne_multi_head_attention_with_output_unit
+        COMMAND vne_multi_head_attention_with_output_unit
+    )
+
+    add_executable(
+        vne_multi_head_attention_with_output_harness
+        multi_head_attention_with_output_harness.cpp
+    )
+
+    target_link_libraries(
+        vne_multi_head_attention_with_output_harness
+        PRIVATE
+            vne_learning_attention
+    )
+
+    virne_configure_libtorch_executable(vne_multi_head_attention_with_output_harness)
+
+    add_executable(
         vne_positional_encoder_unit
         tests/positional_encoder_unit.cpp
     )

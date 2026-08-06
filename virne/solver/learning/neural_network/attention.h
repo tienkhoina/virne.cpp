@@ -1,5 +1,6 @@
 #pragma once
 
+#include <torch/nn/modules/linear.h>
 #include <torch/nn/module.h>
 #include <torch/nn/modules/dropout.h>
 #include <torch/nn/pimpl.h>
@@ -82,5 +83,49 @@ private:
 };
 
 TORCH_MODULE(MultiHeadSelfAttention);
+
+struct MultiHeadAttentionWithOutputOptions {
+    std::int64_t embedding_dim = 0;
+    std::int64_t num_heads = 1;
+    // Zero selects Python's None/default behavior (embedding_dim).
+    std::int64_t d_k = 0;
+    std::int64_t d_v = 0;
+    double dropout = 0.1;
+};
+
+struct MultiHeadAttentionOutput {
+    torch::Tensor output;
+    torch::Tensor weights;
+};
+
+class MultiHeadAttentionWithOutputImpl final : public torch::nn::Module {
+public:
+    explicit MultiHeadAttentionWithOutputImpl(
+        MultiHeadAttentionWithOutputOptions options);
+
+    MultiHeadAttentionOutput forward(
+        const torch::Tensor& query,
+        const torch::Tensor& key,
+        const torch::Tensor& value,
+        const std::optional<torch::Tensor>& attention_mask = std::nullopt);
+
+    [[nodiscard]] const MultiHeadAttentionWithOutputOptions& options() const
+        noexcept {
+        return options_;
+    }
+
+    // Public handles make fixed parameters inspectable without dynamic lookup.
+    torch::nn::Linear W_q{nullptr};
+    torch::nn::Linear W_k{nullptr};
+    torch::nn::Linear W_v{nullptr};
+    torch::nn::Dropout dropout{nullptr};
+    torch::nn::Linear fc{nullptr};
+
+private:
+    MultiHeadAttentionWithOutputOptions options_{};
+    float scale_ = 1.0F;
+};
+
+TORCH_MODULE(MultiHeadAttentionWithOutput);
 
 }  // namespace virne::solver::learning::neural_network
