@@ -1,0 +1,36 @@
+{
+  "benchmark": {
+    "name": "batch32_features64_neurons32",
+    "native_median_ns_per_call": 152200,
+    "native_samples_ns": [
+      181000,
+      145600,
+      152200
+    ],
+    "output_checksum": "8497801754783203451",
+    "python_median_ns_per_call": 227000,
+    "python_over_native_speedup": 1.4914586070959264,
+    "python_samples_ns": [
+      272100,
+      191200,
+      227000
+    ],
+    "shape": [
+      32,
+      64,
+      32
+    ]
+  },
+  "benchmark_mismatches": [],
+  "component": "neural_tensor_network",
+  "exact_cases": "3/3",
+  "fixture_version": 1,
+  "mismatches": [],
+  "oracle_backend": "ast_isolated_torch26_neural_tensor_network",
+  "python_source": {
+    "class_sha256": "d31b524ac423d344c4731bb3bc8b5a16ed9669e03923053ac7748a55aaef360a",
+    "file_sha256": "ca9c38ef8c1f0dae1760e86e500a11702006badbe8b576d16209ad582774e6b1",
+    "path": "D:\\Virne to cpp\\virne\\virne\\solver\\learning\\neural_network\\neural_tensor.py"
+  },
+  "status": "PASS"
+}

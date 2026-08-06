@@ -113,6 +113,7 @@ A component is `COMPLETE` only when all of the following exist and pass:
 | Learning/ML | `neural_network.PositionalEncoder` | **COMPLETE / 3/3 EXACT WINDOWS MSVC GATE PASS** | `porting/components/positional_encoder.md`, `porting/results/positional_encoder_differential_2026-08-06.json`; typed add/concat enum, registered PE buffer, 2.266x focused speedup |
 | Learning/ML | `neural_network.MultiHeadSelfAttention` | **COMPLETE / 3/3 EXACT WINDOWS MSVC GATE PASS** | `porting/components/multi_head_self_attention.md`, `porting/results/multi_head_attention_differential_2026-08-06.json`; typed head/dimension fields, parameter/RNG parity, 2.062x focused speedup |
 | Learning/ML | `neural_network.MultiHeadAttentionWithOutput` | **COMPLETE / 3/3 EXACT WINDOWS MSVC GATE PASS** | `porting/components/multi_head_attention_with_output.md`, `porting/results/multi_head_attention_with_output_differential_2026-08-06.json`; typed projections/mask/dropout, state/output parity, 1.152x focused speedup |
+| Learning/ML | `neural_network.NeuralTensorNetwork` | **COMPLETE / 3/3 EXACT WINDOWS MSVC GATE PASS** | `porting/components/neural_tensor.md`, `porting/results/neural_tensor_differential_2026-08-06.json`; typed tensor parameters and orthogonal/RNG parity, 1.491x focused speedup |
 | Learning/ML | remaining `solver/learning/**` | IN PROGRESS | next independent non-training leaf under document-first audit |
 
 ## Completed behavior
@@ -820,9 +821,10 @@ The ML port is active. The bounded homogeneous and heterogeneous PyG surfaces,
 dense observation/feature bridges, reward registry, rollout return helpers,
 typed rollout storage, action-mask boundary, running statistics, prepared
 dense/homogeneous/dual/heterogeneous observation sampling, typed policy
-action/evaluation, MLP policy construction/inference, positional encoding and
-both attention primitives are complete as separate gates. The next independent
-leaf is selected by the document-first audit of the remaining non-training
-`solver/learning/**` modules. Reuse the completed registries and all frozen
+action/evaluation, MLP policy construction/inference, positional encoding,
+both attention primitives and the neural tensor network are complete as
+separate gates. The next independent leaf is the typed `GCNConvNet` wrapper
+and its add/mean/max graph pooling paths; generic NNConv/PNA and attention
+pooling remain separate. Reuse the completed registries and all frozen
 graph/controller/random/config APIs. The non-RL environment continues to use
 its exact Torch-free gate.

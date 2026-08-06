@@ -1753,6 +1753,37 @@ if(VIRNE_ENABLE_ML)
     virne_configure_libtorch_executable(vne_multi_head_attention_with_output_harness)
 
     add_executable(
+        vne_neural_tensor_unit
+        tests/neural_tensor_unit.cpp
+    )
+
+    target_link_libraries(
+        vne_neural_tensor_unit
+        PRIVATE
+            vne_learning_neural_tensor
+    )
+
+    virne_configure_libtorch_executable(vne_neural_tensor_unit)
+
+    add_test(
+        NAME vne_neural_tensor_unit
+        COMMAND vne_neural_tensor_unit
+    )
+
+    add_executable(
+        vne_neural_tensor_harness
+        neural_tensor_harness.cpp
+    )
+
+    target_link_libraries(
+        vne_neural_tensor_harness
+        PRIVATE
+            vne_learning_neural_tensor
+    )
+
+    virne_configure_libtorch_executable(vne_neural_tensor_harness)
+
+    add_executable(
         vne_positional_encoder_unit
         tests/positional_encoder_unit.cpp
     )
