@@ -687,11 +687,14 @@ DenseMatrixF32 ObservationHandler::get_average_distance(
         // would otherwise change the normalization of every later row.
         const double minimum = *bounds.first;
         const double maximum = *bounds.second;
-        if (maximum != 0.0) {
-            const double span = maximum - minimum;
+        const double span = maximum - minimum;
+        if (span != 0.0) {
             for (double& value : distances) {
                 value = (value - minimum) / span;
             }
+        } else {
+            // Constant distances carry no relative position information.
+            std::fill(distances.begin(), distances.end(), 0.0);
         }
     }
     DenseMatrixF32 result{nodes, 1U, {}};
@@ -877,4 +880,3 @@ DenseMatrixF32 ObservationHandler::get_v_node_neighbor_flags(
 }
 
 }  // namespace virne::solver::learning::rl_core
-

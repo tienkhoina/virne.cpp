@@ -1,0 +1,25 @@
+{
+  "component": "shared_adam",
+  "source_sha256": {
+    "rl_core/shared_adam.py": "99b51f365e9853274a9477cef5dade8a0000e28dd13cc9f1dd7e223f9d9d673b"
+  },
+  "reference_corrections": [
+    "scalar tensor step counters required by Torch 2.6",
+    "initialize AMSGrad maximum-variance state"
+  ],
+  "native_concurrency": "four worker threads, 64 identical gradient packets, unique versions and coherent snapshots",
+  "python_concurrency": "sequential equivalent; no Python IPC compatibility claimed",
+  "threads": 1,
+  "torch": "2.6.0+cpu",
+  "cases": [
+    "shared",
+    "shared_amsgrad",
+    "shared_threads"
+  ],
+  "records": 156,
+  "status": "PASS",
+  "mismatch": null,
+  "python_output_sha256": "2d2f5f6aeb77043211990aac1925c7f8305c07b8453eb0279e3d62b021f40799",
+  "native_output_sha256": "2d2f5f6aeb77043211990aac1925c7f8305c07b8453eb0279e3d62b021f40799",
+  "native_sha256": "3daf15b5df67c1bfe1f7dba3d69ff11b1ad2bb12792d2d226379b394e1a2e01e"
+}

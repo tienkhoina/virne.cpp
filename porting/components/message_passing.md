@@ -7,6 +7,12 @@ operators used by Virne: `GraphViNEConv` and `EdgeFusionGATConv`. It is a
 LibTorch/ATen component and does not add PyG or `torch_scatter` as a native
 dependency.
 
+The 2026-09-08 continuation corrected EdgeFusion's seeded initialization and
+shared-projection reset order. Its broader state/RNG/backward gate is recorded
+in `components/neural_network_remaining.md` and
+`results/learning_continuation_2026-09-08.md`. The historical output benchmark
+below remains frozen and was not rerun.
+
 ## API
 
 Header: `virne/solver/learning/pyg_lite/message_passing.h`

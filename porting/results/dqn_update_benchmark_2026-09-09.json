@@ -1,0 +1,47 @@
+{
+  "component": "dqn_update",
+  "threads": 1,
+  "torch": "2.6.0+cpu",
+  "source_sha256": {
+    "rl_core/rl_solver.py": "1285e787ab60c90497625f5b3c39a1f9ee421a15054384143a57759dbd68c1da",
+    "rl_core/buffer.py": "99f355e436dac79f6782e0610a05eda08345e42e5bf3ef75bab0a65805346b7c",
+    "rl_policy/mlp_policy.py": "c8998d8bbfb14477c55fbcf9240bf4e0d82ff1e5c51da7b4aa82387432a2e407",
+    "neural_network/mlp.py": "4f6d24dde669ec310fd2961bb1a6c0945f5a2d93f2042402025acf094eba89cb"
+  },
+  "reference_corrections": [
+    "Feature-last BatchNorm flattens leading dimensions in the two BN cases; original rank-3 input has an incompatible channel dimension"
+  ],
+  "preserved_source_behavior": [
+    "Target sync on update zero before increment",
+    "Unmasked target max and source buffer clear",
+    "Double DQN online argmax followed by target gather",
+    "Target BatchNorm remains in the source training mode"
+  ],
+  "differential_rerun": false,
+  "parity_reused_from": "dqn_update_differential_2026-09-09.json",
+  "parity_report_sha256": "3113b941ac9dc43e42b12e339b8cc8f730cec958c4e3a608f1739b83f42b7ade",
+  "warmups": 3,
+  "repetitions": 5,
+  "native_samples_ns": [
+    477489,
+    391046,
+    370434,
+    401028,
+    538060
+  ],
+  "python_samples_ns": [
+    3054244,
+    2900285,
+    2501807,
+    2848491,
+    2573558
+  ],
+  "native_median_ns": 401028,
+  "python_median_ns": 2848491,
+  "python_over_native_speedup": 7.102972859750442,
+  "status": "PASS",
+  "mismatch": null,
+  "python_output_sha256": "f213e5244a88351c5b2e5bd8f166b250521bf8535da0fc478e5d8ec345f11ad7",
+  "native_output_sha256": "f213e5244a88351c5b2e5bd8f166b250521bf8535da0fc478e5d8ec345f11ad7",
+  "native_sha256": "0430b1f3092d47aa510112dff240ac5e3a596acc0267d5d05833c8cfacb87531"
+}

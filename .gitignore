@@ -17,6 +17,8 @@ __pycache__/
 /results/
 /tmp-results/
 /.tmp-*/
+# Root-level temporary native harness executables.
+/.tmp_*.exe
 
 # Main may create a Python-compatible <solver>/<run-id> tree below virne/
 # when save_root_dir is omitted. These names are registry leaves, not source

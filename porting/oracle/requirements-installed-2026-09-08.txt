@@ -1,0 +1,36 @@
+# Recorded with pip freeze in virne-python-oracle:py310-torch26-pyg27-cpu.
+# Torch and PyG extension wheels use the CPU indexes in Dockerfile.ml.
+aiohappyeyeballs==2.7.1
+aiohttp==3.14.3
+aiosignal==1.4.0
+async-timeout==5.0.1
+attrs==26.1.0
+certifi==2026.7.22
+charset-normalizer==3.5.1
+filelock==3.32.3
+frozenlist==1.8.0
+fsspec==2026.7.0
+idna==3.19
+Jinja2==3.1.6
+MarkupSafe==3.0.3
+mpmath==1.3.0
+multidict==6.7.1
+networkx==3.4.2
+numpy==2.2.6
+packaging==26.2
+propcache==0.5.2
+psutil==7.2.2
+pyparsing==3.3.2
+PyYAML==6.0.1
+requests==2.34.2
+scipy==1.15.3
+sympy==1.13.1
+torch==2.6.0+cpu
+torch-geometric==2.7.0
+torch_scatter==2.1.2+pt26cpu
+torch_sparse==0.6.18+pt26cpu
+tqdm==4.70.0
+typing_extensions==4.16.0
+urllib3==2.7.0
+xxhash==4.0.1
+yarl==1.24.5

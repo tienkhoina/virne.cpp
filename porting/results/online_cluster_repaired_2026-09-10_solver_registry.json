@@ -1,0 +1,113 @@
+{
+  "component": "learning_solver_registry",
+  "status": "PASS",
+  "cases": {
+    "registry": {
+      "status": "PASS",
+      "records": 35,
+      "mismatch": null,
+      "python_error": null,
+      "native_errors": [],
+      "python_sha256": "4a8c032fad93d896a5c0d486b9c8978d24335d7bc6e78e4e14047e55f657c4a6",
+      "native_sha256": "4a8c032fad93d896a5c0d486b9c8978d24335d7bc6e78e4e14047e55f657c4a6",
+      "reused_from": "online_cluster_2026-09-10_solver_registry.json"
+    },
+    "ppo_mlp+": {
+      "status": "PASS",
+      "records": 41,
+      "mismatch": null,
+      "python_error": null,
+      "native_errors": [],
+      "python_sha256": "1a252c3bffc186c740ea6138e4a23f036853beba39258392627c236dc4c44ae4",
+      "native_sha256": "1a252c3bffc186c740ea6138e4a23f036853beba39258392627c236dc4c44ae4",
+      "reused_from": "online_cluster_2026-09-10_solver_registry.json"
+    },
+    "pg_mlp": {
+      "status": "PASS",
+      "records": 41,
+      "mismatch": null,
+      "python_error": null,
+      "native_errors": [],
+      "python_sha256": "7ea743bcbad3e24d167d32283b93324c29a21d36dbf1a39aa0e7b14c725dbdd3",
+      "native_sha256": "7ea743bcbad3e24d167d32283b93324c29a21d36dbf1a39aa0e7b14c725dbdd3",
+      "reused_from": "online_cluster_2026-09-10_solver_registry.json"
+    },
+    "ppo_att": {
+      "status": "PASS",
+      "records": 41,
+      "mismatch": null,
+      "python_error": null,
+      "native_errors": [],
+      "python_sha256": "7ead62fbecdc30fe3c4dad00be8fb53fbd7eca13b805af60d570654d9fba9ab5",
+      "native_sha256": "7ead62fbecdc30fe3c4dad00be8fb53fbd7eca13b805af60d570654d9fba9ab5",
+      "reused_from": "online_cluster_2026-09-10_solver_registry.json"
+    },
+    "a2c_dual_gcn+": {
+      "status": "PASS",
+      "records": 41,
+      "mismatch": null,
+      "python_error": null,
+      "native_errors": [],
+      "python_sha256": "5be76e194d85c1272642c71e1c17625ffc25b61faeaa059a30ee33e09e4826d0",
+      "native_sha256": "5be76e194d85c1272642c71e1c17625ffc25b61faeaa059a30ee33e09e4826d0",
+      "reused_from": "online_cluster_2026-09-10_solver_registry.json"
+    },
+    "registry_online": {
+      "status": "PASS",
+      "records": 13,
+      "mismatch": null,
+      "python_error": null,
+      "native_errors": [],
+      "python_sha256": "ab79bf7d589b43bc8445b4a84ca42bd48407557b69b5b25e864698325bb3d6f3",
+      "native_sha256": "ab79bf7d589b43bc8445b4a84ca42bd48407557b69b5b25e864698325bb3d6f3"
+    }
+  },
+  "source_sha256": {
+    "reinforcement_learning/solver_maker.py": "8e7de396066d99101afca8245efbdd7d055c59f1f7f55979c0c5286a3507ac10",
+    "reinforcement_learning/mlp_solver.py": "6113f20de539b75bb53fc504e7bb44cf4de2909887704ce95e23cd0d9259284a",
+    "reinforcement_learning/cnn_solver.py": "0369c91f0eaa1b00c5179fa9d3b7019df4b929416095119530152154fc1eab94",
+    "reinforcement_learning/att_solver.py": "b24cc54b1358578a2ef721bd7fa506ccad5e846a6c35aae15db1980db4c32cd9",
+    "reinforcement_learning/gnn_mlp_solver.py": "6122a4bd38eb114bef57e4c01c94847fb63fede05376ecf2c2c88687ad212e95",
+    "reinforcement_learning/dual_gnn_solver.py": "b917f57569b7666b12aebdb8dc8e8d804fb054acba7d9a829caf75647312c55a"
+  },
+  "native_sha256": "f1e2ec7c1550f569ce06aad1fb0b02ec71e44d553be1cb25e857dc20f6f570d0",
+  "native_stderr": "",
+  "registered_source_names": [
+    "pg_mlp",
+    "pg_mlp2",
+    "pg_mlp+",
+    "ppo_mlp+",
+    "a2c_mlp+",
+    "pg_cnn",
+    "pg_cnn2",
+    "pg_cnn+",
+    "a2c_cnn+",
+    "ppo_cnn+",
+    "ppo_att",
+    "pg_att+",
+    "a2c_att+",
+    "ppo_att+",
+    "pg_gcn_mlp+",
+    "a2c_gcn_mlp+",
+    "ppo_gcn_mlp+",
+    "pg_gat_mlp+",
+    "a2c_gat_mlp+",
+    "ppo_gat_mlp+",
+    "pg_deep_edge_gat_mlp+",
+    "a2c_deep_edge_gat_mlp+",
+    "ppo_deep_edge_gat_mlp+",
+    "a2c_dual_gcn",
+    "ppo_dual_gcn",
+    "pg_dual_gcn+",
+    "a2c_dual_gcn+",
+    "ppo_dual_gcn+",
+    "pg_dual_gat+",
+    "a2c_dual_gat+",
+    "ppo_dual_gat+",
+    "pg_dual_deep_edge_gat+",
+    "a2c_dual_deep_edge_gat+",
+    "ppo_dual_deep_edge_gat+"
+  ],
+  "threads": 1,
+  "benchmark": "NOT_RUN"
+}

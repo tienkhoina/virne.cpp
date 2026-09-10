@@ -1,0 +1,27 @@
+{
+  "component": "native_repairs",
+  "status": "PASS",
+  "mismatch": null,
+  "cases": [
+    "single_layer",
+    "residual_initialization",
+    "recurrent_clamp"
+  ],
+  "records": 135,
+  "reference_corrections": {
+    "single_layer": "one output Linear plus Identity, avoiding indexing an empty hidden-dimension list",
+    "residual_initialization": "orthogonal residual matrices after original construction",
+    "recurrent_clamp": "decoder bound is physical-node count 4, not 100, for an embedding with 5 rows"
+  },
+  "source_sha256": {
+    "neural_network/mlp.py": "4f6d24dde669ec310fd2961bb1a6c0945f5a2d93f2042402025acf094eba89cb",
+    "neural_network/gnn.py": "4ba777bafa5a104bfad113440e62d1153e63ee12dc78144374575c0e2202863c",
+    "reinforcement_learning/gnn_seq2seq_solver/policy_with_encoder.py": "11959fc58e0f71cf4da85fd80403e9fc5ef6ebeb9834858dcf48f6ee523934d3"
+  },
+  "python_output_sha256": "f1db80ef0e48215e355163eac64306bc3dfbaeae6beb0291bb7496381f6cd486",
+  "native_output_sha256": "f1db80ef0e48215e355163eac64306bc3dfbaeae6beb0291bb7496381f6cd486",
+  "native_sha256": "974942c0f8e3f691f689fdcfc3e186c9a7fb0bd7f67783b4709ddb05f0d13422",
+  "threads": 1,
+  "torch": "2.6.0+cpu",
+  "benchmark": "Regression-only gate for existing modules; accepted aggregate benchmarks were not rerun"
+}

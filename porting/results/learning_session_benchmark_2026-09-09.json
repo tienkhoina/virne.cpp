@@ -1,0 +1,50 @@
+{
+  "component": "learning_session",
+  "status": "PASS",
+  "workload": "Three sequential PPO episodes followed by flushing remaining rollout; model/environment construction, one warm solve and output serialization excluded",
+  "parity_reused_from": "learning_session_ppo_2026-09-09.json",
+  "parity_report_sha256": "bd125c694724f04cf9b8b7d7161f43e6493c5746d040f3cd23c3916c4c0ca503",
+  "differential_rerun": false,
+  "source_sha256": {
+    "utils.py": "ba1394e89752a70f8d03dbe485125f7c8bffbb77e5767ff000034019f53519e4",
+    "rl_core/tensor_convertor.py": "75a13356834688d6dff77f7e5fc78ca64cf49171f183aedce92116ad31035f2b",
+    "rl_core/instance_agent.py": "759d6bb88362aad558009b0efa044ccaddaf94d2ad4f85d228a9f588d3648636",
+    "rl_core/rl_solver.py": "1285e787ab60c90497625f5b3c39a1f9ee421a15054384143a57759dbd68c1da",
+    "rl_policy/att_policy.py": "0a1f08712dd0d57fb5b9da0d29edba6679db049f965faaddbce4596edadac08d",
+    "rl_policy/dual_gnn_policy.py": "590a320032ed16bce9be844ad34cab0003dc1702161c2cd7e0ac0498a62c2cdf",
+    "rl_policy/gcn_seq2seq_policy.py": "2d5e11b6a2984a0706b434d17346a5bb4136fb2e848563a4fe60444c19fb50c0",
+    "reinforcement_learning/gnn_seq2seq_solver/policy_with_encoder.py": "11959fc58e0f71cf4da85fd80403e9fc5ef6ebeb9834858dcf48f6ee523934d3"
+  },
+  "native_sha256": "0950266aeee94f3cc49f1c398bd1aec093fcd894fd4e6000e2bd2a1e58cf8bc9",
+  "python_output_sha256": "6b7c6cc4ae15d7cdc4dc5c5b23b47646e63d30dd1cefe520c16f5fde18cbd6f9",
+  "native_output_sha256": "6b7c6cc4ae15d7cdc4dc5c5b23b47646e63d30dd1cefe520c16f5fde18cbd6f9",
+  "native_samples_ns": [
+    7335601,
+    6412936,
+    8196843,
+    7887987,
+    9101315
+  ],
+  "python_samples_ns": [
+    96848216,
+    94315164,
+    100260816,
+    85900500,
+    92097796
+  ],
+  "native_median_ns": 7887987,
+  "python_median_ns": 94315164,
+  "native_p95_ns": 8920420.6,
+  "python_p95_ns": 99578296.0,
+  "python_over_native_speedup": 11.956810273647763,
+  "mismatch": null,
+  "warmups": 3,
+  "repetitions": 5,
+  "threads": 1,
+  "cpu_affinity": [
+    2
+  ],
+  "torch": "2.6.0+cpu",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+  "recorded_utc": "2026-09-09T09:39:30.753976+00:00"
+}

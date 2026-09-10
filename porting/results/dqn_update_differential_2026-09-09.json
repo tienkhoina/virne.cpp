@@ -1,0 +1,32 @@
+{
+  "component": "dqn_update",
+  "threads": 1,
+  "torch": "2.6.0+cpu",
+  "source_sha256": {
+    "rl_core/rl_solver.py": "1285e787ab60c90497625f5b3c39a1f9ee421a15054384143a57759dbd68c1da",
+    "rl_core/buffer.py": "99f355e436dac79f6782e0610a05eda08345e42e5bf3ef75bab0a65805346b7c",
+    "rl_policy/mlp_policy.py": "c8998d8bbfb14477c55fbcf9240bf4e0d82ff1e5c51da7b4aa82387432a2e407",
+    "neural_network/mlp.py": "4f6d24dde669ec310fd2961bb1a6c0945f5a2d93f2042402025acf094eba89cb"
+  },
+  "reference_corrections": [
+    "Feature-last BatchNorm flattens leading dimensions in the two BN cases; original rank-3 input has an incompatible channel dimension"
+  ],
+  "preserved_source_behavior": [
+    "Target sync on update zero before increment",
+    "Unmasked target max and source buffer clear",
+    "Double DQN online argmax followed by target gather",
+    "Target BatchNorm remains in the source training mode"
+  ],
+  "cases": [
+    "dqn",
+    "double_dqn",
+    "dqn_bn",
+    "double_dqn_bn"
+  ],
+  "records": 1656,
+  "status": "PASS",
+  "mismatch": null,
+  "python_output_sha256": "c9dd1abac7ba50d99a00820c6094e49663a309a678ff72b6c0aa84eb84e631d8",
+  "native_output_sha256": "c9dd1abac7ba50d99a00820c6094e49663a309a678ff72b6c0aa84eb84e631d8",
+  "native_sha256": "0430b1f3092d47aa510112dff240ac5e3a596acc0267d5d05833c8cfacb87531"
+}

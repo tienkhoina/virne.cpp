@@ -1,0 +1,142 @@
+{
+  "component": "online_environment_solver_registry",
+  "status": "FAIL",
+  "components": {
+    "online_environment": {
+      "status": "FAIL",
+      "report": "online_cluster_repaired_2026-09-10_online_environment.json",
+      "report_sha256": "a8bb6c4a1df2a8f3fc90203bb8573f73e7e7bed8b67d0d39687034a7929c8881",
+      "cases": {
+        "joint": {
+          "status": "PASS",
+          "records": 213,
+          "mismatch": null,
+          "python_error": null,
+          "native_error": null
+        },
+        "placement": {
+          "status": "PASS",
+          "records": 213,
+          "mismatch": null,
+          "python_error": null,
+          "native_error": null
+        },
+        "pair": {
+          "status": "PASS",
+          "records": 213,
+          "mismatch": null,
+          "python_error": null,
+          "native_error": null
+        },
+        "slots": {
+          "status": "FAIL",
+          "records": 69,
+          "mismatch": {
+            "line": 17,
+            "record": "mask",
+            "python": "mask|Bool|6,|010101010101",
+            "cpp": "mask|Bool|24,|010100010101010101010101010100010101010101010101"
+          },
+          "python_error": null,
+          "native_error": null
+        },
+        "solution": {
+          "status": "FAIL",
+          "records": 69,
+          "mismatch": {
+            "line": 17,
+            "record": "mask",
+            "python": "mask|Bool|2,|0101",
+            "cpp": "mask|Bool|6,|010101010101"
+          },
+          "python_error": null,
+          "native_error": "reset RL environment before stepping a completed episode"
+        },
+        "reject": {
+          "status": "PASS",
+          "records": 177,
+          "mismatch": null,
+          "python_error": null,
+          "native_error": null
+        },
+        "failure": {
+          "status": "PASS",
+          "records": 195,
+          "mismatch": null,
+          "python_error": null,
+          "native_error": null
+        }
+      },
+      "exit_code": 1
+    },
+    "solver_registry": {
+      "status": "PASS",
+      "report": "online_cluster_repaired_2026-09-10_solver_registry.json",
+      "report_sha256": "20d91d249dce8472bd246ddb24a3d92ba73dd0b9236dc01bccf83417bb90199f",
+      "cases": {
+        "registry": {
+          "status": "PASS",
+          "records": 35,
+          "mismatch": null,
+          "python_error": null,
+          "native_errors": [],
+          "python_sha256": "4a8c032fad93d896a5c0d486b9c8978d24335d7bc6e78e4e14047e55f657c4a6",
+          "native_sha256": "4a8c032fad93d896a5c0d486b9c8978d24335d7bc6e78e4e14047e55f657c4a6",
+          "reused_from": "online_cluster_2026-09-10_solver_registry.json"
+        },
+        "ppo_mlp+": {
+          "status": "PASS",
+          "records": 41,
+          "mismatch": null,
+          "python_error": null,
+          "native_errors": [],
+          "python_sha256": "1a252c3bffc186c740ea6138e4a23f036853beba39258392627c236dc4c44ae4",
+          "native_sha256": "1a252c3bffc186c740ea6138e4a23f036853beba39258392627c236dc4c44ae4",
+          "reused_from": "online_cluster_2026-09-10_solver_registry.json"
+        },
+        "pg_mlp": {
+          "status": "PASS",
+          "records": 41,
+          "mismatch": null,
+          "python_error": null,
+          "native_errors": [],
+          "python_sha256": "7ea743bcbad3e24d167d32283b93324c29a21d36dbf1a39aa0e7b14c725dbdd3",
+          "native_sha256": "7ea743bcbad3e24d167d32283b93324c29a21d36dbf1a39aa0e7b14c725dbdd3",
+          "reused_from": "online_cluster_2026-09-10_solver_registry.json"
+        },
+        "ppo_att": {
+          "status": "PASS",
+          "records": 41,
+          "mismatch": null,
+          "python_error": null,
+          "native_errors": [],
+          "python_sha256": "7ead62fbecdc30fe3c4dad00be8fb53fbd7eca13b805af60d570654d9fba9ab5",
+          "native_sha256": "7ead62fbecdc30fe3c4dad00be8fb53fbd7eca13b805af60d570654d9fba9ab5",
+          "reused_from": "online_cluster_2026-09-10_solver_registry.json"
+        },
+        "a2c_dual_gcn+": {
+          "status": "PASS",
+          "records": 41,
+          "mismatch": null,
+          "python_error": null,
+          "native_errors": [],
+          "python_sha256": "5be76e194d85c1272642c71e1c17625ffc25b61faeaa059a30ee33e09e4826d0",
+          "native_sha256": "5be76e194d85c1272642c71e1c17625ffc25b61faeaa059a30ee33e09e4826d0",
+          "reused_from": "online_cluster_2026-09-10_solver_registry.json"
+        },
+        "registry_online": {
+          "status": "PASS",
+          "records": 13,
+          "mismatch": null,
+          "python_error": null,
+          "native_errors": [],
+          "python_sha256": "ab79bf7d589b43bc8445b4a84ca42bd48407557b69b5b25e864698325bb3d6f3",
+          "native_sha256": "ab79bf7d589b43bc8445b4a84ca42bd48407557b69b5b25e864698325bb3d6f3"
+        }
+      },
+      "exit_code": 0
+    }
+  },
+  "old_tests_rerun": false,
+  "benchmarks_rerun": false
+}

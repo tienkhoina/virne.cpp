@@ -19,6 +19,12 @@ class NumpyRandomState
 {
 public:
     using Shape = NdArray<double>::Shape;
+    struct Snapshot {
+        std::array<std::uint32_t, 624> key{};
+        std::uint32_t position = 624;
+        bool has_gaussian = false;
+        double gaussian = 0.0;
+    };
 
 private:
     static constexpr std::size_t StateSize = 624;
@@ -92,6 +98,9 @@ public:
 
     void seed(
         std::uint32_t seed_value);
+
+    Snapshot snapshot() const noexcept;
+    void restore(const Snapshot& snapshot);
 
     std::uint32_t next_uint32();
 

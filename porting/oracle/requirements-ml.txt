@@ -1,0 +1,2 @@
+torch_geometric==2.7.0
+scipy==1.15.3

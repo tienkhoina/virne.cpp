@@ -1,0 +1,45 @@
+{
+  "component": "training_update",
+  "status": "PASS",
+  "parity_reused_from": "training_update_differential_2026-09-09.json",
+  "parity_report_sha256": "100ecefa1a2e799354c7ef3c359b53d199e0daedf597b9c99af9f912231a5458",
+  "differential_rerun": false,
+  "native_sha256": "bee97fe02c518b963b6a9df22e0872557bf61dceae81cea20a5be8248aa8c64f",
+  "source_sha256": {
+    "rl_core/rl_solver.py": "1285e787ab60c90497625f5b3c39a1f9ee421a15054384143a57759dbd68c1da",
+    "rl_core/buffer.py": "99f355e436dac79f6782e0610a05eda08345e42e5bf3ef75bab0a65805346b7c",
+    "rl_policy/mlp_policy.py": "c8998d8bbfb14477c55fbcf9240bf4e0d82ff1e5c51da7b4aa82387432a2e407",
+    "utils.py": "ba1394e89752a70f8d03dbe485125f7c8bffbb77e5767ff000034019f53519e4"
+  },
+  "reference_corrections": {},
+  "torch": "2.6.0+cpu",
+  "threads": 1,
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+  "cpu_affinity": [
+    0
+  ],
+  "recorded_utc": "2026-09-09T07:40:14.451304+00:00",
+  "warmups": 3,
+  "repetitions": 5,
+  "iterations_per_sample": 1,
+  "native_samples_ns": [
+    1819450,
+    2092388,
+    1563548,
+    1612639,
+    1442638
+  ],
+  "python_samples_ns": [
+    6180588,
+    5915781,
+    5013450,
+    6420535,
+    5859953
+  ],
+  "native_median_ns": 1612639,
+  "python_median_ns": 5915781,
+  "python_over_native_speedup": 3.6683851748593455,
+  "python_output_sha256": "94b25f5afb66e45bfc21a7e93d23094a68507820890376808f06523fa717e611",
+  "native_output_sha256": "94b25f5afb66e45bfc21a7e93d23094a68507820890376808f06523fa717e611",
+  "mismatch": null
+}

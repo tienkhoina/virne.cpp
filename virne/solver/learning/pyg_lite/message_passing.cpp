@@ -247,19 +247,8 @@ EdgeFusionGATConvImpl::EdgeFusionGATConvImpl(
     }
     const std::int64_t projected =
         options_.heads * options_.out_channels;
-    lin_src = register_module(
-        "lin_src",
-        torch::nn::Linear(torch::nn::LinearOptions(
-            options_.in_channels, projected).bias(false)));
-    // Registering the same implementation preserves both fixed Python names
-    // without allocating a second transform for homogeneous input.
-    lin_dst = register_module("lin_dst", lin_src);
-    if (options_.edge_dim.has_value()) {
-        lin_edge = register_module(
-            "lin_edge",
-            torch::nn::Linear(torch::nn::LinearOptions(
-                *options_.edge_dim, projected).bias(false)));
-    }
+    // Python constructs the pre-network first; registration order also controls
+    // parameter traversal and optimizer state ordering.
     pre_nns = register_module("pre_nns", torch::nn::ModuleList());
     const std::int64_t message_input =
         (options_.edge_dim.has_value() ? 3 : 2) * options_.out_channels;
@@ -274,6 +263,21 @@ EdgeFusionGATConvImpl::EdgeFusionGATConvImpl(
             options_.out_channels).bias(true)));
     pre_nns->push_back(sequence);
 
+    lin_src = register_module(
+        "lin_src",
+        torch::nn::Linear(torch::nn::LinearOptions(
+            options_.in_channels, projected).bias(false)));
+    // PyG Linear's constructor uses Glorot here, with one RNG draw per weight.
+    // LibTorch Linear has already consumed the same number of uniform draws;
+    // the values are overwritten by the final reset below.
+    lin_dst = register_module("lin_dst", lin_src);
+    if (options_.edge_dim.has_value()) {
+        lin_edge = register_module(
+            "lin_edge",
+            torch::nn::Linear(torch::nn::LinearOptions(
+                *options_.edge_dim, projected).bias(false)));
+    }
+
     const std::int64_t total = options_.concat
         ? projected
         : options_.out_channels;
@@ -285,16 +289,18 @@ EdgeFusionGATConvImpl::EdgeFusionGATConvImpl(
 
 void EdgeFusionGATConvImpl::reset_parameters() {
     glorot_last_two(lin_src->weight);
+    // Python resets both names even though they refer to the same parameter.
+    glorot_last_two(lin_dst->weight);
     if (lin_edge) glorot_last_two(lin_edge->weight);
     auto& sequence = pre_nns->at<torch::nn::SequentialImpl>(0);
     // The fixed Python pre-network is Linear -> ReLU -> Linear. Resolve the
     // typed positions once; do not reflect over AnyModule in a hot path.
     auto& first = sequence.at<torch::nn::LinearImpl>(0);
     auto& second = sequence.at<torch::nn::LinearImpl>(2);
-    glorot_last_two(first.weight);
-    zero_parameter(first.bias);
-    glorot_last_two(second.weight);
-    zero_parameter(second.bias);
+    // The two PyG Linear layers have no explicit weight initializer: they use
+    // the same Kaiming-uniform weight and uniform bias defaults as nn.Linear.
+    first.reset_parameters();
+    second.reset_parameters();
     zero_parameter(bias);
 }
 

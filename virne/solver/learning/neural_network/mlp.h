@@ -2,6 +2,8 @@
 
 #include <torch/nn/module.h>
 #include <torch/nn/modules/container/sequential.h>
+#include <torch/nn/modules/batchnorm.h>
+#include <torch/nn/modules/linear.h>
 #include <torch/nn/pimpl.h>
 #include <torch/types.h>
 
@@ -43,6 +45,12 @@ public:
     torch::nn::Sequential lins{nullptr};
 
 private:
+    struct Layer {
+        torch::nn::Linear linear{nullptr};
+        torch::nn::BatchNorm1d norm{nullptr};
+        bool activation = false;
+    };
+    std::vector<Layer> layers_;
     MlpOptions options_;
     std::vector<std::int64_t> resolved_hidden_dims_;
 };

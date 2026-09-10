@@ -1,6 +1,7 @@
 # Virne Python to C++ port status
 
-Last verified: 2026-08-06 (Asia/Saigon).
+Last updated: 2026-09-10 (Asia/Saigon). New learning gates are recorded below;
+the dates/evidence of existing frozen components have not been reverified.
 
 This file is the entry point for continuing the port. Read it and the linked
 component note before opening the original Python implementation.
@@ -115,7 +116,18 @@ A component is `COMPLETE` only when all of the following exist and pass:
 | Learning/ML | `neural_network.MultiHeadAttentionWithOutput` | **COMPLETE / 3/3 EXACT WINDOWS MSVC GATE PASS** | `porting/components/multi_head_attention_with_output.md`, `porting/results/multi_head_attention_with_output_differential_2026-08-06.json`; typed projections/mask/dropout, state/output parity, 1.152x focused speedup |
 | Learning/ML | `neural_network.NeuralTensorNetwork` | **COMPLETE / 3/3 EXACT WINDOWS MSVC GATE PASS** | `porting/components/neural_tensor.md`, `porting/results/neural_tensor_differential_2026-08-06.json`; typed tensor parameters and orthogonal/RNG parity, 1.491x focused speedup |
 | Learning/ML | `neural_network.GCNConvNet` + add/mean/max `GraphPooling` | **COMPLETE / 5/5 EXACT PYTHON/PYG + WINDOWS/LINUX NATIVE GATES PASS** | `porting/components/gcn_conv_net.md`, `porting/results/gcn_conv_net_differential_2026-08-06.json`; fixed ID layer stack, direct Batch metadata, state/output parity, 1.097x focused speedup |
-| Learning/ML | remaining `solver/learning/**` | IN PROGRESS | next independent non-training leaf under document-first audit |
+| Learning/ML | remaining neural primitives and GAT/EdgeFusion/DeepEdge wrappers | **IMPLEMENTED / 27/27 EXACT CPU GATES PASS** | `porting/components/neural_network_remaining.md`, `porting/results/learning_continuation_2026-09-08.md`; state/RNG and backward parity at fixed 1/4 threads; new aggregate forward benchmark 2.685x/2.384x |
+| Learning/ML | CNN + GCN/GAT/DeepEdgeGAT-MLP policies | **IMPLEMENTED / 12/12 EXACT CPU GATES PASS** | `porting/components/cnn_gnn_mlp_policy.md`; 577 records compared byte-for-byte at fixed 1/4 threads; new CNN+GAT/MLP aggregate forward benchmark 3.820x/3.780x |
+| Learning/ML | Attention, dual and seq2seq policies | **27/27 EXACT CPU GATES PASS** | `porting/RL_COMPLETION_PROGRESS.md`; 3655 records, 3.445x forward benchmark |
+| Learning/ML | Adam and PG/A2C/PPO/ARPPO/source-DDPG updates | **11/11 EXACT CPU GATES PASS** | `porting/results/training_update_differential_2026-09-09.json`; 984 records, 3.668x update benchmark |
+| Learning/ML | Instance RL environment | **15/15 DIFFERENTIAL PASS / BENCHMARK PENDING** | `porting/results/instance_environment_differential_2026-09-09.json`; 1890 records; constant-distance NaN correction is covered by the newer session gate |
+| Learning/ML | Native instance learning session | **11/11 EXACT CPU INTEGRATION + 3/3 CHECKPOINT GATES PASS** | `porting/components/learning_session.md`; 858 + 90 records, 11.957x PPO workflow benchmark |
+| Learning/ML | Native SharedAdam worker wrapper | **3/3 EXACT CPU GATES PASS** | `porting/components/shared_adam.md`; 156 records, coherent four-worker updates, 9.028x sequential packet benchmark |
+| Learning/ML | DQN/DoubleDQN update and target state | **4/4 EXACT CPU GATES PASS** | `porting/results/dqn_update_differential_2026-09-09.json`; 1656 records, 7.103x DoubleDQN update benchmark |
+| Learning/ML | DQN/DoubleDQN CPU instance cluster | **COMPLETE / EXACT GATES + BENCHMARK PASS** | `porting/components/dqn.md`; update 1656 + action 45 + session 354 + grouped checkpoint 520 records; 15.776x episode benchmark |
+| Learning/ML | Confirmed neural repairs | **3/3 FOCUSED EXACT GATES PASS** | `porting/components/native_repairs.md`; 135 records |
+| Learning/ML | Online RL environment + solver registry | **COMPLETE WITHIN CPU CLUSTER / PARITY + BENCHMARK PASS** | `porting/components/online_learning.md`; 13 groups, 1361 byte records, 34 names; online transitions 48.805x and registered PPO epoch 10.345x |
+| Learning/ML | remaining `solver/learning/**` | IN PROGRESS | `porting/LEARNING_COMPONENT_MAP.md`; AST inventory covers 71 files, 214 classes and 646 functions/methods; full RL training is not complete |
 
 ## Completed behavior
 
@@ -825,7 +837,23 @@ dense/homogeneous/dual/heterogeneous observation sampling, typed policy
 action/evaluation, MLP policy construction/inference, positional encoding,
 both attention primitives, the neural tensor network, and the typed
 `GCNConvNet` plus add/mean/max graph pooling are complete as separate gates.
-The next independent leaf is the active `ResNetBlock` CNN primitive; generic
-NNConv/PNA, GAT wrappers and attention pooling remain separate. Reuse the
-completed registries and all frozen graph/controller/random/config APIs. The
-non-RL environment continues to use its exact Torch-free gate.
+The remaining valid neural primitives, GAT/EdgeFusion/DeepEdge wrappers,
+attention pooling, CNN policy and the three GNN/MLP policies now have new exact
+CPU gates and paired benchmark artifacts. The continuation fixed EdgeFusion
+initialization/alias order, Barlow Twins backward accumulation order and
+Sinkhorn/ResNet/GAT input boundaries. See
+`porting/results/learning_continuation_2026-09-08.md`.
+
+Attention, dual graph, seq2seq, five policy-gradient update loops and the instance
+environment now have new differential gates. The native instance learning session
+also passes end-to-end comparisons and a PPO workflow benchmark. DQN action,
+update, instance/checkpoint integration and the online environment/34-name solver
+registry cluster have since closed their own exact and benchmark gates.
+Remaining policy-builder surface, heterogeneous/recurrent/safe/distributed RL,
+OnlineAgent admission training, main CLI/config and searchers are tracked in
+`porting/RL_COMPLETION_PROGRESS.md`.
+The detailed dependency/source audit is in
+`porting/LEARNING_COMPONENT_MAP.md`. Fixed thread widths each match Python;
+switching Torch thread width is not bit-invariant. Use one thread as the
+reproducible reference for the new small fixtures. Existing graph/controller/
+random/config and non-RL environment gates remain frozen and were not rerun.

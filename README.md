@@ -1,10 +1,16 @@
 # VirneCpp
 
-VirneCpp is the C++17, non-ML port of the Virne virtual-network-embedding
-runtime. It keeps the Python-compatible configuration and solver names while
-using typed fields, dense graph IDs and local C++ dependencies in runtime
-loops. Reinforcement learning and other ML components are intentionally out
-of scope for this port.
+VirneCpp is the C++17 port of the Virne virtual-network-embedding runtime.
+It keeps Python-compatible configuration and solver names while using typed
+fields, dense graph IDs and local C++ dependencies in runtime loops. The
+non-ML runtime is established; the optional LibTorch/PyG-compatible learning
+port is active. Full native RL training is not yet complete.
+
+The CPU online RL environment and sequential solver registry now pass a grouped
+Python/C++ gate: 34 solver names, 13 groups and 1,361 exact byte records. See
+[`online learning`](porting/components/online_learning.md) for paired benchmarks
+and remaining boundaries. DQN/DoubleDQN instance learning and checkpoint gates
+are documented in [`DQN`](porting/components/dqn.md).
 
 ## Current scope
 
@@ -41,6 +47,9 @@ The porting status and the non-ML component map are maintained in
 | Progress/logger behavior | [`progress/README.md`](progress/README.md) |
 | Required public surface | [`API_MUST_BUILD.md`](API_MUST_BUILD.md) |
 | Port workflow and frozen foundations | [`porting/README.md`](porting/README.md), [`porting/FROZEN_COMPONENTS.md`](porting/FROZEN_COMPONENTS.md) |
+| Learning API inventory and remaining dependencies | [`porting/LEARNING_COMPONENT_MAP.md`](porting/LEARNING_COMPONENT_MAP.md) |
+| Native RL learning, checkpoint and measured parity | [`porting/components/learning_session.md`](porting/components/learning_session.md), [`porting/RL_COMPLETION_PROGRESS.md`](porting/RL_COMPLETION_PROGRESS.md) |
+| Rebuilding the small CPU Python/PyG oracle | [`porting/oracle/README.md`](porting/oracle/README.md) |
 | Port performance contract | [`porting/PERFORMANCE_CONTRACT.md`](porting/PERFORMANCE_CONTRACT.md) |
 | Python parity and frozen benchmarks | [`benchmarks/README.md`](benchmarks/README.md), [`benchmarks/RESULTS.md`](benchmarks/RESULTS.md) |
 | Exact solver API | [`porting/components/exact_solvers.md`](porting/components/exact_solvers.md) |

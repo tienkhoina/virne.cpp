@@ -1,0 +1,40 @@
+{
+  "component": "shared_adam",
+  "source_sha256": {
+    "rl_core/shared_adam.py": "99b51f365e9853274a9477cef5dade8a0000e28dd13cc9f1dd7e223f9d9d673b"
+  },
+  "reference_corrections": [
+    "scalar tensor step counters required by Torch 2.6",
+    "initialize AMSGrad maximum-variance state"
+  ],
+  "native_concurrency": "four worker threads, 64 identical gradient packets, unique versions and coherent snapshots",
+  "python_concurrency": "sequential equivalent; no Python IPC compatibility claimed",
+  "threads": 1,
+  "torch": "2.6.0+cpu",
+  "differential_rerun": false,
+  "parity_reused_from": "shared_adam_differential_2026-09-09.json",
+  "native_samples_ns": [
+    1598267,
+    1652432,
+    1549617,
+    1536537,
+    1576935
+  ],
+  "python_samples_ns": [
+    9006466,
+    14236201,
+    13332877,
+    14896883,
+    16039761
+  ],
+  "native_median_ns": 1576935,
+  "python_median_ns": 14236201,
+  "python_over_native_speedup": 9.027766521765324,
+  "warmups": 3,
+  "repetitions": 5,
+  "status": "PASS",
+  "mismatch": null,
+  "python_output_sha256": "4ad1a4d361a2ed9fab3b4906ceb53c22ee0064ebe5bbca3a061841fbf740c928",
+  "native_output_sha256": "4ad1a4d361a2ed9fab3b4906ceb53c22ee0064ebe5bbca3a061841fbf740c928",
+  "native_sha256": "3daf15b5df67c1bfe1f7dba3d69ff11b1ad2bb12792d2d226379b394e1a2e01e"
+}

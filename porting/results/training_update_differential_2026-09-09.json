@@ -1,0 +1,29 @@
+{
+  "component": "training_update",
+  "status": "PASS",
+  "mismatch": null,
+  "cases": [
+    "adam_0",
+    "adam_1",
+    "adam_2",
+    "adam_3",
+    "training_0",
+    "training_1",
+    "training_2",
+    "training_3",
+    "training_4",
+    "training_mask",
+    "training_early_stop"
+  ],
+  "records": 984,
+  "python_sha256": "1db161562e3d555b9cad29968747eeb54a1023740a5387338cacfba0902037ef",
+  "cpp_sha256": "1db161562e3d555b9cad29968747eeb54a1023740a5387338cacfba0902037ef",
+  "source_sha256": {
+    "rl_core/rl_solver.py": "1285e787ab60c90497625f5b3c39a1f9ee421a15054384143a57759dbd68c1da",
+    "rl_core/buffer.py": "99f355e436dac79f6782e0610a05eda08345e42e5bf3ef75bab0a65805346b7c",
+    "rl_policy/mlp_policy.py": "c8998d8bbfb14477c55fbcf9240bf4e0d82ff1e5c51da7b4aa82387432a2e407",
+    "utils.py": "ba1394e89752a70f8d03dbe485125f7c8bffbb77e5767ff000034019f53519e4"
+  },
+  "torch": "2.6.0+cpu",
+  "benchmark": "NOT_REQUESTED"
+}

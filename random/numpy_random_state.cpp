@@ -284,6 +284,27 @@ NumpyRandomState::seed(
     gauss_ = 0.0;
 }
 
+NumpyRandomState::Snapshot NumpyRandomState::snapshot() const noexcept
+{
+    return {state_, static_cast<std::uint32_t>(position_), has_gauss_, gauss_};
+}
+
+void NumpyRandomState::restore(const Snapshot& saved)
+{
+    if (saved.position > StateSize)
+    {
+        throw std::invalid_argument("NumPy RandomState position exceeds 624");
+    }
+    state_ = saved.key;
+    position_ = saved.position;
+    has_gauss_ = saved.has_gaussian;
+    gauss_ = saved.gaussian;
+    for (std::size_t i = 0; i < StateSize; ++i)
+    {
+        tempered_[i] = temper_mt(state_[i]);
+    }
+}
+
 void
 NumpyRandomState::twist()
 {

@@ -1,4 +1,58 @@
-# Non-ML Python oracle
+# Python oracles
+
+## CPU ML reconstruction (2026-09-08)
+
+The deleted toolchain and oracle images have been reconstructed. From the
+`virne.cpp` directory:
+
+```powershell
+docker build --tag virne-cpp-toolchain:gcc11.4 .
+docker build --tag virne-python-oracle:py310-nonml porting/oracle
+docker build --file porting/oracle/Dockerfile.ml `
+  --tag virne-python-oracle:py310-torch26-pyg27-cpu `
+  --tag virne-cpu:latest porting/oracle
+docker compose up -d --no-build
+```
+
+The ML image derives from the non-ML image and shares its layers. Both ML
+tags resolve to one image ID. Build contexts exclude source/dependency
+payloads; the workspace and original Python checkout are mounted at runtime.
+Pip caching is disabled and only binary wheels are installed. There is no
+CUDA runtime, compiler, copied LibTorch archive or copied repository in the
+ML oracle image. The production C++ compiler continues to use `libs/libtorch`.
+
+The ML oracle pins Torch `2.6.0+cpu`, PyG `2.7.0`, torch_scatter
+`2.1.2+pt26cpu`, torch_sparse `0.6.18+pt26cpu`, SciPy `1.15.3` and pip
+`25.1.1`. The Dockerfile checks package dependencies and imports as part of
+building the image. This is an environment check, not a rerun of frozen
+component tests.
+
+The `virne-cpu:latest` name preserves the old ML commands but now selects CPU
+wheels. It is not the old CUDA-backed image and does not restore every
+optional package from that historical image. Old timing artifacts stay frozen;
+new measurements record this CPU environment separately.
+
+Example for an unfinished/new component only:
+
+```powershell
+docker run --rm --network none `
+  --mount 'type=bind,source=D:\Virne to cpp\virne.cpp,target=/work' `
+  --mount 'type=bind,source=D:\Virne to cpp\virne,target=/virne,readonly' `
+  --workdir /work virne-cpu:latest python porting/compare_neural_network_remaining.py `
+  --native build-ml-linux/porting/vne_neural_network_remaining_harness
+```
+
+The `/work` and `/virne` mount layout preserves the comparator's relative
+Python-source lookup. `virne-cpp-dev` uses the existing Compose definition;
+no duplicate keepalive image/container is needed.
+
+Installed packages are recorded in `requirements-installed-2026-09-08.txt`.
+After removing unused Docker build caches, `docker system df` reported three
+distinct images totaling 1.736 GB, zero build cache and no local volumes.
+Individual image sizes include shared layers and must not be summed to infer
+host disk use. Docker virtual-disk file compaction was not performed.
+
+## Non-ML reference
 
 This image is the minimal reference runtime for porting the original Python
 implementations in `virne/utils/network.py` and `virne/network/topology/`.

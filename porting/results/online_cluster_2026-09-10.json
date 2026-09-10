@@ -1,0 +1,184 @@
+{
+  "component": "online_environment_solver_registry",
+  "status": "FAIL",
+  "components": {
+    "online_environment": {
+      "status": "FAIL",
+      "report": "online_cluster_2026-09-10_online_environment.json",
+      "report_sha256": "14255ed69e34441c31173a01a251761b6c545273f83c533776eda0ce6adb12c0",
+      "cases": {
+        "joint": {
+          "status": "FAIL",
+          "records": 213,
+          "mismatch": {
+            "line": 1,
+            "record": "done",
+            "python": "done|Bool||00",
+            "cpp": "ERROR current event is not a leave event"
+          },
+          "python_error": null,
+          "native_error": "current event is not a leave event"
+        },
+        "placement": {
+          "status": "FAIL",
+          "records": 213,
+          "mismatch": {
+            "line": 1,
+            "record": "done",
+            "python": "done|Bool||00",
+            "cpp": "ERROR current event is not a leave event"
+          },
+          "python_error": null,
+          "native_error": "current event is not a leave event"
+        },
+        "pair": {
+          "status": "FAIL",
+          "records": 2,
+          "mismatch": {
+            "line": 1,
+            "record": "ERROR can't set attribute 'curr_v_node_id'",
+            "python": "ERROR can't set attribute 'curr_v_node_id'",
+            "cpp": "ERROR current event is not a leave event"
+          },
+          "python_error": {
+            "type": "AttributeError",
+            "message": "can't set attribute 'curr_v_node_id'",
+            "traceback": "Traceback (most recent call last):\n  File \"/workspace/virne.cpp/porting/compare_online_environment.py\", line 283, in main\n    execute(environment(name), name, lines=expected[name])\n  File \"/workspace/virne.cpp/porting/compare_online_environment.py\", line 180, in execute\n    env.reset()\n  File \"/workspace/virne.cpp/porting/compare_online_environment.py\", line 95, in reset\n    return super().reset(seed)\n  File \"/workspace/virne/virne/core/environment.py\", line 124, in reset\n    self.ready(event_id=0)\n  File \"/workspace/virne.cpp/porting/compare_online_environment.py\", line 98, in ready\n    super().ready(event_id)\n  File \"/workspace/virne/virne/solver/learning/rl_core/online_rl_environment.py\", line 161, in ready\n    self.curr_v_node_id = None\nAttributeError: can't set attribute 'curr_v_node_id'\n"
+          },
+          "native_error": "current event is not a leave event"
+        },
+        "slots": {
+          "status": "FAIL",
+          "records": 38,
+          "mismatch": {
+            "line": 1,
+            "record": "done",
+            "python": "done|Bool||00",
+            "cpp": "ERROR current event is not a leave event"
+          },
+          "python_error": {
+            "type": "KeyError",
+            "message": "(0, 0)",
+            "traceback": "Traceback (most recent call last):\n  File \"/workspace/virne.cpp/porting/compare_online_environment.py\", line 283, in main\n    execute(environment(name), name, lines=expected[name])\n  File \"/workspace/virne.cpp/porting/compare_online_environment.py\", line 192, in execute\n    _, reward, done, _ = env.step(action)\n  File \"/workspace/virne/virne/solver/learning/rl_core/online_rl_environment.py\", line 256, in step\n    done = self.transit_obs()\n  File \"/workspace/virne.cpp/porting/compare_online_environment.py\", line 119, in transit_obs\n    self.done = super().transit_obs()\n  File \"/workspace/virne/virne/core/environment.py\", line 228, in transit_obs\n    record = self.release()\n  File \"/workspace/virne/virne/core/environment.py\", line 164, in release\n    self.controller.release(self.v_net, self.p_net, solution)\n  File \"/workspace/virne/virne/core/controller/controller.py\", line 675, in release\n    used_node_resources = solution['node_slots_info'][(v_node_id, p_node_id)]\nKeyError: (0, 0)\n"
+          },
+          "native_error": "current event is not a leave event"
+        },
+        "solution": {
+          "status": "FAIL",
+          "records": 69,
+          "mismatch": {
+            "line": 1,
+            "record": "done",
+            "python": "done|Bool||00",
+            "cpp": "ERROR current event is not a leave event"
+          },
+          "python_error": null,
+          "native_error": "current event is not a leave event"
+        },
+        "reject": {
+          "status": "FAIL",
+          "records": 177,
+          "mismatch": {
+            "line": 1,
+            "record": "done",
+            "python": "done|Bool||00",
+            "cpp": "ERROR current event is not a leave event"
+          },
+          "python_error": null,
+          "native_error": "current event is not a leave event"
+        },
+        "failure": {
+          "status": "FAIL",
+          "records": 110,
+          "mismatch": {
+            "line": 1,
+            "record": "done",
+            "python": "done|Bool||00",
+            "cpp": "ERROR current event is not a leave event"
+          },
+          "python_error": {
+            "type": "NotImplementedError",
+            "message": "",
+            "traceback": "Traceback (most recent call last):\n  File \"/workspace/virne.cpp/porting/compare_online_environment.py\", line 283, in main\n    execute(environment(name), name, lines=expected[name])\n  File \"/workspace/virne.cpp/porting/compare_online_environment.py\", line 192, in execute\n    _, reward, done, _ = env.step(action)\n  File \"/workspace/virne/virne/solver/learning/rl_core/online_rl_environment.py\", line 117, in step\n    place_and_route_result, place_and_route_info = self.controller.place_and_route(\n  File \"/workspace/virne/virne/core/controller/controller.py\", line 182, in place_and_route\n    result, route_info = self._safely_place_and_route(v_net, p_net, v_node_id, p_node_id, solution, shortest_method=shortest_method, k=k)\n  File \"/workspace/virne/virne/core/controller/controller.py\", line 230, in _safely_place_and_route\n    route_result, route_info = self.link_mapper.route(v_net, p_net, v_link, (p_node_id, n_p_node_id), solution,\n  File \"/workspace/virne/virne/core/controller/link_mapper.py\", line 100, in route\n    raise NotImplementedError\nNotImplementedError\n"
+          },
+          "native_error": "current event is not a leave event"
+        }
+      },
+      "exit_code": 1
+    },
+    "solver_registry": {
+      "status": "FAIL",
+      "report": "online_cluster_2026-09-10_solver_registry.json",
+      "report_sha256": "7d49bcf04e8b5b4162d4160ed959bde408ecd40c186dc1d7f1b51a7c72ab507c",
+      "cases": {
+        "registry": {
+          "status": "PASS",
+          "records": 35,
+          "mismatch": null,
+          "python_error": null,
+          "native_errors": [],
+          "python_sha256": "4a8c032fad93d896a5c0d486b9c8978d24335d7bc6e78e4e14047e55f657c4a6",
+          "native_sha256": "4a8c032fad93d896a5c0d486b9c8978d24335d7bc6e78e4e14047e55f657c4a6"
+        },
+        "ppo_mlp+": {
+          "status": "PASS",
+          "records": 41,
+          "mismatch": null,
+          "python_error": null,
+          "native_errors": [],
+          "python_sha256": "1a252c3bffc186c740ea6138e4a23f036853beba39258392627c236dc4c44ae4",
+          "native_sha256": "1a252c3bffc186c740ea6138e4a23f036853beba39258392627c236dc4c44ae4"
+        },
+        "pg_mlp": {
+          "status": "PASS",
+          "records": 41,
+          "mismatch": null,
+          "python_error": null,
+          "native_errors": [],
+          "python_sha256": "7ea743bcbad3e24d167d32283b93324c29a21d36dbf1a39aa0e7b14c725dbdd3",
+          "native_sha256": "7ea743bcbad3e24d167d32283b93324c29a21d36dbf1a39aa0e7b14c725dbdd3"
+        },
+        "ppo_att": {
+          "status": "PASS",
+          "records": 41,
+          "mismatch": null,
+          "python_error": null,
+          "native_errors": [],
+          "python_sha256": "7ead62fbecdc30fe3c4dad00be8fb53fbd7eca13b805af60d570654d9fba9ab5",
+          "native_sha256": "7ead62fbecdc30fe3c4dad00be8fb53fbd7eca13b805af60d570654d9fba9ab5"
+        },
+        "a2c_dual_gcn+": {
+          "status": "PASS",
+          "records": 41,
+          "mismatch": null,
+          "python_error": null,
+          "native_errors": [],
+          "python_sha256": "5be76e194d85c1272642c71e1c17625ffc25b61faeaa059a30ee33e09e4826d0",
+          "native_sha256": "5be76e194d85c1272642c71e1c17625ffc25b61faeaa059a30ee33e09e4826d0"
+        },
+        "registry_online": {
+          "status": "FAIL",
+          "records": 13,
+          "mismatch": {
+            "case": "registry_online",
+            "record": "actions",
+            "line": 1,
+            "python_sha256": "c50839a4c132c1425553dccbcc2a3a8afed179cebc02f5eede61e83148d70cde",
+            "cpp_sha256": "3dea1c1604ad05565deaa5c20bd62327db6422e6f7f5b5dcd25b5ef367dd06df",
+            "python": "actions|Long|4,|0100000000000000050000000000000002000000000000000400000000000000",
+            "cpp": "ERROR current event is not a leave event"
+          },
+          "python_error": null,
+          "native_errors": [
+            "ERROR current event is not a leave event"
+          ],
+          "python_sha256": "09e9960cbfb92b433d47756d3e02cd256d589c3f2cc588036667445578c76552",
+          "native_sha256": "9ca5a53d816787572b915f42435110902f94f96eb3fbd83db7b832c332e98d46"
+        }
+      },
+      "exit_code": 1
+    }
+  },
+  "old_tests_rerun": false,
+  "benchmarks_rerun": false
+}

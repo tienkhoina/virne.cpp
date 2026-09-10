@@ -1815,6 +1815,117 @@ if(VIRNE_ENABLE_ML)
     virne_configure_libtorch_executable(vne_gcn_conv_net_harness)
 
     add_executable(
+        vne_neural_network_remaining_unit
+        tests/neural_network_remaining_unit.cpp
+    )
+
+    target_link_libraries(
+        vne_neural_network_remaining_unit
+        PRIVATE
+            vne_learning_neural_network_remaining
+    )
+
+    virne_configure_libtorch_executable(
+        vne_neural_network_remaining_unit)
+
+    add_test(
+        NAME vne_neural_network_remaining_unit
+        COMMAND vne_neural_network_remaining_unit
+    )
+
+    add_executable(
+        vne_neural_network_remaining_harness
+        neural_network_remaining_harness.cpp
+    )
+
+    target_link_libraries(
+        vne_neural_network_remaining_harness
+        PRIVATE
+            vne_learning_neural_network_remaining
+    )
+
+    virne_configure_libtorch_executable(
+        vne_neural_network_remaining_harness)
+
+    add_executable(vne_cnn_gnn_mlp_policy_harness cnn_gnn_mlp_policy_harness.cpp)
+    target_link_libraries(vne_cnn_gnn_mlp_policy_harness PRIVATE
+        vne_learning_cnn_policy vne_learning_gnn_mlp_policy)
+    target_compile_options(vne_cnn_gnn_mlp_policy_harness PRIVATE
+        $<$<CXX_COMPILER_ID:GNU>:-Wall;-Wextra;-Wpedantic;-Werror>)
+    virne_configure_libtorch_executable(vne_cnn_gnn_mlp_policy_harness)
+
+    add_executable(vne_rl_policy_remaining_harness rl_policy_remaining_harness.cpp)
+    target_link_libraries(vne_rl_policy_remaining_harness PRIVATE
+        vne_learning_att_policy vne_learning_dual_policy vne_learning_seq2seq_policy)
+    target_compile_options(vne_rl_policy_remaining_harness PRIVATE
+        $<$<CXX_COMPILER_ID:GNU>:-Wall;-Wextra;-Wpedantic;-Werror>)
+    virne_configure_libtorch_executable(vne_rl_policy_remaining_harness)
+
+    add_executable(vne_training_update_harness training_update_harness.cpp)
+    target_link_libraries(vne_training_update_harness PRIVATE
+        vne_learning_training_update vne_learning_mlp_policy)
+    target_compile_options(vne_training_update_harness PRIVATE
+        $<$<CXX_COMPILER_ID:GNU>:-Wall;-Wextra;-Wpedantic;-Werror>)
+    virne_configure_libtorch_executable(vne_training_update_harness)
+
+    add_executable(vne_shared_adam_harness shared_adam_harness.cpp)
+    target_link_libraries(vne_shared_adam_harness PRIVATE vne_learning_shared_adam Threads::Threads)
+    target_compile_options(vne_shared_adam_harness PRIVATE
+        $<$<CXX_COMPILER_ID:GNU>:-Wall;-Wextra;-Wpedantic;-Werror>)
+    virne_configure_libtorch_executable(vne_shared_adam_harness)
+
+    add_executable(vne_dqn_update_harness dqn_update_harness.cpp)
+    target_link_libraries(vne_dqn_update_harness PRIVATE vne_learning_dqn_update vne_learning_mlp_policy)
+    target_compile_options(vne_dqn_update_harness PRIVATE
+        $<$<CXX_COMPILER_ID:GNU>:-Wall;-Wextra;-Wpedantic;-Werror>)
+    virne_configure_libtorch_executable(vne_dqn_update_harness)
+
+    add_executable(vne_dqn_action_harness dqn_action_harness.cpp)
+    target_link_libraries(vne_dqn_action_harness PRIVATE vne_learning_dqn_action random_lib)
+    target_compile_options(vne_dqn_action_harness PRIVATE
+        $<$<CXX_COMPILER_ID:GNU>:-Wall;-Wextra;-Wpedantic;-Werror>)
+    virne_configure_libtorch_executable(vne_dqn_action_harness)
+
+    add_executable(vne_native_repairs_harness native_repairs_harness.cpp)
+    target_link_libraries(vne_native_repairs_harness PRIVATE vne_learning_mlp vne_learning_gnn vne_learning_seq2seq_policy)
+    target_compile_options(vne_native_repairs_harness PRIVATE
+        $<$<CXX_COMPILER_ID:GNU>:-Wall;-Wextra;-Wpedantic;-Werror>)
+    virne_configure_libtorch_executable(vne_native_repairs_harness)
+
+    add_executable(vne_instance_environment_harness instance_environment_harness.cpp)
+    target_link_libraries(vne_instance_environment_harness PRIVATE vne_learning_instance_environment)
+    target_include_directories(vne_instance_environment_harness SYSTEM PRIVATE ${VIRNE_LIB_DIR}/boost)
+    target_compile_options(vne_instance_environment_harness PRIVATE
+        $<$<CXX_COMPILER_ID:GNU>:-Wall;-Wextra;-Wpedantic;-Werror;-ffp-contract=off>)
+
+    add_executable(vne_learning_session_harness learning_session_harness.cpp)
+    target_link_libraries(vne_learning_session_harness PRIVATE vne_learning_session vne_learning_instance_environment)
+    target_include_directories(vne_learning_session_harness SYSTEM PRIVATE ${VIRNE_LIB_DIR}/boost)
+    target_compile_options(vne_learning_session_harness PRIVATE
+        $<$<CXX_COMPILER_ID:GNU>:-Wall;-Wextra;-Wpedantic;-Werror;-ffp-contract=off>)
+    virne_configure_libtorch_executable(vne_learning_session_harness)
+
+    add_executable(vne_dqn_cluster_harness dqn_cluster_harness.cpp)
+    target_link_libraries(vne_dqn_cluster_harness PRIVATE vne_learning_session vne_learning_instance_environment)
+    target_include_directories(vne_dqn_cluster_harness SYSTEM PRIVATE ${VIRNE_LIB_DIR}/boost)
+    target_compile_options(vne_dqn_cluster_harness PRIVATE
+        $<$<CXX_COMPILER_ID:GNU>:-Wall;-Wextra;-Wpedantic;-Werror;-ffp-contract=off>)
+    virne_configure_libtorch_executable(vne_dqn_cluster_harness)
+
+    add_executable(vne_online_environment_harness online_environment_harness.cpp)
+    target_link_libraries(vne_online_environment_harness PRIVATE vne_learning_online_environment)
+    target_include_directories(vne_online_environment_harness SYSTEM PRIVATE ${VIRNE_LIB_DIR}/boost)
+    target_compile_options(vne_online_environment_harness PRIVATE
+        $<$<CXX_COMPILER_ID:GNU>:-Wall;-Wextra;-Wpedantic;-Werror;-ffp-contract=off>)
+
+    add_executable(vne_learning_registry_harness learning_registry_harness.cpp)
+    target_link_libraries(vne_learning_registry_harness PRIVATE vne_learning_solver_registry vne_learning_online_environment vne_logger)
+    target_include_directories(vne_learning_registry_harness SYSTEM PRIVATE ${VIRNE_LIB_DIR}/boost)
+    target_compile_options(vne_learning_registry_harness PRIVATE
+        $<$<CXX_COMPILER_ID:GNU>:-Wall;-Wextra;-Wpedantic;-Werror;-ffp-contract=off>)
+    virne_configure_libtorch_executable(vne_learning_registry_harness)
+
+    add_executable(
         vne_positional_encoder_unit
         tests/positional_encoder_unit.cpp
     )

@@ -1,0 +1,48 @@
+{
+  "component": "online_registered_learning",
+  "status": "PASS",
+  "workload": "Registry-created PPO solver learns three online requests, handles departures and flushes rollout; construction, container/process startup and output serialization excluded",
+  "native_samples_ns": [
+    163376663,
+    348311724,
+    324768565,
+    187758685,
+    180469425
+  ],
+  "python_samples_ns": [
+    90971799,
+    101485779,
+    96972340,
+    106597067,
+    103010356
+  ],
+  "native_median_ns": 187758685,
+  "python_median_ns": 101485779,
+  "native_p95_ns": 343603092.2,
+  "python_p95_ns": 105879724.8,
+  "python_over_native_speedup": 0.5405117691360056,
+  "native_output_sha256": "f2144a680c79d4ba4e5e2a31558439d05f7ecb47d6712028cfcea7e7517acd99",
+  "python_output_sha256": "f2144a680c79d4ba4e5e2a31558439d05f7ecb47d6712028cfcea7e7517acd99",
+  "native_sha256": "cbda36d8a537a54d7e101f412617b089eddb58181520e996db927deef4da4241",
+  "warmups": 3,
+  "repetitions": 5,
+  "threads": 1,
+  "cpu_affinity": [
+    2
+  ],
+  "torch": "2.6.0+cpu",
+  "differential_rerun": false,
+  "source_sha256": {
+    "reinforcement_learning/solver_maker.py": "8e7de396066d99101afca8245efbdd7d055c59f1f7f55979c0c5286a3507ac10",
+    "reinforcement_learning/mlp_solver.py": "6113f20de539b75bb53fc504e7bb44cf4de2909887704ce95e23cd0d9259284a",
+    "reinforcement_learning/cnn_solver.py": "0369c91f0eaa1b00c5179fa9d3b7019df4b929416095119530152154fc1eab94",
+    "reinforcement_learning/att_solver.py": "b24cc54b1358578a2ef721bd7fa506ccad5e846a6c35aae15db1980db4c32cd9",
+    "reinforcement_learning/gnn_mlp_solver.py": "6122a4bd38eb114bef57e4c01c94847fb63fede05376ecf2c2c88687ad212e95",
+    "reinforcement_learning/dual_gnn_solver.py": "b917f57569b7666b12aebdb8dc8e8d804fb054acba7d9a829caf75647312c55a",
+    "utils.py": "ba1394e89752a70f8d03dbe485125f7c8bffbb77e5767ff000034019f53519e4",
+    "rl_core/tensor_convertor.py": "75a13356834688d6dff77f7e5fc78ca64cf49171f183aedce92116ad31035f2b",
+    "rl_core/instance_agent.py": "759d6bb88362aad558009b0efa044ccaddaf94d2ad4f85d228a9f588d3648636",
+    "rl_core/rl_solver.py": "1285e787ab60c90497625f5b3c39a1f9ee421a15054384143a57759dbd68c1da"
+  },
+  "parity_reused_from": "online_cluster_repaired_2026-09-10_solver_registry.json"
+}

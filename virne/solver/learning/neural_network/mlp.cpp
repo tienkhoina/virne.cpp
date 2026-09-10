@@ -20,8 +20,8 @@ std::vector<std::int64_t> resolve_hidden_dims(const MlpOptions& options) {
     if (options.output_dim <= 0) {
         throw std::invalid_argument("MLPNet output_dim must be positive");
     }
-    if (options.num_layers < 2) {
-        throw std::invalid_argument("MLPNet num_layers must be at least two");
+    if (options.num_layers < 1) {
+        throw std::invalid_argument("MLPNet num_layers must be positive");
     }
 
     const auto layer_count_u64 =
@@ -95,14 +95,19 @@ MLPNetImpl::MLPNetImpl(MlpOptions options)
         linear_layers.emplace_back(
             torch::nn::LinearOptions(input_dimension, output_dimension));
         lins->push_back(linear_layers.back());
+        Layer layer;
+        layer.linear = linear_layers.back();
+        layer.activation = !final_layer;
 
         if (final_layer) {
             lins->push_back(torch::nn::Identity());
+            layers_.push_back(std::move(layer));
             continue;
         }
 
         if (options_.batch_norm) {
-            lins->push_back(torch::nn::BatchNorm1d(output_dimension));
+            layer.norm = torch::nn::BatchNorm1d(output_dimension);
+            lins->push_back(layer.norm);
         } else {
             lins->push_back(torch::nn::Identity());
         }
@@ -110,6 +115,7 @@ MLPNetImpl::MLPNetImpl(MlpOptions options)
             torch::nn::LeakyReLUOptions()
                 .negative_slope(0.01)
                 .inplace(false)));
+        layers_.push_back(std::move(layer));
     }
 
     // Python constructs every Linear (including its default bias) first, then
@@ -121,7 +127,21 @@ MLPNetImpl::MLPNetImpl(MlpOptions options)
 }
 
 torch::Tensor MLPNetImpl::forward(const torch::Tensor& input) {
-    return lins->forward(input);
+    auto x = input;
+    auto output_shape = input.sizes().vec();
+    const bool flatten_features = options_.batch_norm && input.dim() > 2;
+    if (flatten_features) x = x.reshape({-1, options_.input_dim});
+    for (auto& layer : layers_) {
+        // ATen linear matches Python's fused rank-3 projection/backward path.
+        x = torch::linear(x, layer.linear->weight, layer.linear->bias);
+        if (layer.norm) x = layer.norm->forward(x);
+        if (layer.activation) x = torch::leaky_relu(x, 0.01);
+    }
+    if (flatten_features) {
+        output_shape.back() = options_.output_dim;
+        x = x.reshape(output_shape);
+    }
+    return x;
 }
 
 const MlpOptions& MLPNetImpl::options() const noexcept {

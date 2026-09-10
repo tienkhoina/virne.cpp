@@ -1,5 +1,7 @@
 #pragma once
 
+#include "rl_core/feature_types.h"
+
 #include "../../core/solution.h"
 #include "../../network/attribute/attribute_benchmark_manager.h"
 #include "../../network/base_network.h"
@@ -15,31 +17,6 @@
 #include <vector>
 
 namespace virne::solver::learning::rl_core {
-
-struct DenseMatrixF32 {
-    std::size_t rows = 0U;
-    std::size_t columns = 0U;
-    std::vector<float> values;
-};
-
-struct DenseMatrixI64 {
-    std::size_t rows = 0U;
-    std::size_t columns = 0U;
-    std::vector<std::int64_t> values;
-};
-
-struct DenseVectorF32 {
-    std::vector<float> values;
-};
-
-struct DenseVectorI32 {
-    std::vector<std::int32_t> values;
-};
-
-struct DenseVectorBool {
-    // Canonical zero/one bytes match NumPy bool serialization exactly.
-    std::vector<std::uint8_t> values;
-};
 
 struct LinkResourceThreshold {
     // Cold boundary name: it is resolved to a graph-local AttrId once before

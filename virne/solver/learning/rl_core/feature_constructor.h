@@ -11,12 +11,6 @@
 
 namespace virne::solver::learning::rl_core {
 
-enum class FeatureConstructorKind : std::uint8_t {
-    p_net,
-    p_net_v_node,
-    p_net_v_net,
-};
-
 // Dynamic configuration strings terminate here; repeated construction stores
 // and switches on this compact fixed ID only.
 FeatureConstructorKind feature_constructor_kind_from_string(
@@ -40,18 +34,6 @@ struct FeatureConstructorPreparedData {
         p_net_attribute_benchmarks;
     std::optional<network::TopologicalMetrics> p_net_topological_metrics;
     std::optional<network::TopologicalMetrics> v_net_topological_metrics;
-};
-
-struct NetworkFeatures {
-    DenseMatrixF32 x;
-    DenseMatrixI64 edge_index;
-    DenseMatrixF32 edge_attr;
-};
-
-struct FeatureObservation {
-    NetworkFeatures p_net;
-    std::optional<DenseVectorF32> v_node_x;
-    std::optional<NetworkFeatures> v_net;
 };
 
 class FeatureConstructor {

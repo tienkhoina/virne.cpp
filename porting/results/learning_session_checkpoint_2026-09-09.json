@@ -1,0 +1,78 @@
+{
+  "component": "learning_session",
+  "status": "PASS",
+  "cases": {
+    "resume_mlp": {
+      "status": "PASS",
+      "records": 30,
+      "python_sha256": "c41e97994bb3c64798c6933514346503daecdd47cc8f067dcbf02c6cc10d1f7e",
+      "cpp_sha256": "c41e97994bb3c64798c6933514346503daecdd47cc8f067dcbf02c6cc10d1f7e",
+      "mismatch": null
+    },
+    "resume_gcn": {
+      "status": "PASS",
+      "records": 30,
+      "python_sha256": "8c389fc46413310e3f137807b0d5507c7211c69c6e27dca5990e4da6cbc12fa2",
+      "cpp_sha256": "8c389fc46413310e3f137807b0d5507c7211c69c6e27dca5990e4da6cbc12fa2",
+      "mismatch": null
+    },
+    "resume_dual": {
+      "status": "PASS",
+      "records": 30,
+      "python_sha256": "b77b0e486427cd86f8bade7a7d5bcd9bc6099e2b484e8a8bf4b4112c6d16319f",
+      "cpp_sha256": "b77b0e486427cd86f8bade7a7d5bcd9bc6099e2b484e8a8bf4b4112c6d16319f",
+      "mismatch": null
+    }
+  },
+  "source_sha256": {
+    "utils.py": "ba1394e89752a70f8d03dbe485125f7c8bffbb77e5767ff000034019f53519e4",
+    "rl_core/tensor_convertor.py": "75a13356834688d6dff77f7e5fc78ca64cf49171f183aedce92116ad31035f2b",
+    "rl_core/instance_agent.py": "759d6bb88362aad558009b0efa044ccaddaf94d2ad4f85d228a9f588d3648636",
+    "rl_core/rl_solver.py": "1285e787ab60c90497625f5b3c39a1f9ee421a15054384143a57759dbd68c1da",
+    "rl_policy/att_policy.py": "0a1f08712dd0d57fb5b9da0d29edba6679db049f965faaddbce4596edadac08d",
+    "rl_policy/dual_gnn_policy.py": "590a320032ed16bce9be844ad34cab0003dc1702161c2cd7e0ac0498a62c2cdf",
+    "rl_policy/gcn_seq2seq_policy.py": "2d5e11b6a2984a0706b434d17346a5bb4136fb2e848563a4fe60444c19fb50c0",
+    "reinforcement_learning/gnn_seq2seq_solver/policy_with_encoder.py": "11959fc58e0f71cf4da85fd80403e9fc5ef6ebeb9834858dcf48f6ee523934d3"
+  },
+  "environment_source_sha256": {
+    "utils/network.py": "ab16494b64a468dadfebdcefa3e03708806b08792db70fd16be2fa26ad13cd26",
+    "utils/dataset.py": "269650ebcc373d7bdf79fa17346bd6f847973f17e60c1ac9bcae7cfd97bf936f",
+    "utils/setting.py": "89fb0e0d6e40fb10703adb30ad588731dacd0475f34e2e86f1ebfbb4e2031c8e",
+    "utils/class_dict.py": "19637bbc0d4eff9f240c5be6b799b84af96c7423e8c32ad97626468e3e3de8fe",
+    "utils/config.py": "ad1d32e6b2db842c958240301535d356919dbd822e403d6a767ce2ed2bbfe787",
+    "network/topology/topology_generator.py": "f69d3c45f288b6194db2945cfa33d2cb4a32032af8130ce4e7a53ab2dd697722",
+    "network/topology/topological_metric_calculator.py": "4bc760a97ab9b7a46ea115db981747a82fdbfed32096e4b327257270625bcf8d",
+    "network/base_network.py": "94cb1185b5e6f0046d9393f97af1ee0dd1c0d688596b102a0ec3cc98314addce",
+    "network/physical_network.py": "e37d48b2c1651b503931597b6cca5620a413a11c3d003cf8c70af89246e4ca5a",
+    "network/virtual_network.py": "0b73e73feb43793559976f08fd93ed227698b810ed8741ea5bcc1534adb3768c",
+    "core/solution.py": "ec5d64ef6695350f718a818461fbf60934b5077d8add39bb7ee8be18cfe1e78b",
+    "core/counter.py": "574745f86e99cd656cb0165330e3196b4f5ebf4eaa0687b076b8d9602db4d637",
+    "core/controller/controller.py": "352552b0312d18b42eb6904629ed43c76df2d9c844df59fe51ab8653ffac02a5",
+    "network/virtual_network_request_simulator.py": "970e63f9dac59f60e2ed1786606dc87d3271af062ba1d8d6c67aef8d3c7478e1",
+    "core/environment.py": "6004cff2114e504e30c5490232763f71cb9e7799216c4f6ce8badc27a0e42b34",
+    "solver/rank/node_rank.py": "428f0deb188e685a9f3eb6177a70df533519f62c560284063fc4cf6ec7624fff",
+    "solver/learning/obs_handler.py": "61ce92fdef5544ef3a4384872a13bede8c53521db53f8277439f3092a9e99058",
+    "solver/learning/rl_core/feature_constructor.py": "0f3c3377545a4b33ba8801415c2826cd7c1409301a0a2856111217d6a9245965",
+    "solver/learning/rl_core/reward_calculator.py": "3d44b31c7ed0105923dc091d4d04cc71d0a3fe2dd6f2567f455b45da1090ae1b",
+    "solver/learning/rl_core/rl_enviroment_base.py": "c84a107ee9643a168ca4a49d064a301f0703064394bf65cb972932b764531ce6",
+    "solver/learning/rl_core/online_rl_environment.py": "48cdb82f3a5f48c000ca35f2168becbadbbb80343759e2dedb721fecb6870c16",
+    "solver/learning/rl_core/instance_rl_environment.py": "d02f68adf163bcbdddd05cdd7041e1b08e5aed29862fd49ebd26a75a4ab401bd",
+    "network/attribute/base_attribute.py": "103c5c16126ca76e782c2191ff0811b95ed88a0c3637f3a61e84c0b22df42e8e",
+    "network/attribute/attribute_method.py": "e17499af8e6ffbdb12f2100dd58abeab48dd06d92feb442ef192f8b9310b6b4f",
+    "network/attribute/node_attribute.py": "e90e286320e59ebbba9957b701f6f12acdc1785e4821de80ccc5a0ab0f3ee56a",
+    "network/attribute/link_attribute.py": "a95cfd2b8e2b46d4de23f70934ca942de502e674e2a7eaa139482df640e8646f",
+    "network/attribute/graph_attribute.py": "dfa858918068a792cb0a673b400ee6f3f93107f1d17baad28f72546f50fbcede",
+    "network/attribute/attribute_benchmark_manager.py": "8ad9bab52a40342eaf331e3ac71b3d5f6db0326742d3d3c7c6aad7d34ad52d9e",
+    "network/attribute/__init__.py": "11ac0c2235ba02f6538427f3774c93766820ea640531c97c94f4b4daf2d7b010",
+    "core/controller/constraint_checker.py": "ea41ee9226cef3f38cfff30d7abb276a7a9af58fee67ce78c3763413bdb9619a",
+    "core/controller/resource_updator.py": "9b7c14f8c6eaa5e8bc50a723b727fec7eff8f1c7d05f7bef0da0cc941c15ac85",
+    "core/controller/topology_analyzer.py": "665519c5c4bf50c2318e2d22d30679881dda0edcbc0b618c4fb2055ac5a01b28",
+    "core/controller/node_mapper.py": "8ad2ae077e61732dcb77ffa08269aab630bdb6df29969c983d09a3565ba860f9",
+    "core/controller/link_mapper.py": "e7e5fb542d6fca6a5c9a8bebace2c82e9bfedef1628cd8adbb065c4f95d40237"
+  },
+  "torch": "2.6.0+cpu",
+  "threads": 1,
+  "reference": "Original InstanceAgent.learn_with_instance, TensorConvertor, RLSolver action/value and update methods; native environment corrections are inherited from compare_instance_environment.",
+  "additional_correction": "Constant average distances normalize to zeros; original nonzero constant distances divide by zero and Categorical rejects NaN logits.",
+  "benchmark": "NOT_REQUESTED"
+}

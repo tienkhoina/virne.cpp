@@ -1,0 +1,39 @@
+{
+  "component": "online_environment_solver_registry",
+  "status": "PASS",
+  "components": {
+    "online_environment": {
+      "status": "PASS",
+      "report": "online_environment_complete_2026-09-10.json",
+      "report_sha256": "194198e53c86e51eb3e014be3982b9c90aa02c25fbc09b9a2a10b733946fe921",
+      "cases": 7,
+      "records": 1149
+    },
+    "registry": {
+      "status": "PASS",
+      "report": "online_cluster_repaired_2026-09-10_solver_registry.json",
+      "report_sha256": "20d91d249dce8472bd246ddb24a3d92ba73dd0b9236dc01bccf83417bb90199f",
+      "cases": 6,
+      "records": 212
+    }
+  },
+  "benchmarks": {
+    "online_cluster_accepted_2026-09-10_registry_benchmark.json": {
+      "status": "PASS",
+      "sha256": "248cdf88405a4dbb253356883f329223c05be2d0c682a5065076e55912f43ca5",
+      "speedup": 1.6842043505339594
+    },
+    "online_cluster_complete_2026-09-10_environment_benchmark.json": {
+      "status": "PASS",
+      "sha256": "04196aff42856e6c8f746204214f2eedb87e2debb836e23edd25c996f603a447",
+      "speedup": 48.80501501594406
+    }
+  },
+  "registered_solvers": 34,
+  "original_learning_sources_unchanged": 71,
+  "benchmark_scope_correction": "online_registry_benchmark_scope_correction_2026-09-10.md",
+  "old_tests_rerun": false,
+  "accepted_benchmarks_rerun": false,
+  "recorded_utc": "2026-09-10T03:41:48.677414+00:00",
+  "scope": "Online RL transition modes, sequential PG/A2C/PPO solver registry and native online learning epoch; main CLI, A3C, recurrent/safe solvers remain outside this cluster"
+}

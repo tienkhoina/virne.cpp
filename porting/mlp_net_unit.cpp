@@ -111,11 +111,11 @@ void test_dropout_compatibility() {
 void test_validation() {
     bool bad_layers = false;
     try {
-        ml::MLPNet invalid(options(4, 3, 1));
+        ml::MLPNet invalid(options(4, 3, 0));
     } catch (const std::invalid_argument&) {
         bad_layers = true;
     }
-    require(bad_layers, "single-layer Python error boundary was not rejected");
+    require(bad_layers, "zero-layer MLP was not rejected");
 
     bool bad_dims = false;
     try {

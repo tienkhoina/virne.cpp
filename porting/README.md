@@ -14,6 +14,49 @@ Continue to run unit/differential/sanitizer/integration checks as needed. A new
 component gets one compact benchmark after correctness passes, then it is frozen
 immediately.
 
+## Online/registry cluster (2026-09-10)
+
+The cluster passed 13 grouped cases and 1,361 exact byte records, with 34 source
+solver names. On the prepared three-request fixture, online transitions measured
+48.805x and a complete registered PPO epoch measured 10.345x. Source Python is
+unchanged. See `components/online_learning.md` and the authoritative acceptance
+artifact `results/online_cluster_final_2026-09-10.json`. Only failing cases were
+retried; accepted tests and benchmarks stayed frozen.
+
+The preceding DQN cluster closed five additional checkpoint boundary cases
+(520 records), and the focused neural repairs closed three cases (135 records).
+
+## Earlier learning continuation (2026-09-09)
+
+The new native instance learning session passes 11 end-to-end Python/C++ cases
+(858 byte records). Three PPO episodes plus a final update take a median
+7.887987 ms in C++ and 94.315164 ms in Python, a measured 11.957x ratio with
+identical output hashes. See `components/learning_session.md` for ownership,
+confirmed source corrections, commands and limits. Ongoing RL work is tracked in
+`RL_COMPLETION_PROGRESS.md`; the entire RL package is not yet complete.
+
+## Earlier continuation (2026-09-08)
+
+The deleted Docker toolchain/oracles were rebuilt using a small CPU-only ML
+image; reconstruction and storage notes are in `oracle/README.md`.
+The continuation closed the unfinished EdgeFusion state/RNG discrepancy and
+ported CNN and GCN/GAT/DeepEdgeGAT-MLP policies.
+
+| New group | Exact comparison | Paired forward speedup (threads 1 / 4) |
+| --- | --- | --- |
+| Remaining neural primitives/wrappers | 27/27 at each fixed width | 2.685x / 2.384x |
+| CNN and GNN/MLP policies | 12/12, 577 raw-byte records at each fixed width | 3.820x / 3.780x (CNN+GAT/MLP pipeline) |
+
+Both small native pipelines are faster with one thread than with four.
+Some numerical tensors change bits when switching Torch thread width; exact
+Python/C++ equality is claimed only at a matching fixed width. Frozen samples,
+commands, hashes and limits are in `results/learning_continuation_2026-09-08.md`.
+Do not rerun these now-accepted benchmark rows. Existing accepted tests and
+benchmarks were not rerun in this continuation.
+
+The complete source inventory/dependency backlog is in
+`LEARNING_COMPONENT_MAP.md`. Full native RL training remains in progress.
+
 ## Build and unit/regression tests
 
 The existing toolchain container mounts `virne.cpp` at `/work`:

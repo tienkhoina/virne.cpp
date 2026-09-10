@@ -1,0 +1,51 @@
+{
+  "component": "rl_policy_remaining",
+  "status": "PASS",
+  "threads": 1,
+  "source_sha256": {
+    "rl_policy/att_policy.py": "0a1f08712dd0d57fb5b9da0d29edba6679db049f965faaddbce4596edadac08d",
+    "rl_policy/dual_gnn_policy.py": "590a320032ed16bce9be844ad34cab0003dc1702161c2cd7e0ac0498a62c2cdf",
+    "rl_policy/gcn_seq2seq_policy.py": "2d5e11b6a2984a0706b434d17346a5bb4136fb2e848563a4fe60444c19fb50c0",
+    "reinforcement_learning/gnn_seq2seq_solver/policy_with_encoder.py": "11959fc58e0f71cf4da85fd80403e9fc5ef6ebeb9834858dcf48f6ee523934d3"
+  },
+  "torch": "2.6.0+cpu",
+  "cases": [
+    "att_eval",
+    "att_train",
+    "att_double",
+    "att_heads2_eval",
+    "att_heads2_train",
+    "dual_0_0",
+    "dual_0_1",
+    "dual_0_2",
+    "dual_train_0",
+    "dual_1_0",
+    "dual_1_1",
+    "dual_1_2",
+    "dual_train_1",
+    "dual_2_0",
+    "dual_2_1",
+    "dual_2_2",
+    "dual_train_2",
+    "dual_mixed",
+    "seq_0",
+    "seq_train_0",
+    "seq_1",
+    "seq_train_1",
+    "seq_2",
+    "seq_train_2",
+    "seq_3",
+    "seq_train_3",
+    "additive_mask"
+  ],
+  "records": 3655,
+  "python_sha256": "f3fc01681042a105c718ed9bbaf17fd00675ffecdae2f46e7371eda26b5fd6d1",
+  "cpp_sha256": "f3fc01681042a105c718ed9bbaf17fd00675ffecdae2f46e7371eda26b5fd6d1",
+  "mismatch": null,
+  "benchmark": "NOT_REQUESTED",
+  "case_mismatches": [],
+  "reference_corrections": {
+    "seq_3": "orthogonal initialization of otherwise undefined residual weights",
+    "seq_train_3": "orthogonal initialization of otherwise undefined residual weights"
+  }
+}

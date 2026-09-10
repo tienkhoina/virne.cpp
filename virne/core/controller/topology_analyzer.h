@@ -1,5 +1,7 @@
 #pragma once
 
+#include "route_method.h"
+
 #include "constraint_checker.h"
 
 #include "attribute/link_attribute.h"
@@ -14,16 +16,6 @@
 
 namespace virne::core::controller
 {
-
-enum class ShortestPathMethod : std::uint8_t
-{
-    first_shortest,
-    k_shortest,
-    k_shortest_length,
-    all_shortest,
-    bfs_shortest,
-    available_shortest,
-};
 
 enum class TopologyAnalyzerErrorCode : std::uint8_t
 {

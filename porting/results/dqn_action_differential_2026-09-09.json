@@ -1,0 +1,22 @@
+{
+  "component": "dqn_action",
+  "status": "PASS",
+  "mismatch": null,
+  "cases": [
+    "epsilon_0",
+    "epsilon_1",
+    "epsilon_2",
+    "rng_gaussian_resume"
+  ],
+  "records": 45,
+  "source_sha256": {
+    "rl_core/rl_solver.py": "1285e787ab60c90497625f5b3c39a1f9ee421a15054384143a57759dbd68c1da"
+  },
+  "python_output_sha256": "0f29b134f0b01bc904911f244cf5fd45886e21790a48cf0af0e3a1e12ad10afd",
+  "native_output_sha256": "0f29b134f0b01bc904911f244cf5fd45886e21790a48cf0af0e3a1e12ad10afd",
+  "native_sha256": "65d72133f44496797586a02144e60544626f3ab7d8e1bdb1458f8a64f0fd5598",
+  "reference_corrections": [],
+  "threads": 1,
+  "torch": "2.6.0+cpu",
+  "numpy": "2.2.6"
+}

@@ -1,0 +1,65 @@
+{
+  "component": "cnn_gnn_mlp_policy",
+  "status": "PASS",
+  "python_sources": {
+    "rl_policy/cnn_policy.py": "8cc2ea694880370c7923a31235d624fd7fddf0c56635ac5a025b1747791fc0fc",
+    "rl_policy/gnn_mlp_policy.py": "f60090e3e722175d9da60819353f7b1f86d8fca896e0ea295cf14d448fb1fb59",
+    "rl_policy/base_policy.py": "8fff0492a113f34d2a3b8a6bc7ee9c665635b7c921c47450f6f9d7c44b8c52d4",
+    "neural_network/mlp.py": "4f6d24dde669ec310fd2961bb1a6c0945f5a2d93f2042402025acf094eba89cb"
+  },
+  "neural_sources": {
+    "multipler.py": "66b017324fec8493d7570d53224c2d8bfbfa846a0befa78b191b15e00fafecd6",
+    "loss.py": "ba5eafe4fee8d5483360210ceaf87ab966f4df1e2ce80a32ca2d6be95e7e1e56",
+    "res.py": "365b78be46f90ce2a0c2acc3dba8a1e2cc99628348446b5d6d5b2069a4e8206c",
+    "sinkhorn.py": "e98026d712043e9e1b0353772799f04a5707588f4db65b7702fa9690920a5606",
+    "gnn.py": "4ba777bafa5a104bfad113440e62d1153e63ee12dc78144374575c0e2202863c",
+    "graph_conv.py": "5d787b98c535cacdfb10b60e5f779f55d9fa05819862b03895d6bde437dca315"
+  },
+  "torch_version": "2.6.0+cpu",
+  "threads": 1,
+  "exact_bytes": true,
+  "mismatch": null,
+  "cases": [
+    "cnn_0",
+    "cnn_1",
+    "cnn_2",
+    "cnn_3",
+    "gnn_0_0",
+    "gnn_0_1",
+    "gnn_1_0",
+    "gnn_1_1",
+    "gnn_2_0",
+    "gnn_2_1",
+    "gnn_0_1_bn",
+    "gnn_batch_norm_boundary"
+  ],
+  "record_count": 577,
+  "raw_fixture_bytes": 89072,
+  "python_sha256": "c95e4817036c10355fa400404e1dd283e1199f6d218f2df6552048cc1e2f8ebf",
+  "cpp_sha256": "c95e4817036c10355fa400404e1dd283e1199f6d218f2df6552048cc1e2f8ebf",
+  "benchmark": {
+    "name": "cnn_and_gat_mlp_actor_critic",
+    "warmups": 3,
+    "repetitions": 5,
+    "iterations": 10,
+    "native_samples_ns": [
+      606210,
+      590827,
+      527167,
+      548194,
+      530007
+    ],
+    "python_samples_ns": [
+      2032230,
+      2136461,
+      2067680,
+      2259580,
+      2094355
+    ],
+    "output_mismatch": null,
+    "output_sha256": "8c00944eda95fbc11e7caddfa5d8128be3c1bd148e992941398a29fef8e8e525",
+    "native_median_ns": 548194,
+    "python_median_ns": 2094355,
+    "python_over_native_speedup": 3.8204631936869067
+  }
+}
