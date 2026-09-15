@@ -1,0 +1,5 @@
+native:
+  output:
+    report: summary
+  progress:
+    enabled: true

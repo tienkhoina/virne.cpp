@@ -1,0 +1,33 @@
+{
+  "image": "virne-python-oracle:py310-rl-full-cpu",
+  "image_id": "af884910638e",
+  "base": "virne-python-oracle:py310-rl-cpu",
+  "python": "3.10.20",
+  "packages_verified": {
+    "torch": "2.6.0+cpu",
+    "torch_geometric": "2.7.0",
+    "torch_scatter": "2.1.2+pt26cpu",
+    "torch_sparse": "0.6.18+pt26cpu",
+    "torch_cluster": "1.6.3+pt26cpu",
+    "torch_spline_conv": "1.2.2+pt26cpu",
+    "pyg_lib": "0.5.0+pt26cpu",
+    "hydra_core": "1.3.7",
+    "colorlog": "6.12.0",
+    "higher": "0.2.1",
+    "ortools": "9.15.6755",
+    "scikit_learn": "1.7.2",
+    "tensorboard": "2.21.0",
+    "wandb": "0.30.0"
+  },
+  "checks": {
+    "all_imports": "PASS",
+    "python_main_help": "PASS",
+    "cpp_checkpoint_to_python_state_dict": "PASS",
+    "python_main_loaded_checkpoint": "PASS",
+    "python_fast_inference": "PASS",
+    "python_fast_inference_requests": 1,
+    "python_fast_inference_acceptance": 1.0
+  },
+  "source_python_changed": false,
+  "network_note": "Temporary install container used bridge network; final oracle uses the full image and source mounts."
+}

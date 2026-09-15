@@ -28,7 +28,7 @@ v_net_size:
 arrival_rate:
   distribution: poisson
   dtype: float
-  lam: 0.7
+  lam: 0.1667
 
 
 # -------------------------
@@ -37,7 +37,7 @@ arrival_rate:
 lifetime:
   distribution: exponential
   dtype: float
-  scale: 1000
+  scale: 500
 
 
 # -------------------------
@@ -51,8 +51,8 @@ node_attrs_setting:
     distribution: uniform
     dtype: int
     generative: true
-    low: 10
-    high: 40
+    low: 0
+    high: 20
 
   - name: gpu
     owner: node
@@ -60,8 +60,8 @@ node_attrs_setting:
     distribution: uniform
     dtype: int
     generative: true
-    low: 10
-    high: 40
+    low: 0
+    high: 20
 
   - name: ram
     owner: node
@@ -69,8 +69,8 @@ node_attrs_setting:
     distribution: uniform
     dtype: int
     generative: true
-    low: 10
-    high: 40
+    low: 0
+    high: 20
 
 
 # -------------------------

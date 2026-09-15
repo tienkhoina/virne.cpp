@@ -160,3 +160,13 @@ should warm up each case and collect repeated samples with
 the C++/Python ratio. Keep kernel time separate from parsing and serialization
 time, use identical inputs and seeds, and do not include image or container
 startup in either result.
+
+## Full CPU RL pipeline
+
+Use the reusable image `virne-python-oracle:py310-rl-full-cpu` for the complete
+Python application path. It adds Hydra, OR-Tools, scikit-learn, higher,
+colorlog, TensorBoard, W&B and the Torch 2.6 CPU / PyG 2.7 wheels to the pinned
+CPU base. The native checkpoint converter
+`porting/convert_cpp_checkpoint.py` emits a Python `state_dict` without editing
+the original Python checkout. The installation and loaded one-request smoke
+are recorded in `porting/results/python_pipeline_install_2026-09-15.json`.

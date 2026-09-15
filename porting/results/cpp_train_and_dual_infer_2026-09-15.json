@@ -1,0 +1,47 @@
+{
+  "scope": "one C++ training epoch followed by loaded inference checks",
+  "setting": {
+    "physical_group": "p_net_setting_multi_resource",
+    "virtual_group": "v_sim_setting_multi_resource",
+    "physical_nodes": 100,
+    "virtual_requests": 1000,
+    "rl_target_steps": 256,
+    "training_epochs": 1,
+    "solver": "ppo_dual_deep_edge_gat+",
+    "seed": 0
+  },
+  "cpp_training": {
+    "status": "PASS",
+    "accepted": 673,
+    "rejected": 327,
+    "acceptance_rate": 0.673,
+    "long_term_r2c_ratio": 0.58111443469164181,
+    "updates": 409,
+    "checkpoint": "virne/ppo_dual_deep_edge_gat+/cpp-1epoch-multi-resource/models/model.vne"
+  },
+  "cpp_loaded_inference": {
+    "status": "PASS",
+    "checkpoint_loaded": true,
+    "accepted": 667,
+    "rejected": 333,
+    "acceptance_rate": 0.667,
+    "long_term_r2c_ratio": 0.57439983901800917,
+    "processed_requests": 1000
+  },
+  "python_loaded_inference": {
+    "status": "PASS",
+    "checkpoint_loaded": true,
+    "parameter_count": 96,
+    "pending_observations": 120,
+    "input": "first pending checkpoint observation",
+    "action": 80,
+    "logits_shape": [1, 100],
+    "logits_checksum": 968.333740234375,
+    "value": 0.7197641134262085
+  },
+  "python_full_entrypoint": {
+    "status": "NOT_RUN",
+    "reason": "oracle image lacks hydra, colorlog, ortools, scikit-learn and higher; pip network unavailable",
+    "python_source_unchanged": true
+  }
+}
