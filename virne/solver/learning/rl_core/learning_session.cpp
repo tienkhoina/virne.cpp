@@ -7,7 +7,11 @@
 #include "dqn_action.h"
 #include <torch/torch.h>
 #include <ATen/CPUGeneratorImpl.h>
+#include <algorithm>
+#include <cstring>
+#include <iostream>
 #include <iterator>
+#include <limits>
 #include <sstream>
 #include <stdexcept>
 
@@ -32,7 +36,78 @@ template <class T> std::vector<T> tensor_vector(const torch::Tensor& value, cons
     if (!data.numel()) return {};
     return {data.data_ptr<T>(), data.data_ptr<T>() + data.numel()};
 }
-void write_observation(Output& archive, const p::PolicyObservation& o) {
+
+constexpr char checkpoint_magic[] = "VIRNE_NATIVE_CHECKPOINT_2";
+
+void append_u64(std::vector<std::uint8_t>& output, const std::uint64_t value) {
+    for (unsigned shift = 0; shift != 64U; shift += 8U)
+        output.push_back(static_cast<std::uint8_t>((value >> shift) & 0xffU));
+}
+
+void append_blob(std::vector<std::uint8_t>& output, const std::vector<char>& blob) {
+    append_u64(output, static_cast<std::uint64_t>(blob.size()));
+    output.insert(output.end(), blob.begin(), blob.end());
+}
+
+void append_tensor(std::vector<std::uint8_t>& output, const torch::Tensor& value) {
+    if (!value.defined()) {
+        append_u64(output, std::numeric_limits<std::uint64_t>::max());
+        return;
+    }
+    append_blob(output, torch::pickle_save(torch::IValue(value.detach().cpu())));
+}
+
+void append_observation(std::vector<std::uint8_t>& output,
+    const p::PolicyObservation& observation) {
+    const std::vector<torch::Tensor> fields{
+        observation.p_net_x, observation.v_node_x, observation.v_net_x,
+        observation.current_virtual_node, observation.virtual_net_size,
+        observation.hidden_state, observation.p_node_id,
+        observation.encoder_outputs,
+        observation.recurrent_mask.value_or(torch::Tensor{}),
+        observation.action_mask.value_or(torch::Tensor{}), observation.p_net.x,
+        observation.p_net.edge_index,
+        observation.p_net.edge_attr.value_or(torch::Tensor{}),
+        observation.v_net.x, observation.v_net.edge_index,
+        observation.v_net.edge_attr.value_or(torch::Tensor{})};
+    for (const auto& field : fields) append_tensor(output, field);
+}
+
+class CheckpointReader final {
+public:
+    explicit CheckpointReader(const std::vector<std::uint8_t>& bytes)
+        : bytes_(bytes) {}
+
+    std::uint64_t u64() {
+        if (offset_ + 8U > bytes_.size()) throw std::invalid_argument("truncated learning checkpoint");
+        std::uint64_t result = 0U;
+        for (unsigned shift = 0; shift != 64U; shift += 8U)
+            result |= static_cast<std::uint64_t>(bytes_[offset_++]) << shift;
+        return result;
+    }
+
+    torch::Tensor tensor() {
+        const auto size = u64();
+        if (size == std::numeric_limits<std::uint64_t>::max()) return torch::Tensor{};
+        if (size > bytes_.size() - offset_ || size > static_cast<std::uint64_t>(std::numeric_limits<std::size_t>::max()))
+            throw std::invalid_argument("invalid learning checkpoint tensor size");
+        std::vector<char> blob(size);
+        if (size != 0U) std::memcpy(blob.data(), bytes_.data() + offset_, static_cast<std::size_t>(size));
+        offset_ += static_cast<std::size_t>(size);
+        const auto value = torch::pickle_load(blob);
+        if (!value.isTensor()) throw std::invalid_argument("learning checkpoint blob is not a tensor");
+        return value.toTensor();
+    }
+
+    void require_end() const {
+        if (offset_ != bytes_.size()) throw std::invalid_argument("learning checkpoint has trailing data");
+    }
+
+private:
+    const std::vector<std::uint8_t>& bytes_;
+    std::size_t offset_ = 0U;
+};
+void write_observation(Output& archive, const std::string& root, const p::PolicyObservation& o) {
     const std::vector<std::pair<const char*, torch::Tensor>> fields{
         {"physical_x", o.p_net_x}, {"vnode_x", o.v_node_x}, {"virtual_x", o.v_net_x},
         {"current", o.current_virtual_node}, {"size", o.virtual_net_size}, {"hidden", o.hidden_state},
@@ -40,25 +115,47 @@ void write_observation(Output& archive, const p::PolicyObservation& o) {
         {"recurrent_mask", o.recurrent_mask.value_or(torch::Tensor{})}, {"action_mask", o.action_mask.value_or(torch::Tensor{})},
         {"p_x", o.p_net.x}, {"p_edges", o.p_net.edge_index}, {"p_attr", o.p_net.edge_attr.value_or(torch::Tensor{})},
         {"v_x", o.v_net.x}, {"v_edges", o.v_net.edge_index}, {"v_attr", o.v_net.edge_attr.value_or(torch::Tensor{})}};
-    for (const auto& field : fields) write_optional(archive, field.first, field.second);
+    for (const auto& field : fields) write_optional(archive, root + field.first, field.second);
 }
-p::PolicyObservation read_observation(Input& archive) {
+p::PolicyObservation read_observation(Input& archive, const std::string& root) {
     p::PolicyObservation o;
-    o.p_net_x = read_optional(archive, "physical_x"); o.v_node_x = read_optional(archive, "vnode_x");
-    o.v_net_x = read_optional(archive, "virtual_x"); o.current_virtual_node = read_optional(archive, "current");
-    o.virtual_net_size = read_optional(archive, "size"); o.hidden_state = read_optional(archive, "hidden");
-    o.p_node_id = read_optional(archive, "node_id"); o.encoder_outputs = read_optional(archive, "encoded");
-    const auto recurrent_mask = read_optional(archive, "recurrent_mask"), mask = read_optional(archive, "action_mask");
+    o.p_net_x = read_optional(archive, root + "physical_x"); o.v_node_x = read_optional(archive, root + "vnode_x");
+    o.v_net_x = read_optional(archive, root + "virtual_x"); o.current_virtual_node = read_optional(archive, root + "current");
+    o.virtual_net_size = read_optional(archive, root + "size"); o.hidden_state = read_optional(archive, root + "hidden");
+    o.p_node_id = read_optional(archive, root + "node_id"); o.encoder_outputs = read_optional(archive, root + "encoded");
+    const auto recurrent_mask = read_optional(archive, root + "recurrent_mask"), mask = read_optional(archive, root + "action_mask");
     if (recurrent_mask.defined()) o.recurrent_mask = recurrent_mask;
     if (mask.defined()) o.action_mask = mask;
-    const auto graph = [&](const std::string& prefix) {
+    const auto graph = [&](const std::string& graph_prefix) {
         pyg_lite::Data data;
-        data.x = read_optional(archive, prefix + "_x"); data.edge_index = read_optional(archive, prefix + "_edges");
-        const auto attributes = read_optional(archive, prefix + "_attr");
+        data.x = read_optional(archive, root + graph_prefix + "_x"); data.edge_index = read_optional(archive, root + graph_prefix + "_edges");
+        const auto attributes = read_optional(archive, root + graph_prefix + "_attr");
         if (attributes.defined()) data.edge_attr = attributes;
         return data.x.defined() ? pyg_lite::Batch::from_data_list({data}) : pyg_lite::Batch{};
     };
     o.p_net = graph("p"); o.v_net = graph("v"); return o;
+}
+
+p::PolicyObservation read_portable_observation(CheckpointReader& reader) {
+    p::PolicyObservation o;
+    o.p_net_x = reader.tensor(); o.v_node_x = reader.tensor();
+    o.v_net_x = reader.tensor(); o.current_virtual_node = reader.tensor();
+    o.virtual_net_size = reader.tensor(); o.hidden_state = reader.tensor();
+    o.p_node_id = reader.tensor(); o.encoder_outputs = reader.tensor();
+    const auto recurrent_mask = reader.tensor();
+    const auto mask = reader.tensor();
+    if (recurrent_mask.defined()) o.recurrent_mask = recurrent_mask;
+    if (mask.defined()) o.action_mask = mask;
+    const auto graph = [&reader](const bool physical) {
+        pyg_lite::Data data;
+        data.x = reader.tensor(); data.edge_index = reader.tensor();
+        const auto attributes = reader.tensor();
+        if (attributes.defined()) data.edge_attr = attributes;
+        static_cast<void>(physical);
+        return data.x.defined() ? pyg_lite::Batch::from_data_list({data}) : pyg_lite::Batch{};
+    };
+    o.p_net = graph(true); o.v_net = graph(false);
+    return o;
 }
 }
 
@@ -76,6 +173,11 @@ public:
     std::vector<std::int64_t> actions;
     std::vector<std::uint8_t> dones;
     std::vector<double> rewards, returns, log_probabilities;
+    std::optional<double> last_actor_loss, last_critic_loss, last_entropy_loss,
+        last_approximate_kl, last_gradient_norm, last_log_probability_mean,
+        last_old_log_probability_mean, last_value_mean, last_return_mean,
+        last_advantage_mean, last_reward_mean;
+    std::int64_t last_applied_update_steps = 0;
 
     explicit Impl(LearningSessionOptions value) : options(std::move(value)) {
         if (options.target_steps <= 0 || options.num_layers <= 0) throw std::invalid_argument("invalid learning-session limits");
@@ -163,46 +265,234 @@ public:
         if (q_learning()) values.insert(values.end(), {options.dqn.epsilon_start, options.dqn.epsilon_end, options.dqn.epsilon_decay});
         return torch::tensor(values, torch::kFloat64);
     }
+    std::vector<std::uint8_t> portable_checkpoint() const {
+        if (!policy) throw std::logic_error("cannot checkpoint an uninitialized learning session");
+        torch::NoGradGuard no_grad;
+        std::vector<std::uint8_t> result(checkpoint_magic, checkpoint_magic + sizeof(checkpoint_magic) - 1U);
+        append_tensor(result, configuration_integers());
+        append_tensor(result, configuration_reals());
+        const auto& policy_options = policy->options();
+        append_tensor(result, torch::tensor(std::vector<std::int64_t>{policy_options.physical_nodes,
+            policy_options.physical_features, policy_options.virtual_node_features,
+            policy_options.virtual_features, policy_options.physical_edge_features.value_or(-1),
+            policy_options.virtual_edge_features.value_or(-1)}, torch::kInt64));
+        const auto parameters = unique_parameters(policy->module());
+        append_u64(result, parameters.size());
+        for (const auto& parameter : parameters) append_tensor(result, parameter);
+        const auto buffers = policy->module().named_buffers(true);
+        append_u64(result, buffers.size());
+        for (const auto& buffer : buffers) append_tensor(result, buffer.value());
+        append_tensor(result, torch::tensor(static_cast<std::int64_t>(policy->module().is_training())));
+        append_tensor(result, torch::tensor(update_time()));
+        append_tensor(result, at::detail::getDefaultCPUGenerator().get_state());
+        const auto state = optimizer->snapshot();
+        append_u64(result, 1U);
+        append_u64(result, state.moments.size());
+        for (const auto& moment : state.moments) {
+            append_tensor(result, moment.step); append_tensor(result, moment.exp_avg);
+            append_tensor(result, moment.exp_avg_sq); append_tensor(result, moment.max_exp_avg_sq);
+        }
+        std::vector<double> groups;
+        for (const auto& group : state.options) groups.insert(groups.end(), {group.lr, group.beta1,
+            group.beta2, group.eps, group.weight_decay, static_cast<double>(group.amsgrad),
+            static_cast<double>(group.maximize)});
+        append_tensor(result, torch::tensor(groups, torch::kFloat64));
+        append_tensor(result, torch::tensor(actions, torch::kInt64));
+        append_tensor(result, torch::tensor(rewards, torch::kFloat64));
+        append_tensor(result, torch::tensor(returns, torch::kFloat64));
+        append_tensor(result, torch::tensor(log_probabilities, torch::kFloat64));
+        append_u64(result, observations.size());
+        for (const auto& observation : observations)
+            append_observation(result, observation);
+        append_u64(result, q_learning() ? 1U : 0U);
+        if (q_learning()) {
+            const auto target_parameters = unique_parameters(target_policy->module());
+            append_u64(result, target_parameters.size());
+            for (const auto& parameter : target_parameters) append_tensor(result, parameter);
+            const auto target_buffers = target_policy->module().named_buffers(true);
+            append_u64(result, target_buffers.size());
+            for (const auto& buffer : target_buffers) append_tensor(result, buffer.value());
+            append_tensor(result, torch::tensor(static_cast<std::int64_t>(target_policy->module().is_training())));
+            append_tensor(result, torch::tensor(dones, torch::kUInt8));
+            append_u64(result, next_observations.size());
+            for (const auto& observation : next_observations)
+                append_observation(result, observation);
+            const auto exploration = q_selector->snapshot();
+            append_tensor(result, torch::tensor(std::vector<std::int64_t>(
+                exploration.random.key.begin(), exploration.random.key.end()), torch::kInt64));
+            append_tensor(result, torch::tensor(std::vector<std::int64_t>{
+                exploration.steps_done, exploration.random.position,
+                exploration.random.has_gaussian}, torch::kInt64));
+            append_tensor(result, torch::tensor(std::vector<double>{
+                exploration.epsilon, exploration.random.gaussian}, torch::kFloat64));
+        }
+        return result;
+    }
+    void restore_portable(const std::vector<std::uint8_t>& bytes) {
+        const std::size_t magic_size = sizeof(checkpoint_magic) - 1U;
+        if (bytes.size() < magic_size || !std::equal(checkpoint_magic,
+                checkpoint_magic + magic_size, bytes.begin()))
+            throw std::invalid_argument("invalid native learning checkpoint");
+        std::vector<std::uint8_t> body(bytes.begin() + static_cast<std::ptrdiff_t>(magic_size), bytes.end());
+        CheckpointReader reader(body);
+        if (!torch::equal(reader.tensor(), configuration_integers()) ||
+            !torch::equal(reader.tensor(), configuration_reals()))
+            throw std::invalid_argument("checkpoint learning configuration mismatch");
+        const auto dims = tensor_vector<std::int64_t>(reader.tensor(), torch::kInt64);
+        if (dims.size() != 6U) throw std::invalid_argument("invalid checkpoint dimensions");
+        p::PolicyOptions policy_options;
+        policy_options.kind = options.policy; policy_options.physical_nodes = dims[0];
+        policy_options.physical_features = dims[1]; policy_options.virtual_node_features = dims[2];
+        policy_options.virtual_features = dims[3];
+        if (dims[4] >= 0) policy_options.physical_edge_features = dims[4];
+        if (dims[5] >= 0) policy_options.virtual_edge_features = dims[5];
+        policy_options.embedding_dim = options.embedding_dim; policy_options.num_layers = options.num_layers;
+        policy_options.dropout = options.dropout; policy_options.batch_norm = options.batch_norm;
+        initialize(policy_options);
+        torch::NoGradGuard no_grad;
+        const auto parameters = unique_parameters(policy->module());
+        const auto parameter_count = reader.u64();
+        if (parameter_count != parameters.size()) throw std::invalid_argument("checkpoint policy parameter count mismatch");
+        for (const auto& parameter : parameters) {
+            const auto source = reader.tensor();
+            if (source.sizes() != parameter.sizes()) throw std::invalid_argument("checkpoint policy parameter shape mismatch");
+            parameter.copy_(source.to(parameter.options()));
+        }
+        const auto buffers = policy->module().named_buffers(true);
+        if (reader.u64() != buffers.size()) throw std::invalid_argument("checkpoint policy buffer count mismatch");
+        for (const auto& buffer : buffers) {
+            const auto source = reader.tensor();
+            if (source.sizes() != buffer.value().sizes()) throw std::invalid_argument("checkpoint policy buffer shape mismatch");
+            buffer.value().copy_(source.to(buffer.value().options()));
+        }
+        policy->train(reader.tensor().item<std::int64_t>() != 0);
+        const auto restored_update_time = reader.tensor().item<std::int64_t>();
+        const auto restored_rng = reader.tensor();
+        const bool has_optimizer = reader.u64() != 0U;
+        auto state = optimizer->snapshot();
+        if (has_optimizer) {
+            try {
+                if (reader.u64() != state.moments.size()) throw std::invalid_argument("checkpoint optimizer parameter count mismatch");
+                for (auto& moment : state.moments) {
+                    moment.step = reader.tensor(); moment.exp_avg = reader.tensor();
+                    moment.exp_avg_sq = reader.tensor(); moment.max_exp_avg_sq = reader.tensor();
+                }
+                const auto groups = tensor_vector<double>(reader.tensor(), torch::kFloat64);
+                if (groups.size() != state.options.size() * 7U) throw std::invalid_argument("checkpoint optimizer group count mismatch");
+                for (std::size_t i = 0; i < state.options.size(); ++i) state.options[i] = {groups[i*7], groups[i*7+1], groups[i*7+2],
+                    groups[i*7+3], groups[i*7+4], groups[i*7+5] != 0, groups[i*7+6] != 0};
+                optimizer->restore(state);
+            } catch (const std::exception& error) {
+                std::clog << "warning: learning checkpoint optimizer ignored: " << error.what()
+                          << "; using the algorithm optimizer defaults\n";
+            }
+        } else {
+            std::clog << "warning: learning checkpoint has no optimizer state; "
+                      << "using the algorithm optimizer defaults\n";
+        }
+        actions = tensor_vector<std::int64_t>(reader.tensor(), torch::kInt64);
+        rewards = tensor_vector<double>(reader.tensor(), torch::kFloat64);
+        returns = tensor_vector<double>(reader.tensor(), torch::kFloat64);
+        log_probabilities = tensor_vector<double>(reader.tensor(), torch::kFloat64);
+        if (actions.size() != rewards.size() || actions.size() != returns.size() ||
+            actions.size() != log_probabilities.size())
+            throw std::invalid_argument("checkpoint rollout lengths differ");
+        const auto observation_count = reader.u64();
+        observations.reserve(static_cast<std::size_t>(observation_count));
+        for (std::uint64_t i = 0; i < observation_count; ++i)
+            observations.push_back(read_portable_observation(reader));
+        if (q_learning() != (reader.u64() != 0U)) throw std::invalid_argument("checkpoint learning algorithm mismatch");
+        if (q_learning()) {
+            const auto target_parameters = unique_parameters(target_policy->module());
+            if (reader.u64() != target_parameters.size()) throw std::invalid_argument("checkpoint target parameter count mismatch");
+            for (const auto& parameter : target_parameters) parameter.copy_(reader.tensor().to(parameter.options()));
+            const auto target_buffers = target_policy->module().named_buffers(true);
+            if (reader.u64() != target_buffers.size()) throw std::invalid_argument("checkpoint target buffer count mismatch");
+            for (const auto& buffer : target_buffers) buffer.value().copy_(reader.tensor().to(buffer.value().options()));
+            target_policy->train(reader.tensor().item<std::int64_t>() != 0);
+            dones = tensor_vector<std::uint8_t>(reader.tensor(), torch::kUInt8);
+            const auto next_observation_count = reader.u64();
+            next_observations.reserve(static_cast<std::size_t>(next_observation_count));
+            for (std::uint64_t i = 0; i < next_observation_count; ++i)
+                next_observations.push_back(read_portable_observation(reader));
+            const auto keys = tensor_vector<std::int64_t>(reader.tensor(), torch::kInt64);
+            const auto integers = tensor_vector<std::int64_t>(reader.tensor(), torch::kInt64);
+            const auto reals = tensor_vector<double>(reader.tensor(), torch::kFloat64);
+            if (keys.size() != 624U || integers.size() != 3U || reals.size() != 2U)
+                throw std::invalid_argument("invalid checkpoint exploration state");
+            DqnExplorationState exploration;
+            for (std::size_t i = 0; i < keys.size(); ++i) {
+                if (keys[i] < 0 || keys[i] > UINT32_MAX)
+                    throw std::invalid_argument("invalid checkpoint MT19937 word");
+                exploration.random.key[i] = static_cast<std::uint32_t>(keys[i]);
+            }
+            exploration.steps_done = integers[0];
+            exploration.random.position = static_cast<std::uint32_t>(integers[1]);
+            exploration.random.has_gaussian = integers[2] != 0;
+            exploration.epsilon = reals[0]; exploration.random.gaussian = reals[1];
+            q_selector->restore(exploration);
+        }
+        if (q_trainer) q_trainer->set_update_time(restored_update_time); else trainer->set_update_time(restored_update_time);
+        auto generator = at::detail::getDefaultCPUGenerator(); generator.set_state(restored_rng);
+        reader.require_end();
+    }
     std::vector<std::uint8_t> checkpoint() const {
         if (!policy) throw std::logic_error("cannot checkpoint an uninitialized learning session");
         torch::NoGradGuard no_grad;
-        Output archive, model;
+        Output archive;
         archive.write("configuration_i", configuration_integers(), true);
         archive.write("configuration_f", configuration_reals(), true);
         const auto& o = policy->options();
         archive.write("dimensions", torch::tensor(std::vector<std::int64_t>{o.physical_nodes, o.physical_features,
             o.virtual_node_features, o.virtual_features, o.physical_edge_features.value_or(-1), o.virtual_edge_features.value_or(-1)}, torch::kInt64), true);
-        policy->module().save(model); archive.write("policy", model);
+        // Persist raw tensors instead of nesting a TorchScript module archive.
+        // LibTorch 2.6 may abort in its JIT regex loader when that nested
+        // archive is reopened from a different process.
+        const auto parameters = unique_parameters(policy->module());
+        archive.write("parameter_count", torch::tensor(static_cast<std::int64_t>(parameters.size()), torch::kInt64), true);
+        for (std::size_t i = 0; i < parameters.size(); ++i)
+            archive.write("parameter_" + std::to_string(i), parameters[i].detach().cpu(), true);
+        const auto buffers = policy->module().named_buffers(true);
+        archive.write("buffer_count", torch::tensor(static_cast<std::int64_t>(buffers.size()), torch::kInt64), true);
+        for (std::size_t i = 0; i < buffers.size(); ++i)
+            archive.write("buffer_" + std::to_string(i), buffers[i].value().detach().cpu(), true);
         archive.write("training", torch::tensor(static_cast<std::int64_t>(policy->module().is_training())), true);
         archive.write("update_time", torch::tensor(update_time()), true);
         archive.write("rng", at::detail::getDefaultCPUGenerator().get_state(), true);
         const auto state = optimizer->snapshot();
         archive.write("moment_count", torch::tensor(static_cast<std::int64_t>(state.moments.size())), true);
         for (std::size_t i = 0; i < state.moments.size(); ++i) {
-            Output moment;
-            write_optional(moment, "step", state.moments[i].step);
-            write_optional(moment, "mean", state.moments[i].exp_avg);
-            write_optional(moment, "variance", state.moments[i].exp_avg_sq);
-            write_optional(moment, "maximum", state.moments[i].max_exp_avg_sq);
-            archive.write("moment_" + std::to_string(i), moment);
+            const auto prefix = "moment_" + std::to_string(i) + "_";
+            write_optional(archive, prefix + "step", state.moments[i].step);
+            write_optional(archive, prefix + "mean", state.moments[i].exp_avg);
+            write_optional(archive, prefix + "variance", state.moments[i].exp_avg_sq);
+            write_optional(archive, prefix + "maximum", state.moments[i].max_exp_avg_sq);
         }
         std::vector<double> groups;
         for (const auto& group : state.options) groups.insert(groups.end(), {group.lr, group.beta1, group.beta2,
             group.eps, group.weight_decay, static_cast<double>(group.amsgrad), static_cast<double>(group.maximize)});
+        archive.write("optimizer_present", torch::tensor(static_cast<std::int64_t>(1), torch::kInt64), true);
         archive.write("optimizer_groups", torch::tensor(groups, torch::kFloat64), true);
         archive.write("actions", torch::tensor(actions, torch::kInt64), true);
         archive.write("rewards", torch::tensor(rewards, torch::kFloat64), true);
         archive.write("returns", torch::tensor(returns, torch::kFloat64), true);
         archive.write("logprobs", torch::tensor(log_probabilities, torch::kFloat64), true);
         for (std::size_t i = 0; i < observations.size(); ++i) {
-            Output record; write_observation(record, observations[i]); archive.write("observation_" + std::to_string(i), record);
+            write_observation(archive, "observation_" + std::to_string(i) + "_", observations[i]);
         }
         if (q_learning()) {
-            Output target; target_policy->module().save(target); archive.write("target_policy", target);
+            const auto target_parameters = unique_parameters(target_policy->module());
+            archive.write("target_parameter_count", torch::tensor(static_cast<std::int64_t>(target_parameters.size()), torch::kInt64), true);
+            for (std::size_t i = 0; i < target_parameters.size(); ++i)
+                archive.write("target_parameter_" + std::to_string(i), target_parameters[i].detach().cpu(), true);
+            const auto target_buffers = target_policy->module().named_buffers(true);
+            archive.write("target_buffer_count", torch::tensor(static_cast<std::int64_t>(target_buffers.size()), torch::kInt64), true);
+            for (std::size_t i = 0; i < target_buffers.size(); ++i)
+                archive.write("target_buffer_" + std::to_string(i), target_buffers[i].value().detach().cpu(), true);
             archive.write("target_training", torch::tensor(static_cast<std::int64_t>(target_policy->module().is_training())), true);
             archive.write("dones", torch::tensor(dones, torch::kUInt8), true);
             for (std::size_t i = 0; i < next_observations.size(); ++i) {
-                Output record; write_observation(record, next_observations[i]); archive.write("next_observation_" + std::to_string(i), record);
+                write_observation(archive, "next_observation_" + std::to_string(i) + "_", next_observations[i]);
             }
             const auto state = q_selector->snapshot();
             archive.write("exploration_key", torch::tensor(std::vector<std::int64_t>(state.random.key.begin(), state.random.key.end()), torch::kInt64), true);
@@ -226,21 +516,58 @@ public:
         o.embedding_dim = options.embedding_dim; o.num_layers = options.num_layers;
         o.dropout = options.dropout; o.batch_norm = options.batch_norm;
         initialize(o);
-        Input model; archive.read("policy", model); policy->module().load(model);
+        torch::NoGradGuard no_grad;
+        torch::Tensor parameter_count;
+        if (!archive.try_read("parameter_count", parameter_count))
+            throw std::invalid_argument("checkpoint does not contain portable policy tensors");
+        const auto parameters = unique_parameters(policy->module());
+        if (parameter_count.item<std::int64_t>() != static_cast<std::int64_t>(parameters.size()))
+            throw std::invalid_argument("checkpoint policy parameter count mismatch");
+        for (std::size_t i = 0; i < parameters.size(); ++i) {
+            const auto source = read_tensor(archive, "parameter_" + std::to_string(i));
+            if (source.sizes() != parameters[i].sizes()) throw std::invalid_argument("checkpoint policy parameter shape mismatch");
+            parameters[i].copy_(source.to(parameters[i].options()));
+        }
+        torch::Tensor buffer_count;
+        if (!archive.try_read("buffer_count", buffer_count))
+            throw std::invalid_argument("checkpoint does not contain policy buffers");
+        const auto buffers = policy->module().named_buffers(true);
+        if (buffer_count.item<std::int64_t>() != static_cast<std::int64_t>(buffers.size()))
+            throw std::invalid_argument("checkpoint policy buffer count mismatch");
+        for (std::size_t i = 0; i < buffers.size(); ++i) {
+            const auto source = read_tensor(archive, "buffer_" + std::to_string(i));
+            if (source.sizes() != buffers[i].value().sizes()) throw std::invalid_argument("checkpoint policy buffer shape mismatch");
+            buffers[i].value().copy_(source.to(buffers[i].value().options()));
+        }
         policy->train(read_tensor(archive, "training").item<std::int64_t>() != 0);
         auto state = optimizer->snapshot();
-        if (read_tensor(archive, "moment_count").item<std::int64_t>() != static_cast<std::int64_t>(state.moments.size()))
-            throw std::invalid_argument("checkpoint optimizer parameter count mismatch");
-        for (std::size_t i = 0; i < state.moments.size(); ++i) {
-            Input record; archive.read("moment_" + std::to_string(i), record);
-            state.moments[i] = {read_optional(record, "step"), read_optional(record, "mean"),
-                read_optional(record, "variance"), read_optional(record, "maximum")};
+        torch::Tensor optimizer_marker;
+        const bool has_optimizer = archive.try_read("optimizer_present", optimizer_marker)
+            ? optimizer_marker.item<std::int64_t>() != 0
+            : archive.try_read("moment_count", optimizer_marker);
+        if (has_optimizer) {
+            try {
+                const auto moment_count = archive.try_read("moment_count", optimizer_marker)
+                    ? optimizer_marker.item<std::int64_t>() : -1;
+                if (moment_count != static_cast<std::int64_t>(state.moments.size()))
+                    throw std::invalid_argument("checkpoint optimizer parameter count mismatch");
+                for (std::size_t i = 0; i < state.moments.size(); ++i) {
+                    const auto prefix = "moment_" + std::to_string(i) + "_";
+                    state.moments[i] = {read_optional(archive, prefix + "step"), read_optional(archive, prefix + "mean"),
+                        read_optional(archive, prefix + "variance"), read_optional(archive, prefix + "maximum")};
+                }
+                const auto groups = tensor_vector<double>(read_tensor(archive, "optimizer_groups"), torch::kFloat64);
+                if (groups.size() != state.options.size() * 7) throw std::invalid_argument("checkpoint optimizer group count mismatch");
+                for (std::size_t i = 0; i < state.options.size(); ++i) state.options[i] = {groups[i*7], groups[i*7+1], groups[i*7+2],
+                    groups[i*7+3], groups[i*7+4], groups[i*7+5] != 0, groups[i*7+6] != 0};
+                optimizer->restore(state);
+            } catch (const std::exception& error) {
+                std::clog << "warning: learning checkpoint optimizer ignored: " << error.what()
+                          << "; using the algorithm optimizer defaults\n";
+            }
+        } else {
+            std::clog << "warning: learning checkpoint has no optimizer state; using the algorithm optimizer defaults\n";
         }
-        const auto groups = tensor_vector<double>(read_tensor(archive, "optimizer_groups"), torch::kFloat64);
-        if (groups.size() != state.options.size() * 7) throw std::invalid_argument("checkpoint optimizer group count mismatch");
-        for (std::size_t i = 0; i < state.options.size(); ++i) state.options[i] = {groups[i*7], groups[i*7+1], groups[i*7+2],
-            groups[i*7+3], groups[i*7+4], groups[i*7+5] != 0, groups[i*7+6] != 0};
-        optimizer->restore(state);
         const auto updates = read_tensor(archive, "update_time").item<std::int64_t>();
         if (q_trainer) q_trainer->set_update_time(updates); else trainer->set_update_time(updates);
         actions = tensor_vector<std::int64_t>(read_tensor(archive, "actions"), torch::kInt64);
@@ -250,15 +577,34 @@ public:
         if (rewards.size() != actions.size() || returns.size() != actions.size() || log_probabilities.size() != actions.size())
             throw std::invalid_argument("checkpoint rollout lengths differ");
         for (std::size_t i = 0; i < actions.size(); ++i) {
-            Input record; archive.read("observation_" + std::to_string(i), record); observations.push_back(read_observation(record));
+            observations.push_back(read_observation(archive, "observation_" + std::to_string(i) + "_"));
         }
         if (q_learning()) {
-            Input target; archive.read("target_policy", target); target_policy->module().load(target);
+            torch::Tensor target_parameter_count;
+            if (!archive.try_read("target_parameter_count", target_parameter_count))
+                throw std::invalid_argument("checkpoint does not contain portable target policy tensors");
+            const auto target_parameters = unique_parameters(target_policy->module());
+            if (target_parameter_count.item<std::int64_t>() != static_cast<std::int64_t>(target_parameters.size()))
+                throw std::invalid_argument("checkpoint target parameter count mismatch");
+            for (std::size_t i = 0; i < target_parameters.size(); ++i) {
+                const auto source = read_tensor(archive, "target_parameter_" + std::to_string(i));
+                if (source.sizes() != target_parameters[i].sizes()) throw std::invalid_argument("checkpoint target parameter shape mismatch");
+                target_parameters[i].copy_(source.to(target_parameters[i].options()));
+            }
+            const auto target_buffers = target_policy->module().named_buffers(true);
+            const auto target_buffer_count = read_tensor(archive, "target_buffer_count").item<std::int64_t>();
+            if (target_buffer_count != static_cast<std::int64_t>(target_buffers.size()))
+                throw std::invalid_argument("checkpoint target buffer count mismatch");
+            for (std::size_t i = 0; i < target_buffers.size(); ++i) {
+                const auto source = read_tensor(archive, "target_buffer_" + std::to_string(i));
+                if (source.sizes() != target_buffers[i].value().sizes()) throw std::invalid_argument("checkpoint target buffer shape mismatch");
+                target_buffers[i].value().copy_(source.to(target_buffers[i].value().options()));
+            }
             target_policy->train(read_tensor(archive, "target_training").item<std::int64_t>() != 0);
             dones = tensor_vector<std::uint8_t>(read_tensor(archive, "dones"), torch::kUInt8);
             if (dones.size() != actions.size()) throw std::invalid_argument("checkpoint DQN terminal count mismatch");
             for (std::size_t i = 0; i < actions.size(); ++i) {
-                Input record; archive.read("next_observation_" + std::to_string(i), record); next_observations.push_back(read_observation(record));
+                next_observations.push_back(read_observation(archive, "next_observation_" + std::to_string(i) + "_"));
             }
             const auto keys = tensor_vector<std::int64_t>(read_tensor(archive, "exploration_key"), torch::kInt64);
             const auto integers = tensor_vector<std::int64_t>(read_tensor(archive, "exploration_i"), torch::kInt64);
@@ -279,15 +625,39 @@ public:
     std::optional<double> update() {
         if (observations.empty()) return std::nullopt;
         policy->train();
+        last_actor_loss.reset(); last_critic_loss.reset(); last_entropy_loss.reset();
+        last_approximate_kl.reset(); last_gradient_norm.reset();
+        last_log_probability_mean.reset(); last_old_log_probability_mean.reset();
+        last_value_mean.reset(); last_return_mean.reset(); last_advantage_mean.reset();
+        last_reward_mean.reset(); last_applied_update_steps = 0;
         torch::Tensor loss;
         if (q_learning()) {
             DqnBatch batch{torch::tensor(actions, torch::kInt64), torch::tensor(rewards, torch::kFloat32), torch::tensor(dones, torch::kFloat32)};
-            loss = q_trainer->update(batch).loss;
+            const auto update_result = q_trainer->update(batch);
+            loss = update_result.loss;
+            last_gradient_norm = update_result.gradient_norm.item<double>();
+            last_applied_update_steps = 1;
             next_observations.clear(); dones.clear();
         } else {
             TrainingBatch batch{torch::tensor(actions, torch::kInt64), torch::tensor(rewards, torch::kFloat32),
                 torch::tensor(returns, torch::kFloat32), torch::tensor(log_probabilities, torch::kFloat32)};
-            loss = trainer->update(batch).loss;
+            const auto update_result = trainer->update(batch);
+            loss = update_result.loss;
+            const auto scalar = [](const torch::Tensor& value) -> std::optional<double> {
+                return value.defined() ? std::optional<double>(value.item<double>()) : std::nullopt;
+            };
+            last_actor_loss = scalar(update_result.actor_loss);
+            last_critic_loss = scalar(update_result.critic_loss);
+            last_entropy_loss = scalar(update_result.entropy);
+            last_approximate_kl = scalar(update_result.approximate_kl);
+            last_gradient_norm = scalar(update_result.gradient_norm);
+            last_log_probability_mean = scalar(update_result.log_probability_mean);
+            last_old_log_probability_mean = scalar(update_result.old_log_probability_mean);
+            last_value_mean = scalar(update_result.value_mean);
+            last_return_mean = scalar(update_result.return_mean);
+            last_advantage_mean = scalar(update_result.advantage_mean);
+            last_reward_mean = scalar(update_result.reward_mean);
+            last_applied_update_steps = update_result.applied_steps;
         }
         observations.clear(); actions.clear(); rewards.clear(); returns.clear(); log_probabilities.clear();
         return loss.item<double>();
@@ -370,7 +740,22 @@ public:
                 next_observations.insert(next_observations.end(), std::make_move_iterator(episode_next_observations.begin()), std::make_move_iterator(episode_next_observations.end()));
                 dones.insert(dones.end(), result.dones.begin(), result.dones.end());
             }
-            if (static_cast<std::int64_t>(observations.size()) >= options.target_steps) result.update_loss = update();
+            if (static_cast<std::int64_t>(observations.size()) >= options.target_steps) {
+                result.update_loss = update();
+                result.actor_loss = last_actor_loss;
+                result.critic_loss = last_critic_loss;
+                result.entropy_loss = last_entropy_loss;
+                result.approximate_kl = last_approximate_kl;
+                result.gradient_norm = last_gradient_norm;
+                result.log_probability_mean = last_log_probability_mean;
+                result.old_log_probability_mean = last_old_log_probability_mean;
+                result.value_mean = last_value_mean;
+                result.return_mean = last_return_mean;
+                result.advantage_mean = last_advantage_mean;
+                result.reward_mean = last_reward_mean;
+                result.learning_rate = optimizer->options(0).lr;
+                result.applied_update_steps = last_applied_update_steps;
+            }
         }
         result.update_time = update_time();
         result.pending_steps = static_cast<std::int64_t>(observations.size());
@@ -413,14 +798,17 @@ std::vector<double> LearningSession::target_parameter_values() const {
     }
     return result;
 }
-std::vector<std::uint8_t> LearningSession::checkpoint() const { return impl_->checkpoint(); }
+std::vector<std::uint8_t> LearningSession::checkpoint() const { return impl_->portable_checkpoint(); }
 void LearningSession::restore_checkpoint(const std::vector<std::uint8_t>& bytes) {
     auto generator = at::detail::getDefaultCPUGenerator();
     const auto rng_before = generator.get_state();
     try {
-        Input archive; archive.load_from(reinterpret_cast<const char*>(bytes.data()), bytes.size(), torch::kCPU);
+        const std::size_t magic_size = sizeof(checkpoint_magic) - 1U;
+        if (bytes.size() < magic_size || !std::equal(checkpoint_magic,
+                checkpoint_magic + magic_size, bytes.begin()))
+            throw std::invalid_argument("legacy learning checkpoint is unsupported; using the algorithm defaults");
         auto restored = std::make_unique<Impl>(impl_->options);
-        restored->restore(archive);
+        restored->restore_portable(bytes);
         impl_ = std::move(restored);
     } catch (...) {
         generator.set_state(rng_before); throw;

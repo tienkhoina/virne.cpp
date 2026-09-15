@@ -14,12 +14,15 @@
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
+#include <memory>
 #include <optional>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 
 namespace virne::system {
+
+struct MainLearningConfig;
 
 enum class MainConfigErrorCode : std::uint8_t {
     invalid_seed,
@@ -108,6 +111,11 @@ struct MainConfig {
     virne::utils::SettingDocument physical_setting;
     virne::utils::SettingDocument virtual_setting;
     MainRuntimeWorkers workers;
+
+    // Opaque to the graph-only public boundary. It is populated when the
+    // binary is built with ML support and the selected solver is registered
+    // as a learning policy.
+    std::shared_ptr<const MainLearningConfig> learning;
 };
 
 MainConfig main_config_from_hydra(Config& config, PyRandom& random);

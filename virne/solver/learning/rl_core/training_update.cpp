@@ -43,12 +43,16 @@ TrainingResult PolicyGradientTrainer::update(TrainingBatch& batch) {
             : torch::arange(size, torch::TensorOptions().dtype(torch::kInt64).device(torch::kCPU));
         const auto actions = batch.actions.index_select(0, indices.to(batch.actions.device()));
         const auto selected_returns = returns.index_select(0, indices.to(returns.device()));
+        const auto selected_rewards = batch.rewards.index_select(0, indices.to(batch.rewards.device()));
         const auto evaluated = evaluator_(indices, actions);
         const auto target = selected_returns.to(evaluated.log_probabilities.device());
         torch::Tensor actor, critic, entropy, approximate_kl;
         torch::Tensor loss;
         if (pg) {
             loss = -(evaluated.log_probabilities * target).mean();
+            result.log_probability_mean = evaluated.log_probabilities.mean().detach();
+            result.return_mean = target.mean().detach();
+            result.reward_mean = selected_rewards.to(evaluated.log_probabilities.device()).mean().detach();
         } else {
             if (!evaluated.values) throw std::invalid_argument("actor-critic update requires critic values");
             const auto value = *evaluated.values;
@@ -73,6 +77,14 @@ TrainingResult PolicyGradientTrainer::update(TrainingBatch& batch) {
                 loss = evaluated.masked_action_probability ? loss + options_.mask_coefficient * *evaluated.masked_action_probability : loss + 0.0;
                 loss = evaluated.prediction_loss ? loss + *evaluated.prediction_loss : loss + 0.0;
             }
+            result.log_probability_mean = evaluated.log_probabilities.mean().detach();
+            result.old_log_probability_mean = repeated
+                ? batch.old_log_probabilities.index_select(0, indices.to(batch.old_log_probabilities.device())).to(evaluated.log_probabilities.device()).mean().detach()
+                : torch::Tensor{};
+            result.value_mean = value.mean().detach();
+            result.return_mean = target.mean().detach();
+            result.advantage_mean = advantage.mean().detach();
+            result.reward_mean = selected_rewards.to(evaluated.log_probabilities.device()).mean().detach();
         }
         result.loss = loss.detach(); result.actor_loss = detached(actor); result.critic_loss = detached(critic);
         result.entropy = detached(entropy); result.approximate_kl = approximate_kl;

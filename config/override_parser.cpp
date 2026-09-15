@@ -307,14 +307,6 @@ void apply(
             "Invalid override with an empty key: " + expr);
     }
 
-    // A matching <config-root>/<group>/<option>.yaml takes precedence over a
-    // scalar assignment. This is Hydra's config-group selection syntax and is
-    // deliberately independent of the process working directory.
-    const auto option = scalar_string(value);
-    auto selected = option.empty()
-        ? YAML::Node(YAML::NodeType::Undefined)
-        : ConfigLoader::load_group(cfg.config_root_, key, option);
-
     auto clean_group_key = key;
 
     while (!clean_group_key.empty() && clean_group_key.front() == '/')
@@ -324,6 +316,14 @@ void apply(
     const bool known_group =
         !cfg.config_root_.empty() &&
         std::filesystem::is_directory(group_directory);
+
+    // A matching <config-root>/<group>/<option>.yaml takes precedence over a
+    // scalar assignment. Do not probe the loader for ordinary values: paths
+    // such as a binary checkpoint must never be parsed as YAML.
+    const auto option = scalar_string(value);
+    auto selected = (known_group && !option.empty())
+        ? ConfigLoader::load_group(cfg.config_root_, key, option)
+        : YAML::Node(YAML::NodeType::Undefined);
 
     if (known_group && !selected.IsDefined())
     {

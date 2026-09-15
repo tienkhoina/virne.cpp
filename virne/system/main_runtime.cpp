@@ -6,6 +6,11 @@
 #include "../solver/heuristic/registry.h"
 #include "../solver/exact/exact_solver.h"
 #include "../solver/meta_heuristic/meta_heuristic.h"
+#if defined(VIRNE_MAIN_LEARNING)
+#include "../solver/learning/online_learning.h"
+#include "../solver/learning/solver_registry.h"
+#include "main_learning_config.h"
+#endif
 #include "../../random/random_context.h"
 
 #include <algorithm>
@@ -14,6 +19,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <filesystem>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <limits>
@@ -786,6 +792,180 @@ void log_run_complete(core::Logger& logger, const MainRunReport& report) {
     logger.info(message.str());
 }
 
+#if defined(VIRNE_MAIN_LEARNING)
+void train_learning_solver(
+    const MainConfig& config,
+    const RuntimeSelections& selections,
+    const network::PhysicalNetwork& physical,
+    const network::VirtualNetworkRequestSimulator& simulator,
+    solver::learning::LearningSolver& solver,
+    MainRunReport& report) {
+    if (config.learning == nullptr) {
+        return;
+    }
+    report.learning = true;
+    const auto begin = Clock::now();
+    const auto& learning = *config.learning;
+
+    auto load_checkpoint = [&](const std::filesystem::path& path) {
+        std::ifstream input(path, std::ios::binary);
+        if (!input) {
+            throw std::runtime_error(
+                "cannot open learning checkpoint: " + path.string());
+        }
+        const auto size = std::filesystem::file_size(path);
+        if (size > static_cast<std::uintmax_t>(std::numeric_limits<std::size_t>::max())) {
+            throw std::runtime_error("learning checkpoint is too large");
+        }
+        std::vector<std::uint8_t> bytes(static_cast<std::size_t>(size));
+        if (!bytes.empty()) {
+            input.read(reinterpret_cast<char*>(bytes.data()),
+                static_cast<std::streamsize>(bytes.size()));
+            if (!input) throw std::runtime_error("cannot read learning checkpoint: " + path.string());
+        }
+        try {
+            solver.restore_checkpoint(bytes);
+            report.learning_checkpoint_loaded = true;
+        } catch (const std::exception& error) {
+            std::clog << "warning: learning checkpoint ignored: " << error.what()
+                      << "; starting with the algorithm defaults\n";
+        }
+    };
+
+    if (!learning.pretrained_model_path.empty()) {
+        solver.logger().info("Learning checkpoint load: " +
+            learning.pretrained_model_path.generic_string());
+        load_checkpoint(learning.pretrained_model_path);
+    }
+    if (!learning.random_training_seed) {
+        solver.set_sampling_seed(learning.solver_options.session.seed);
+    }
+
+    std::filesystem::path checkpoint_path;
+    auto save_checkpoint = [&]() {
+        if (learning.model_dir_name.empty()) return;
+        std::filesystem::path directory(learning.model_dir_name);
+        if (!directory.is_absolute()) directory = config.solver_config.save_dir / directory;
+        std::filesystem::create_directories(directory);
+        checkpoint_path = directory / "model.vne";
+        const auto bytes = solver.checkpoint();
+        std::ofstream output(checkpoint_path, std::ios::binary | std::ios::trunc);
+        if (!output) throw std::runtime_error("cannot write learning checkpoint: " + checkpoint_path.string());
+        if (!bytes.empty()) output.write(reinterpret_cast<const char*>(bytes.data()), static_cast<std::streamsize>(bytes.size()));
+        if (!output) throw std::runtime_error("cannot write learning checkpoint: " + checkpoint_path.string());
+        report.learning_checkpoint_path = checkpoint_path.generic_string();
+        solver.logger().critical("Save model to " + checkpoint_path.generic_string());
+    };
+
+    if (learning.num_train_epochs != 0U) {
+        std::ostringstream settings;
+        settings << "**************************************************\n"
+                 << "Key parameters of RL training are as following:\n"
+                 << "**************************************************\n"
+                 << "       device: cpu\n"
+                 << "   num_workers: " << learning.solver_options.environment.workers << "\n"
+                 << "  distributed: false\n"
+                 << "     gamma: " << learning.solver_options.session.gamma << "\n"
+                 << "     lr_actor: " << learning.solver_options.session.learning_rates.actor.value_or(0.0) << "\n"
+                 << "    lr_critic: " << learning.solver_options.session.learning_rates.critic.value_or(0.0) << "\n"
+                 << "   batch_size: " << learning.solver_options.session.training.batch_size << "\n"
+                 << "coef_ent_loss: " << learning.solver_options.session.training.entropy_coefficient << "\n"
+                 << "     norm_adv: " << (learning.solver_options.session.training.normalize_advantage ? "true" : "false") << "\n"
+                 << "    clip_grad: " << (learning.solver_options.session.training.clip_grad ? "true" : "false") << "\n"
+                 << "max_grad_norm: " << learning.solver_options.session.training.max_grad_norm << "\n"
+                 << "save_interval: " << learning.save_interval << "\n"
+                 << "eval_interval: " << learning.eval_interval << "\n"
+                 << " log_interval: " << learning.log_interval << "\n"
+                 << "Logging training info at "
+                 << (config.solver_config.save_dir / "logs" / "training_info.csv").generic_string()
+                 << "\n**************************************************";
+        solver.logger().info(settings.str());
+        solver.logger().info("Learning training start: epochs=" +
+            std::to_string(learning.num_train_epochs));
+        auto lifecycle = environment_config(config, selections);
+        lifecycle.recorder.temporary_records = true;
+        solver::learning::rl_core::OnlineEnvironment environment(
+            physical.clone(), simulator.clone(), std::move(lifecycle),
+            learning.solver_options.environment);
+        for (std::size_t epoch = 0U; epoch < learning.num_train_epochs; ++epoch) {
+            environment.reset();
+            const auto result = solver::learning::run_online_learning_epoch(
+                environment, solver,
+                solver::learning::OnlineLearningOptions{true, true, false, true, true});
+            report.learning_requests += result.requests;
+            report.learning_epochs = epoch + 1U;
+            if (learning.log_interval != 0U &&
+                ((epoch + 1U) % learning.log_interval == 0U ||
+                 epoch + 1U == learning.num_train_epochs)) {
+                double log_probability_sum = 0.0;
+                std::size_t log_probability_count = 0U;
+                for (const auto& episode : result.episodes) {
+                    for (const auto value : episode.log_probabilities) {
+                        log_probability_sum += value;
+                        ++log_probability_count;
+                    }
+                }
+                const double mean_log_probability = log_probability_count == 0U
+                    ? 0.0 : log_probability_sum / static_cast<double>(log_probability_count);
+                const auto summary = environment.lifecycle().summary();
+                const double time_cost = static_cast<double>(
+                    elapsed_ns(begin, Clock::now())) / 1.0e9;
+                std::ostringstream message;
+                message << "\nepoch " << std::setw(4) << epoch
+                        << ", success_count " << std::setw(5) << result.accepted
+                        << ", r2c " << std::fixed << std::setprecision(4)
+                        << summary.long_term_r2c_ratio
+                        << ", mean logprob " << std::setprecision(4)
+                        << mean_log_probability
+                        << ", time_cost " << std::setprecision(6)
+                        << time_cost;
+                solver.logger().info(message.str());
+            }
+            if (learning.eval_interval != 0U &&
+                (epoch + 1U) % learning.eval_interval == 0U &&
+                epoch + 1U != learning.num_train_epochs) {
+                solver.logger().info("-------------------- Validate --------------------");
+                auto validation_lifecycle = environment_config(config, selections);
+                validation_lifecycle.recorder.record_dir_name += "-validate";
+                validation_lifecycle.recorder.temporary_records = false;
+                solver::learning::rl_core::OnlineEnvironment validation(
+                    physical.clone(), simulator.clone(),
+                    std::move(validation_lifecycle),
+                    learning.solver_options.environment);
+                validation.reset();
+                const auto validation_result = solver::learning::run_online_learning_epoch(
+                    validation, solver,
+                    solver::learning::OnlineLearningOptions{
+                        false, learning.inference_sample, false, false, false});
+                const auto validation_summary = validation.lifecycle().summary();
+                std::ostringstream validation_message;
+                validation_message << "Validate: requests="
+                    << validation_result.requests << ", success_count="
+                    << validation_result.accepted << ", r2c=" << std::fixed
+                    << std::setprecision(4)
+                    << validation_summary.long_term_r2c_ratio;
+                solver.logger().info(validation_message.str());
+                solver.logger().info("-------------------- Done --------------------");
+            }
+            if (learning.save_interval != 0U &&
+                ((epoch + 1U) % learning.save_interval == 0U ||
+                 epoch + 1U == learning.num_train_epochs)) {
+                save_checkpoint();
+            }
+        }
+        if (solver.pending_steps() > 0) {
+            (void)solver.update();
+        }
+        report.learning_updates = solver.update_time();
+        report.learning_pending_steps = solver.pending_steps();
+        if (checkpoint_path.empty()) save_checkpoint();
+        solver.logger().info("-------------------- Pretrain " +
+            std::string(solver.canonical_name()) + " done --------------------");
+    }
+    report.learning_time_ns = elapsed_ns(begin, Clock::now());
+}
+#endif
+
 } // namespace
 
 RuntimeSelections runtime_selections_from_virtual_config(
@@ -857,6 +1037,52 @@ RuntimeSelections runtime_selections_from_virtual_config(
     return result;
 }
 
+void register_main_solvers(
+    solver::SolverRegistry& registry,
+    RandomContext& random,
+    const MainConfig* config) {
+    solver::heuristic::HeuristicSolverRegistryOptions registry_options;
+    solver::exact::ExactSolverParameters exact_parameters;
+    solver::exact::ExactRiskParameters exact_risk_parameters;
+    solver::meta::MetaHeuristicOptions meta_options;
+    if (config != nullptr) {
+        registry_options.workers = config->workers.node_rank;
+        registry_options.bfs = config->bfs_solver_parameters;
+        exact_parameters = config->exact_solver_parameters;
+        exact_risk_parameters = config->exact_risk_parameters;
+        meta_options.evaluation_workers = config->workers.node_rank.rank_workers;
+        meta_options.candidate_workers = std::max(
+            config->workers.node_rank.node_candidate_workers,
+            config->workers.node_rank.link_candidate_workers);
+        meta_options.topology_constraint_workers =
+            config->workers.node_rank.link_topology_constraint_workers;
+    }
+    solver::heuristic::register_heuristic_solvers(
+        registry, random.numpy(), random.python(), registry_options);
+    solver::exact::register_exact_solvers(
+        registry, random.python(), exact_parameters);
+    solver::exact::register_exact_with_risk_solver(
+        registry, random.python(), exact_parameters, exact_risk_parameters);
+    solver::meta::register_meta_heuristic_solvers(
+        registry, random.python(), meta_options);
+#if defined(VIRNE_MAIN_LEARNING)
+    if (config != nullptr && config->learning != nullptr) {
+        solver::learning::register_learning_solvers(
+            registry, config->learning->solver_options);
+    } else {
+        solver::learning::register_learning_solvers(registry);
+    }
+#endif
+}
+
+std::vector<solver::SolverDescriptor> list_main_solvers() {
+    RandomContext random(0U);
+    solver::SolverRegistry registry;
+    register_main_solvers(registry, random);
+    registry.freeze();
+    return registry.list_registered();
+}
+
 MainRunReport run_main_config(const MainConfig& config) {
     const auto setup_begin = Clock::now();
     core::Logger logger(config.logger_config);
@@ -866,35 +1092,7 @@ MainRunReport run_main_config(const MainConfig& config) {
     // compact ID and category are fixed before dataset construction; neither
     // a registry lookup nor a string comparison reaches a request loop.
     solver::SolverRegistry registry;
-    solver::heuristic::HeuristicSolverRegistryOptions registry_options;
-    registry_options.workers = config.workers.node_rank;
-    registry_options.bfs = config.bfs_solver_parameters;
-    solver::heuristic::register_heuristic_solvers(
-        registry,
-        random.numpy(),
-        random.python(),
-        registry_options);
-    solver::exact::register_exact_solvers(
-        registry,
-        random.python(),
-        config.exact_solver_parameters);
-    solver::exact::register_exact_with_risk_solver(
-        registry,
-        random.python(),
-        config.exact_solver_parameters,
-        config.exact_risk_parameters);
-    solver::meta::MetaHeuristicOptions meta_options;
-    meta_options.evaluation_workers = config.workers.node_rank.rank_workers;
-    meta_options.candidate_workers =
-        std::max(
-            config.workers.node_rank.node_candidate_workers,
-            config.workers.node_rank.link_candidate_workers);
-    meta_options.topology_constraint_workers =
-        config.workers.node_rank.link_topology_constraint_workers;
-    solver::meta::register_meta_heuristic_solvers(
-        registry,
-        random.python(),
-        meta_options);
+    register_main_solvers(registry, random, &config);
     registry.freeze();
     const solver::SolverId selected_solver_id =
         registry.resolve(config.solver_name);
@@ -942,6 +1140,15 @@ MainRunReport run_main_config(const MainConfig& config) {
             std::cref(counter),
             std::ref(logger)},
         config.solver_config);
+
+#if defined(VIRNE_MAIN_LEARNING)
+    if (auto* learning_solver =
+            dynamic_cast<solver::learning::LearningSolver*>(solver_instance.get());
+        learning_solver != nullptr) {
+        train_learning_solver(
+            config, selections, physical, simulator, *learning_solver, report);
+    }
+#endif
 
     SystemRunConfig run_config = system_run_config(config);
     run_config.progress = config.progress.enabled ? &progress : nullptr;
@@ -1131,7 +1338,20 @@ void write_main_report_json(
                << ",\"auto_released_events\":"
                << window.auto_released_events << '}';
     }
-    output << "]}\n";
+    output << "]";
+    if (report.learning) {
+        output << ",\"learning\":{\"epochs\":" << report.learning_epochs
+               << ",\"requests\":" << report.learning_requests
+               << ",\"updates\":" << report.learning_updates
+               << ",\"pending_steps\":" << report.learning_pending_steps
+               << ",\"time_ns\":" << report.learning_time_ns
+               << ",\"checkpoint_loaded\":"
+               << (report.learning_checkpoint_loaded ? "true" : "false")
+               << ",\"checkpoint_path\":";
+        write_json_string(output, report.learning_checkpoint_path);
+        output.put('}');
+    }
+    output << "}\n";
 }
 
 void write_main_summary_json(
@@ -1169,7 +1389,20 @@ void write_main_summary_json(
     output << ",\"long_term_r2c_ratio\":";
     write_json_double(output, r2c);
     output << ",\"setup_time_ns\":" << report.setup_time_ns
-           << ",\"run_time_ns\":" << report.run_time_ns << "}\n";
+           << ",\"run_time_ns\":" << report.run_time_ns;
+    if (report.learning) {
+        output << ",\"learning\":{\"epochs\":" << report.learning_epochs
+               << ",\"requests\":" << report.learning_requests
+               << ",\"updates\":" << report.learning_updates
+               << ",\"pending_steps\":" << report.learning_pending_steps
+               << ",\"time_ns\":" << report.learning_time_ns
+               << ",\"checkpoint_loaded\":"
+               << (report.learning_checkpoint_loaded ? "true" : "false")
+               << ",\"checkpoint_path\":";
+        write_json_string(output, report.learning_checkpoint_path);
+        output.put('}');
+    }
+    output << "}\n";
 }
 
 } // namespace virne::system

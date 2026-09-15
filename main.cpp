@@ -19,6 +19,7 @@ struct CommandLine {
     std::filesystem::path config_path;
     std::vector<std::string> overrides;
     bool help = false;
+    bool list_solvers = false;
 };
 
 bool apply_python_group_merge(
@@ -85,6 +86,8 @@ CommandLine parse_command_line(int argc, char** argv) {
         const std::string argument = argv[index];
         if (argument == "--help" || argument == "-h") {
             result.help = true;
+        } else if (argument == "--list-solvers") {
+            result.list_solvers = true;
         } else if (argument == "--config") {
             if (index + 1 >= argc) {
                 throw std::invalid_argument("--config requires a path");
@@ -102,7 +105,9 @@ CommandLine parse_command_line(int argc, char** argv) {
 
 void print_help() {
     std::cout
-        << "Usage: main [--config PATH] [hydra.override=value ...]\n"
+        << "Usage: main [--list-solvers] [--config PATH] [hydra.override=value ...]\n"
+        << "List compiled solvers:\n"
+        << "  main --list-solvers\n"
         << "Example:\n"
         << "  main solver.solver_name=ffd_rank "
            "v_sim_setting.num_v_nets=32 "
@@ -127,6 +132,16 @@ int main(int argc, char** argv) {
         const CommandLine command = parse_command_line(argc, argv);
         if (command.help) {
             print_help();
+            return 0;
+        }
+        if (command.list_solvers) {
+            for (const auto& descriptor : virne::system::list_main_solvers()) {
+                std::cout << descriptor.id.value << '\t'
+                          << descriptor.name << '\t'
+                          << virne::solver::solver_category_name(
+                                 descriptor.category)
+                          << '\n';
+            }
             return 0;
         }
 

@@ -29,6 +29,9 @@ struct LearningSolverOptions {
     rl_core::LearningSessionOptions session;
     rl_core::InstanceEnvironmentOptions environment;
     rank::NodeRankParameters node_ranking;
+    // Runtime decoding is selected once at the CLI boundary. Training still
+    // samples internally; inference can opt into the same stochastic policy.
+    bool inference_sample = false;
 };
 
 // Resolves the policy, algorithm and mandatory environment overrides of a

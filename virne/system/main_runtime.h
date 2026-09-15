@@ -34,7 +34,25 @@ struct MainRunReport {
     SystemRunResult run;
     std::vector<ChangeableStageSummary> stages;
     std::vector<TimeWindowSummary> windows;
+    bool learning = false;
+    std::size_t learning_epochs = 0U;
+    std::size_t learning_requests = 0U;
+    std::int64_t learning_updates = 0;
+    std::int64_t learning_pending_steps = 0;
+    std::uint64_t learning_time_ns = 0U;
+    bool learning_checkpoint_loaded = false;
+    std::string learning_checkpoint_path;
 };
+
+// All solver families are registered through this one cold-start function.
+// The same function backs normal execution and --list-solvers so a newly
+// compiled solver cannot be visible in one path and missing in the other.
+void register_main_solvers(
+    solver::SolverRegistry& registry,
+    RandomContext& random,
+    const MainConfig* config = nullptr);
+
+std::vector<solver::SolverDescriptor> list_main_solvers();
 
 MainRunReport run_main_config(const MainConfig& config);
 

@@ -82,6 +82,14 @@ Checkpoint serialization is a native extension; its archive bytes are not
 claimed to match Python's checkpoint format. Serialization is outside the PPO
 benchmark workload.
 
+The main ML runtime uses the `VIRNE_NATIVE_CHECKPOINT_2` framing. Each tensor is
+stored with `torch::pickle_save`, so loading does not enter LibTorch's nested
+TorchScript/JIT archive path. A checkpoint with optimizer state restores Adam
+moments and groups; a checkpoint that marks the optimizer absent emits a
+warning and keeps the algorithm's freshly initialized optimizer. Legacy or
+invalid checkpoints are also warning-only at the main CLI boundary and leave
+the run on native defaults.
+
 The DQN/DoubleDQN branch now includes online/target policy updates, lazy
 epsilon-greedy actions, next observations and NumPy RNG checkpoint state. Its
 five integration/resume cases and frozen 15.776x episode benchmark are detailed
@@ -89,8 +97,10 @@ in `dqn.md`. Failed initialization is also checked separately: four invalid
 attempts leave no partial policy or optimizer behind.
 
 Recurrent episode integration and auxiliary cost/lambda learning still need their
-own gates. Heterogeneous policies, safe-RL updates, online event
-integration, searchers and main solver registration remain on the active backlog.
+own gates. Heterogeneous policies, safe-RL updates, searchers and the remaining
+advanced registrations remain on the active backlog. Main CLI registration and
+CPU train/evaluate/checkpoint orchestration are covered by
+`../results/main_cli_learning_cluster_2026-09-15.json`.
 The public session currently runs on CPU. No new MSVC or CUDA parity is claimed.
 
 ## Reproduction provenance

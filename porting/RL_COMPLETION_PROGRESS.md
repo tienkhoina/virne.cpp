@@ -32,7 +32,7 @@ The objective remains completing the RL port, not only adding policy leaves.
 | DQN/DoubleDQN update variants | Differential and benchmark PASS | `results/dqn_update_differential_2026-09-09.json`: 4 cases, 1656 records; `results/dqn_update_benchmark_2026-09-09.json`: 7.103x |
 | DQN/DoubleDQN CPU instance cluster | COMPLETE within documented scope | `components/dqn.md`; action 45, update 1656, session 354 and grouped checkpoint 520 records. One early-reseed defect fixed after failure; only that case rerun. DoubleDQN episodes 15.776x |
 | Safe-RL update variants | Pending | Extend real update workflow with explicit numerical/state comparisons |
-| Concrete solver registrations/full RL integration | 34 sequential names and native epoch complete; broader integration pending | Main CLI/config training, OnlineAgent admission loop, distributed/recurrent/safe families, searchers and remaining registrations still require their own clusters |
+| Concrete solver registrations/full RL integration | 34 sequential names plus main CLI/config training and native checkpoint lifecycle complete within CPU scope | `results/main_cli_learning_cluster_2026-09-15.json`; broader OnlineAgent admission, distributed/recurrent/safe families, searchers and unsupervised leaves still require their own clusters |
 
 ## Confirmed source defects and native choices
 

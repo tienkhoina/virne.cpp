@@ -1,0 +1,63 @@
+{
+  "cluster": "main_cli_learning",
+  "date": "2026-09-15",
+  "scope": "new CLI and checkpoint gate only; previously accepted RL gates were not rerun",
+  "build": {
+    "generator": "Unix Makefiles",
+    "compiler": "/usr/bin/g++-11",
+    "options": ["VIRNE_ENABLE_LIBTORCH=ON", "VIRNE_ENABLE_ML=ON"],
+    "target": "main"
+  },
+  "list_solvers": {
+    "status": "PASS",
+    "count": 57,
+    "last": "56\\tppo_dual_deep_edge_gat+\\tr_learning"
+  },
+  "train_smoke": {
+    "status": "PASS",
+    "solver": "ppo_dual_deep_edge_gat+",
+    "multi_resource": true,
+    "training_epochs": 1,
+    "training_requests": 1,
+    "updates": 1,
+    "pending_steps": 0,
+    "checkpoint": "virne/ppo_dual_deep_edge_gat+/portable5/models/model.vne",
+    "smoke_artifact_cleaned": true,
+    "setup_time_ns": 557217578,
+    "run_time_ns": 9459871,
+    "learning_time_ns": 523015469
+  },
+  "restore_smoke": {
+    "status": "PASS",
+    "checkpoint_loaded": true,
+    "training_epochs": 0,
+    "warning": null
+  },
+  "invalid_checkpoint_fallback": {
+    "status": "PASS",
+    "checkpoint_loaded": false,
+    "exit_code": 0,
+    "warning": "legacy learning checkpoint is unsupported; using the algorithm defaults"
+  },
+  "full_logging_smoke": {
+    "status": "PASS",
+    "level": "DEBUG",
+    "backends": ["console", "file", "tensorboard", "wandb"],
+    "training_info_csv": true,
+    "columns": [
+      "lr", "loss/loss", "loss/actor_loss", "loss/critic_loss",
+      "loss/entropy_loss", "value/logprob", "value/old_action_logprob",
+      "info/approx_kl", "value/value", "value/return",
+      "value/advantage", "value/reward", "grad/grad_clipped"
+    ],
+    "training_epoch_log": true,
+    "validation_log": "implemented; emitted on eval_interval boundaries"
+  },
+  "checkpoint_policy": {
+    "format": "VIRNE_NATIVE_CHECKPOINT_2",
+    "policy": "direct tensor pickle framing",
+    "optimizer_present": true,
+    "missing_optimizer": "warning and algorithm-default optimizer fallback",
+    "legacy_or_invalid_checkpoint": "warning and algorithm-default runtime fallback"
+  }
+}

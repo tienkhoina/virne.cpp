@@ -25,3 +25,9 @@ target_link_libraries(
     config_lib
     vne_utils_setting
 )
+
+if(VIRNE_ENABLE_ML)
+    target_sources(vne_system PRIVATE main_learning_config.cpp)
+    target_link_libraries(vne_system PRIVATE vne_learning_solver_registry)
+    target_compile_definitions(vne_system PRIVATE VIRNE_MAIN_LEARNING=1)
+endif()

@@ -25,6 +25,11 @@ struct EpisodeLearningResult {
     std::vector<std::uint8_t> dones;
     double last_value = 0.0;
     std::optional<double> update_loss;
+    std::optional<double> actor_loss, critic_loss, entropy_loss,
+        approximate_kl, gradient_norm, log_probability_mean,
+        old_log_probability_mean, value_mean, return_mean,
+        advantage_mean, reward_mean, learning_rate;
+    std::int64_t applied_update_steps = 0;
     std::int64_t update_time = 0, pending_steps = 0;
     std::optional<double> exploration_epsilon;
     std::int64_t exploration_steps = 0;

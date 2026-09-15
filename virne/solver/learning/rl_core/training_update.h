@@ -19,6 +19,8 @@ struct TrainingBatch {
 };
 struct TrainingResult {
     torch::Tensor loss, actor_loss, critic_loss, entropy, gradient_norm, approximate_kl;
+    torch::Tensor log_probability_mean, old_log_probability_mean, value_mean,
+        return_mean, advantage_mean, reward_mean;
     std::int64_t applied_steps = 0;
     bool early_stopped = false;
 };

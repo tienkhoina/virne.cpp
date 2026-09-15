@@ -127,7 +127,8 @@ A component is `COMPLETE` only when all of the following exist and pass:
 | Learning/ML | DQN/DoubleDQN CPU instance cluster | **COMPLETE / EXACT GATES + BENCHMARK PASS** | `porting/components/dqn.md`; update 1656 + action 45 + session 354 + grouped checkpoint 520 records; 15.776x episode benchmark |
 | Learning/ML | Confirmed neural repairs | **3/3 FOCUSED EXACT GATES PASS** | `porting/components/native_repairs.md`; 135 records |
 | Learning/ML | Online RL environment + solver registry | **COMPLETE WITHIN CPU CLUSTER / PARITY + BENCHMARK PASS** | `porting/components/online_learning.md`; 13 groups, 1361 byte records, 34 names; online transitions 48.805x and registered PPO epoch 10.345x |
-| Learning/ML | remaining `solver/learning/**` | IN PROGRESS | `porting/LEARNING_COMPONENT_MAP.md`; AST inventory covers 71 files, 214 classes and 646 functions/methods; full RL training is not complete |
+| Learning/ML | main CLI/config, registered RL training and checkpoint lifecycle | **IMPLEMENTED / NEW CPU CLI GATE PASS** | `porting/results/main_cli_learning_cluster_2026-09-15.json`; one `main --list-solvers` build lists 57 names, multi-resource `ppo_dual_deep_edge_gat+` trains/updates/saves, and a second process restores the checkpoint |
+| Learning/ML | remaining `solver/learning/**` | IN PROGRESS | `porting/LEARNING_COMPONENT_MAP.md`; AST inventory covers 71 files, 214 classes and 646 functions/methods; distributed/recurrent/safe/searcher and unsupervised leaves remain |
 
 ## Completed behavior
 

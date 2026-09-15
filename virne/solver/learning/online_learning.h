@@ -3,7 +3,11 @@
 #include "rl_core/online_environment.h"
 
 namespace virne::solver::learning {
-struct OnlineLearningOptions { bool train=true, sample=false, flush_rollout=true, capture=false; };
+struct OnlineLearningOptions {
+    bool train = true, sample = false, flush_rollout = true, capture = false;
+    // Main runtime enables Python-compatible training_info.csv/update logs.
+    bool log_updates = false;
+};
 struct OnlineLearningEpoch {
     std::size_t requests=0,accepted=0;
     std::int64_t updates=0,pending_steps=0;

@@ -154,7 +154,9 @@ rl::InstanceEnvironment LearningSolver::make_environment(const SolverInstance& i
     }
     return rl::InstanceEnvironment(instance.physical_network.clone(), instance.virtual_network.clone(), std::move(options));
 }
-core::Solution LearningSolver::solve(const SolverInstance& instance) { return evaluate(instance).solution; }
+core::Solution LearningSolver::solve(const SolverInstance& instance) {
+    return evaluate(instance, options_.inference_sample).solution;
+}
 LearningSolverResult LearningSolver::evaluate(const SolverInstance& instance, const bool sample) {
     auto environment = make_environment(instance);
     auto episode = session_->solve(environment, sample);

@@ -411,6 +411,10 @@ else()
     )
 endif()
 
+if(VIRNE_ENABLE_ML)
+    virne_configure_libtorch_executable(main)
+endif()
+
 add_test(
     NAME vne_main_multi_resource_smoke
     COMMAND main

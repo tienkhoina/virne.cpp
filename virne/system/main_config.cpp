@@ -1,5 +1,9 @@
 #include "main_config.h"
 
+#if defined(VIRNE_MAIN_LEARNING)
+#include "main_learning_config.h"
+#endif
+
 #include "../network/attribute/attribute_factory.h"
 #include "../network/dataset_generator.h"
 #include "../utils/utils_config.h"
@@ -484,6 +488,19 @@ MainConfig main_config_from_hydra(
         config.get<double>("native.time_window_origin", 0.0);
 
     result.solver_name = config.get<std::string>("solver.solver_name");
+#if defined(VIRNE_MAIN_LEARNING)
+    const auto& learning_descriptors =
+        solver::learning::registered_learning_solvers();
+    const bool is_learning_solver = std::any_of(
+        learning_descriptors.begin(), learning_descriptors.end(),
+        [&result](const auto& descriptor) {
+            return descriptor.name == result.solver_name;
+        });
+    if (is_learning_solver) {
+        result.learning = std::make_shared<const MainLearningConfig>(
+            main_learning_config_from_hydra(config));
+    }
+#endif
     const std::filesystem::path save_root =
         config.get<std::string>("experiment.save_root_dir", "virne/");
 
